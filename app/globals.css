@@ -19,7 +19,7 @@ button { font: inherit; }
 button:focus-visible { outline: 3px solid rgba(76, 145, 119, .32); outline-offset: 2px; }
 
 .app-shell { min-height: 100vh; display: grid; grid-template-columns: 246px 1fr; }
-.sidebar { position: sticky; top: 0; height: 100vh; padding: 30px 20px 22px; background: #153e34; color: white; display: flex; flex-direction: column; }
+.sidebar { position: sticky; top: 0; height: 100vh; padding: 30px 20px 22px; background: #153e34; color: white; display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.18) transparent; }
 .brand { display: flex; align-items: center; gap: 11px; padding: 0 6px 32px; font-size: 17px; line-height: 1.1; font-weight: 750; letter-spacing: -.35px; }
 .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; background: #f1bf75; color: var(--forest); border-radius: 11px 11px 11px 3px; font-family: Georgia, serif; font-size: 22px; }
 .nav-list { display: grid; gap: 7px; }
@@ -32,6 +32,7 @@ button:focus-visible { outline: 3px solid rgba(76, 145, 119, .32); outline-offse
 .sidebar-section-title { display: flex; align-items: center; gap: 9px; margin: 0 9px 9px; color: #82a097; text-transform: uppercase; letter-spacing: 1.2px; font-size: 8px; font-weight: 800; }
 .sidebar-section-title::after { content: ""; height: 1px; flex: 1; background: rgba(255,255,255,.12); }
 .department-list { display: grid; gap: 4px; }
+.department-entry { display: grid; gap: 3px; }
 .department-tab { position: relative; width: 100%; min-height: 37px; display: flex; align-items: center; gap: 9px; padding: 6px 9px; border: 0; border-radius: 9px; color: #a9beb6; background: transparent; cursor: pointer; text-align: left; transition: .18s ease; }
 .department-tab:hover { color: white; background: rgba(255,255,255,.06); }
 .department-tab.selected { color: white; background: rgba(255,255,255,.11); }
@@ -39,6 +40,11 @@ button:focus-visible { outline: 3px solid rgba(76, 145, 119, .32); outline-offse
 .department-tab.selected .department-initials { color: var(--forest); background: #f1bf75; }
 .department-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; font-weight: 650; }
 .department-active-dot { width: 5px; height: 5px; margin-left: auto; border-radius: 50%; background: #75c6a6; box-shadow: 0 0 0 3px rgba(117,198,166,.12); }
+.department-subtabs { display: grid; gap: 2px; margin: 0 4px 4px 20px; padding: 2px 0 2px 12px; border-left: 1px solid rgba(241,191,117,.42); }
+.department-subtab { border: 0; border-radius: 7px; padding: 7px 8px; color: #91aaa1; background: transparent; text-align: left; font-size: 9px; cursor: pointer; transition: .18s ease; }
+.department-subtab:hover { color: white; background: rgba(255,255,255,.05); }
+.department-subtab.active { color: #f4c67f; background: rgba(241,191,117,.09); font-weight: 800; }
+.department-subtab span { margin-left: 5px; }
 .sidebar-card { margin-top: auto; padding: 18px; border-radius: 14px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.08); }
 .sidebar-card .eyebrow { color: #a8c1b8; }
 .sidebar-card strong { display: block; margin: 7px 0 10px; font-size: 16px; }
@@ -166,9 +172,13 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .sidebar-departments { order: 1; margin: 0 0 5px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,.1); }
   .sidebar-section-title { display: none; }
   .department-list { grid-template-columns: repeat(6, 1fr); gap: 3px; }
+  .department-entry { display: block; }
   .department-tab { min-height: 34px; justify-content: center; padding: 4px; }
   .department-name, .department-active-dot { display: none; }
   .department-initials { width: 27px; height: 27px; }
+  .quality-active { padding-bottom: 168px; }
+  .department-subtabs { position: fixed; z-index: 31; left: 0; right: 0; bottom: 124px; height: 44px; margin: 0; padding: 5px 10px; grid-template-columns: repeat(2, 1fr); gap: 5px; border: 0; background: #12372e; box-shadow: 0 -8px 22px rgba(13,43,35,.16); }
+  .department-subtab { text-align: center; padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04); }
   .topbar { height: 92px; padding: 19px 20px; }
   .top-actions .icon-button { display: none; }
   .primary-button { padding: 11px 12px; font-size: 0; }

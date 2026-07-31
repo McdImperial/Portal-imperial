@@ -136,7 +136,7 @@ export default function Home() {
   ];
 
   return (
-    <main className="app-shell">
+    <main className={department === "qualidade" ? "app-shell quality-active" : "app-shell"}>
       <aside className="sidebar" aria-label="Navegação principal">
         <div className="brand">
           <span className="brand-mark">M</span>
@@ -154,17 +154,24 @@ export default function Home() {
           <div className="sidebar-section-title"><span>Departamentos</span></div>
           <div className="department-list">
             {departments.map((item) => (
-              <button
-                key={item.id}
-                className={department === item.id ? "department-tab selected" : "department-tab"}
-                onClick={() => { setDepartment(item.id); setView("resumo"); }}
-                aria-pressed={department === item.id}
-                title={item.label}
-              >
-                <span className="department-initials">{item.short}</span>
-                <span className="department-name">{item.label}</span>
-                {department === item.id && <span className="department-active-dot" />}
-              </button>
+              <div className="department-entry" key={item.id}>
+                <button
+                  className={department === item.id ? "department-tab selected" : "department-tab"}
+                  onClick={() => { setDepartment(item.id); setView("resumo"); }}
+                  aria-pressed={department === item.id}
+                  title={item.label}
+                >
+                  <span className="department-initials">{item.short}</span>
+                  <span className="department-name">{item.label}</span>
+                  {department === item.id && <span className="department-active-dot" />}
+                </button>
+                {item.id === "qualidade" && department === "qualidade" && (
+                  <div className="department-subtabs" aria-label="Secções de Qualidade e Produtos">
+                    <button className={view === "objetivos" ? "department-subtab active" : "department-subtab"} onClick={() => setView("objetivos")}>◎ <span>Objetivos mensais</span></button>
+                    <button className={view === "areas" ? "department-subtab active" : "department-subtab"} onClick={() => setView("areas")}>✦ <span>Áreas Limpeza</span></button>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>
@@ -185,7 +192,7 @@ export default function Home() {
         <header className="topbar">
           <div>
             <p className="date-line">Sexta-feira · 31 de julho · {departmentLabel}</p>
-            <h1>{viewLabels[view]}</h1>
+            <h1>{department === "qualidade" && view === "areas" ? "Áreas Limpeza" : viewLabels[view]}</h1>
           </div>
           <div className="top-actions">
             <button className="icon-button" aria-label="Notificações"><span className="notification-dot" />♢</button>
@@ -251,7 +258,7 @@ export default function Home() {
 
           {(view === "resumo" || view === "areas") && (
             <section className="panel zones-panel">
-              <div className="panel-heading"><div><span className="eyebrow">Estado atual · {departmentLabel}</span><h2>Áreas de acompanhamento</h2></div><span className="live-indicator"><i /> Atualizado agora</span></div>
+              <div className="panel-heading"><div><span className="eyebrow">Estado atual · {departmentLabel}</span><h2>{department === "qualidade" ? "Áreas Limpeza" : "Áreas de acompanhamento"}</h2></div><span className="live-indicator"><i /> Atualizado agora</span></div>
               <div className="zones-grid">
                 {activeProfile.zones.map((zone) => (
                   <article className="zone-card" key={zone.name}>
