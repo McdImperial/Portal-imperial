@@ -94,7 +94,7 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .segmented button { border: 0; background: transparent; color: #77817d; padding: 7px 10px; border-radius: 7px; font-size: 11px; cursor: pointer; }
 .segmented button.selected { background: white; color: var(--forest); font-weight: 700; box-shadow: 0 1px 4px rgba(21,62,52,.09); }
 .task-list { border-top: 1px solid var(--line); }
-.task-row { min-height: 65px; padding: 12px 22px; display: grid; grid-template-columns: 28px minmax(220px, 1fr) 68px 122px 36px 28px; gap: 14px; align-items: center; border-bottom: 1px solid var(--line); transition: background .15s ease; }
+.task-row { min-height: 65px; padding: 12px 22px; display: grid; grid-template-columns: 28px minmax(220px, 1fr) 68px 132px 96px 28px; gap: 14px; align-items: center; border-bottom: 1px solid var(--line); transition: background .15s ease; }
 .task-row:hover { background: #fbfcfb; }
 .task-row.done { opacity: .62; }
 .task-row.done .task-main strong { text-decoration: line-through; }
@@ -108,13 +108,15 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .priority.media { background: #f8eccf; color: #9a722c; }
 .priority.baixa { background: #e4f0ea; color: #4c7c67; }
 .row-more { border: 0; color: #a2aaa7; background: transparent; cursor: pointer; }
+.task-owner { display: flex; align-items: center; gap: 7px; min-width: 0; color: var(--muted); font-size: 9px; }
+.task-owner > span:last-child:not(.avatar) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .empty-state { color: var(--muted); text-align: center; padding: 36px; font-size: 13px; }
 .text-button { border: 0; background: transparent; color: #39765f; padding: 15px 24px; font-size: 11px; font-weight: 800; cursor: pointer; }
 .text-button span { margin-left: 4px; }
 .text-button.compact { padding: 8px 0; }
 
 .objectives-section { display: grid; gap: 14px; }
-.objective-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+.objective-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
 .objective-card { border-radius: 14px; padding: 18px; display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center; }
 .objective-icon { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; font-size: 13px; }
 .objective-copy { display: grid; gap: 5px; }
@@ -179,5 +181,6 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .segmented button { flex: 1; }
   .task-row { grid-template-columns: 28px 1fr 36px; gap: 10px; padding: 13px 15px; }
   .task-row .priority, .task-row .due, .task-row .row-more { display: none; }
+  .task-owner > span:last-child:not(.avatar) { display: none; }
   .objective-card { grid-template-columns: 36px 1fr auto; }
 }
