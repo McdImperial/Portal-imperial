@@ -125,8 +125,8 @@ export default function Home() {
     <main className="app-shell">
       <aside className="sidebar" aria-label="Navegação principal">
         <div className="brand">
-          <span className="brand-mark">P</span>
-          <span>Prumo</span>
+          <span className="brand-mark">M</span>
+          <span>McDonald&apos;s Imperial</span>
         </div>
         <nav className="nav-list">
           {navItems.map((item) => (

@@ -17,20 +17,20 @@ export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "prumo-limpeza.tiagosoutelo.chatgpt.site";
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
-  const imageUrl = `${protocol}://${host}/og.png`;
+  const imageUrl = `${protocol}://${host}/og-v2.png`;
 
   return {
-    title: "Prumo — Gestão transversal da empresa",
+    title: "McDonald's Imperial — Gestão transversal",
     description: "Tarefas, objetivos mensais e áreas de acompanhamento para todos os departamentos.",
     icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
     openGraph: {
-      title: "Prumo — Uma visão comum para toda a empresa",
+      title: "McDonald's Imperial — Uma visão comum para toda a empresa",
       description: "Tarefas, objetivos e áreas num único portal transversal.",
-      images: [{ url: imageUrl, width: 1200, height: 630, alt: "Portal Prumo" }],
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: "Portal McDonald's Imperial" }],
     },
     twitter: {
       card: "summary_large_image",
-      title: "Prumo — Uma visão comum para toda a empresa",
+      title: "McDonald's Imperial — Uma visão comum para toda a empresa",
       description: "Tarefas, objetivos e áreas num único portal transversal.",
       images: [imageUrl],
     },

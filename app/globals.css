@@ -20,7 +20,7 @@ button:focus-visible { outline: 3px solid rgba(76, 145, 119, .32); outline-offse
 
 .app-shell { min-height: 100vh; display: grid; grid-template-columns: 246px 1fr; }
 .sidebar { position: sticky; top: 0; height: 100vh; padding: 30px 20px 22px; background: #153e34; color: white; display: flex; flex-direction: column; }
-.brand { display: flex; align-items: center; gap: 11px; padding: 0 10px 32px; font-size: 22px; font-weight: 750; letter-spacing: -.4px; }
+.brand { display: flex; align-items: center; gap: 11px; padding: 0 6px 32px; font-size: 17px; line-height: 1.1; font-weight: 750; letter-spacing: -.35px; }
 .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; background: #f1bf75; color: var(--forest); border-radius: 11px 11px 11px 3px; font-family: Georgia, serif; font-size: 22px; }
 .nav-list { display: grid; gap: 7px; }
 .nav-item { border: 0; width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 13px; border-radius: 10px; color: #c1d1ca; background: transparent; cursor: pointer; text-align: left; transition: .2s ease; }
