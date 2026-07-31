@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type View = "resumo" | "tarefas" | "objetivos" | "areas";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao" | "segit";
+type TaskStatus = "Por fazer" | "Em curso" | "Bloqueado" | "Concluído";
 
 type Task = {
   id: number;
@@ -14,6 +15,7 @@ type Task = {
   assigneeName?: string;
   priority: "Alta" | "Média" | "Baixa";
   done: boolean;
+  status?: TaskStatus;
   department: Exclude<Department, "global">;
 };
 
@@ -51,6 +53,18 @@ const departments: { id: Department; label: string; short: string }[] = [
   { id: "manutencao", label: "Manutenção", short: "MA" },
   { id: "segit", label: "Seg. & IT", short: "SI" },
 ];
+
+const statusOptions: TaskStatus[] = ["Por fazer", "Em curso", "Bloqueado", "Concluído"];
+const ownerOptions = [
+  { initials: "SU", name: "Susana Torres" },
+  { initials: "DC", name: "Diogo Cabral" },
+  { initials: "SI", name: "Silvia Tavares" },
+  { initials: "TS", name: "Tiago Soutelo" },
+];
+
+function statusClass(status: string) {
+  return status.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replaceAll(" ", "-");
+}
 
 const departmentProfiles = {
   global: {
@@ -92,6 +106,35 @@ export default function Home() {
   const [tasks, setTasks] = useState(initialTasks);
   const [filter, setFilter] = useState<"pendentes" | "concluidas" | "todas">("pendentes");
   const [notice, setNotice] = useState("");
+  const [taskSearch, setTaskSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"Todos" | TaskStatus>("Todos");
+  const [boardMode, setBoardMode] = useState<"tabela" | "kanban">("tabela");
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [dataReady, setDataReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    async function loadTasks() {
+      try {
+        const response = await fetch("/api/tasks");
+        if (!response.ok) throw new Error("load failed");
+        const data = await response.json() as { tasks: Task[] };
+        if (data.tasks.length) {
+          if (active) setTasks(data.tasks);
+        } else {
+          const seedResponse = await fetch("/api/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tasks: initialTasks }) });
+          const seeded = await seedResponse.json() as { tasks: Task[] };
+          if (active && seeded.tasks) setTasks(seeded.tasks);
+        }
+      } catch {
+        setNotice("A trabalhar em modo local. As alterações podem não ficar guardadas.");
+      } finally {
+        if (active) setDataReady(true);
+      }
+    }
+    loadTasks();
+    return () => { active = false; };
+  }, []);
 
   const scopedTasks = tasks.filter((task) => department === "global" || task.department === department);
   const pending = scopedTasks.filter((task) => !task.done).length;
@@ -106,26 +149,64 @@ export default function Home() {
     return scopedTasks;
   }, [filter, scopedTasks]);
 
-  function toggleTask(id: number) {
-    setTasks((current) => current.map((task) => task.id === id ? { ...task, done: !task.done } : task));
+  const boardTasks = useMemo(() => scopedTasks.filter((task) => {
+    const status = task.status ?? (task.done ? "Concluído" : "Por fazer");
+    const matchesStatus = statusFilter === "Todos" || status === statusFilter;
+    const query = taskSearch.trim().toLocaleLowerCase("pt");
+    const matchesSearch = !query || [task.title, task.area, task.assigneeName ?? "", task.due].some((value) => value.toLocaleLowerCase("pt").includes(query));
+    return matchesStatus && matchesSearch;
+  }), [scopedTasks, statusFilter, taskSearch]);
+
+  const boardGroups = useMemo(() => {
+    const groups = [
+      { id: "semanais", label: "Tarefas semanais", color: "#579bfc", tasks: boardTasks.filter((task) => task.due.startsWith("Semanal")) },
+      { id: "mensais", label: "Mensais e quinzenais", color: "#a25ddc", tasks: boardTasks.filter((task) => !task.due.startsWith("Semanal")) },
+    ];
+    return groups.filter((group) => group.tasks.length || !taskSearch);
+  }, [boardTasks, taskSearch]);
+
+  async function updateTask(id: number, changes: Partial<Task>) {
+    setTasks((current) => current.map((task) => task.id === id ? { ...task, ...changes, done: changes.status ? changes.status === "Concluído" : task.done } : task));
+    try {
+      await fetch("/api/tasks", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, ...changes }) });
+    } catch {
+      setNotice("Alteração aplicada localmente; não foi possível guardar.");
+    }
   }
 
-  function createTask() {
-    const id = Math.max(...tasks.map((task) => task.id)) + 1;
-    setTasks((current) => [{
-      id,
+  function toggleTask(id: number) {
+    const task = tasks.find((item) => item.id === id);
+    if (task) updateTask(id, { status: task.done ? "Por fazer" : "Concluído", done: !task.done });
+  }
+
+  async function createTask(group: "semanais" | "mensais" = "semanais") {
+    const draft: Omit<Task, "id"> = {
       title: "Nova verificação de rotina",
       area: "Área geral",
-      due: "Hoje, 17:00",
+      due: group === "semanais" ? "Semanal · 2.ª-feira" : "Mensal",
       assignee: "TS",
       priority: "Média",
       done: false,
+      status: "Por fazer",
       department: department === "global" ? "qualidade" : department,
-    }, ...current]);
+    };
+    try {
+      const response = await fetch("/api/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) });
+      const data = await response.json() as { task: Task };
+      if (data.task) setTasks((current) => [data.task, ...current]);
+    } catch {
+      const id = Math.max(0, ...tasks.map((task) => task.id)) + 1;
+      setTasks((current) => [{ id, ...draft }, ...current]);
+    }
     setFilter("pendentes");
     setView("tarefas");
     setNotice(`Nova tarefa adicionada a ${departmentLabel}.`);
     window.setTimeout(() => setNotice(""), 2400);
+  }
+
+  async function deleteTask(id: number) {
+    setTasks((current) => current.filter((task) => task.id !== id));
+    try { await fetch("/api/tasks", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) }); } catch { setNotice("Tarefa removida apenas nesta sessão."); }
   }
 
   const navItems: { id: View; label: string; glyph: string }[] = [
@@ -196,14 +277,14 @@ export default function Home() {
           </div>
           <div className="top-actions">
             <button className="icon-button" aria-label="Notificações"><span className="notification-dot" />♢</button>
-            <button className="primary-button" onClick={createTask}><span>＋</span> Nova tarefa</button>
+            <button className="primary-button" onClick={() => createTask()}><span>＋</span> Nova tarefa</button>
           </div>
         </header>
 
         {notice && <div className="toast" role="status">✓ {notice}</div>}
 
         <div className="content">
-          {(view === "resumo" || view === "tarefas") && (
+          {view === "resumo" && (
             <section className="summary-grid" aria-label="Indicadores principais">
               <article className="metric-card feature">
                 <div><span className="eyebrow">Progresso do mês</span><strong className="big-number">{completion}%</strong><p>{department === "qualidade" ? <span className="source-copy">Dados de julho · folha GDR</span> : <><span className="up">↗ 8%</span> face ao mês passado</>}</p></div>
@@ -215,7 +296,7 @@ export default function Home() {
             </section>
           )}
 
-          {(view === "resumo" || view === "tarefas") && (
+          {view === "resumo" && (
             <section className="panel tasks-panel">
               <div className="panel-heading">
                 <div><span className="eyebrow">Plano de trabalho</span><h2>{view === "resumo" ? "Tarefas prioritárias" : "Lista de tarefas"}</h2></div>
@@ -237,6 +318,80 @@ export default function Home() {
                 {visibleTasks.length === 0 && <div className="empty-state">Sem tarefas nesta categoria.</div>}
               </div>
               {view === "resumo" && <button className="text-button" onClick={() => setView("tarefas")}>Ver todas as tarefas <span>→</span></button>}
+            </section>
+          )}
+
+          {view === "tarefas" && (
+            <section className="board-page" aria-label="Gestão de tarefas">
+              <div className="board-titlebar">
+                <div>
+                  <span className="eyebrow">{departmentLabel}</span>
+                  <h2>Gestão de tarefas</h2>
+                  <p>Organize, atualize e acompanhe o trabalho da equipa num único quadro.</p>
+                </div>
+                <span className="board-count">{boardTasks.length} tarefas</span>
+              </div>
+              <div className="board-view-tabs">
+                <button className={boardMode === "tabela" ? "active" : ""} onClick={() => setBoardMode("tabela")}>Quadro principal</button>
+                <button className={boardMode === "kanban" ? "active" : ""} onClick={() => setBoardMode("kanban")}>Kanban</button>
+                <button className="board-add-view" aria-label="Adicionar visualização">＋</button>
+              </div>
+              <div className="board-toolbar">
+                <button className="board-new" onClick={() => createTask()}>＋ Nova tarefa</button>
+                <label className="board-search"><span>⌕</span><input value={taskSearch} onChange={(event) => setTaskSearch(event.target.value)} placeholder="Pesquisar tarefas" aria-label="Pesquisar tarefas" /></label>
+                <label className="board-filter"><span>≡</span><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "Todos" | TaskStatus)} aria-label="Filtrar por estado"><option>Todos</option>{statusOptions.map((status) => <option key={status}>{status}</option>)}</select></label>
+                <div className="view-toggle" aria-label="Modo de visualização">
+                  <button className={boardMode === "tabela" ? "active" : ""} onClick={() => setBoardMode("tabela")} title="Tabela">▦</button>
+                  <button className={boardMode === "kanban" ? "active" : ""} onClick={() => setBoardMode("kanban")} title="Kanban">▥</button>
+                </div>
+              </div>
+
+              {!dataReady && <div className="board-loading">A carregar o quadro…</div>}
+
+              {dataReady && boardMode === "tabela" && <div className="monday-board">
+                {boardGroups.map((group) => (
+                  <div className="board-group" key={group.id} style={{ "--group-color": group.color } as React.CSSProperties}>
+                    <button className="group-heading" onClick={() => setCollapsedGroups((current) => ({ ...current, [group.id]: !current[group.id] }))} aria-expanded={!collapsedGroups[group.id]}>
+                      <span className="group-chevron">⌄</span><strong>{group.label}</strong><span>{group.tasks.length} itens</span>
+                    </button>
+                    {!collapsedGroups[group.id] && <>
+                      <div className="board-row board-header-row">
+                        <span className="row-select"><input type="checkbox" aria-label={`Selecionar ${group.label}`} /></span>
+                        <span>Tarefa</span><span>Responsável</span><span>Estado</span><span>Prioridade</span><span>Periodicidade</span><span>Área</span><span />
+                      </div>
+                      {group.tasks.map((task) => {
+                        const taskStatus = task.status ?? (task.done ? "Concluído" : "Por fazer");
+                        return <div className="board-row" key={task.id}>
+                          <span className="row-select"><input type="checkbox" checked={taskStatus === "Concluído"} onChange={(event) => updateTask(task.id, { status: event.target.checked ? "Concluído" : "Por fazer" })} aria-label={`Concluir ${task.title}`} /></span>
+                          <input className="task-title-input" defaultValue={task.title} onBlur={(event) => { const value = event.target.value.trim(); if (value && value !== task.title) updateTask(task.id, { title: value }); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} aria-label={`Nome da tarefa ${task.title}`} />
+                          <label className="owner-cell"><span className="avatar small">{task.assignee}</span><select value={task.assigneeName ?? ""} onChange={(event) => { const owner = ownerOptions.find((item) => item.name === event.target.value); if (owner) updateTask(task.id, { assignee: owner.initials, assigneeName: owner.name }); }} aria-label={`Responsável por ${task.title}`}><option value="">Sem responsável</option>{ownerOptions.map((owner) => <option value={owner.name} key={owner.name}>{owner.name}</option>)}</select></label>
+                          <select className={`status-cell ${statusClass(taskStatus)}`} value={taskStatus} onChange={(event) => updateTask(task.id, { status: event.target.value as TaskStatus })} aria-label={`Estado de ${task.title}`}>{statusOptions.map((status) => <option value={status} key={status}>{status}</option>)}</select>
+                          <select className={`priority-cell ${statusClass(task.priority)}`} value={task.priority} onChange={(event) => updateTask(task.id, { priority: event.target.value as Task["priority"] })} aria-label={`Prioridade de ${task.title}`}><option>Alta</option><option>Média</option><option>Baixa</option></select>
+                          <input className="plain-cell" defaultValue={task.due} onBlur={(event) => { if (event.target.value !== task.due) updateTask(task.id, { due: event.target.value }); }} aria-label={`Periodicidade de ${task.title}`} />
+                          <input className="plain-cell" defaultValue={task.area} onBlur={(event) => { if (event.target.value !== task.area) updateTask(task.id, { area: event.target.value }); }} aria-label={`Área de ${task.title}`} />
+                          <button className="delete-row" onClick={() => deleteTask(task.id)} aria-label={`Apagar ${task.title}`}>×</button>
+                        </div>;
+                      })}
+                      <button className="add-board-row" onClick={() => createTask(group.id as "semanais" | "mensais")}>＋ Adicionar tarefa</button>
+                    </>}
+                  </div>
+                ))}
+              </div>}
+
+              {dataReady && boardMode === "kanban" && <div className="kanban-board">
+                {statusOptions.map((status) => {
+                  const statusTasks = boardTasks.filter((task) => (task.status ?? (task.done ? "Concluído" : "Por fazer")) === status);
+                  return <section className={`kanban-column ${statusClass(status)}`} key={status} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { const id = Number(event.dataTransfer.getData("text/plain")); if (id) updateTask(id, { status }); }}>
+                    <header><strong>{status}</strong><span>{statusTasks.length}</span></header>
+                    <div className="kanban-cards">{statusTasks.map((task) => <article className="kanban-card" draggable onDragStart={(event) => event.dataTransfer.setData("text/plain", String(task.id))} key={task.id}>
+                      <span className={`kanban-priority ${statusClass(task.priority)}`}>{task.priority}</span>
+                      <strong>{task.title}</strong><small>{task.area}</small>
+                      <footer><span className="avatar small">{task.assignee}</span><span>{task.due}</span></footer>
+                    </article>)}</div>
+                    <button onClick={() => createTask(status === "Por fazer" ? "semanais" : "mensais")}>＋ Adicionar</button>
+                  </section>;
+                })}
+              </div>}
             </section>
           )}
 

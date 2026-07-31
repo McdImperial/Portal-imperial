@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "prumo-limpeza.tiagosoutelo.chatgpt.site";
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
-  const imageUrl = `${protocol}://${host}/og-v2.png`;
+  const imageUrl = `${protocol}://${host}/og-v3.png`;
 
   return {
     title: "McDonald's Imperial — Gestão transversal",

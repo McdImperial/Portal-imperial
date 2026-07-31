@@ -156,6 +156,80 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .zone-track span.progress { background: #75a8c0; }
 .zone-track span.attention { background: #e37c65; }
 
+.board-page { min-width: 0; background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 3px 12px rgba(22,54,44,.04); overflow: hidden; }
+.board-titlebar { padding: 24px 26px 17px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+.board-titlebar h2 { margin: 5px 0 5px; font-family: Georgia, serif; font-size: 25px; font-weight: 500; }
+.board-titlebar p { margin: 0; color: var(--muted); font-size: 11px; }
+.board-count { padding: 6px 10px; border-radius: 999px; color: #4d635b; background: #edf3f0; font-size: 10px; font-weight: 800; white-space: nowrap; }
+.board-view-tabs { height: 40px; padding: 0 22px; display: flex; align-items: stretch; gap: 4px; border-bottom: 1px solid var(--line); }
+.board-view-tabs button { position: relative; border: 0; padding: 0 12px; color: #707d78; background: transparent; font-size: 10px; cursor: pointer; }
+.board-view-tabs button.active { color: var(--forest); font-weight: 800; }
+.board-view-tabs button.active::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: -1px; height: 2px; background: #579bfc; }
+.board-view-tabs .board-add-view { color: #98a19e; font-size: 16px; }
+.board-toolbar { min-height: 62px; padding: 11px 22px; display: flex; align-items: center; gap: 8px; }
+.board-new { border: 0; border-radius: 6px; padding: 9px 13px; color: white; background: #0073ea; font-size: 10px; font-weight: 750; cursor: pointer; }
+.board-new:hover { background: #0060b9; }
+.board-search { height: 34px; min-width: 190px; display: flex; align-items: center; gap: 6px; padding: 0 9px; border: 1px solid transparent; border-radius: 6px; color: #6c7773; background: #f6f7f7; }
+.board-search:focus-within { border-color: #579bfc; background: white; }
+.board-search input { width: 100%; border: 0; outline: 0; background: transparent; font-size: 10px; }
+.board-filter { height: 34px; display: flex; align-items: center; gap: 5px; padding: 0 8px; border-radius: 6px; color: #66726d; background: #f6f7f7; }
+.board-filter select { border: 0; outline: 0; color: inherit; background: transparent; font-size: 10px; }
+.view-toggle { margin-left: auto; padding: 3px; display: flex; gap: 2px; border-radius: 7px; background: #f2f4f3; }
+.view-toggle button { width: 28px; height: 28px; border: 0; border-radius: 5px; color: #78837f; background: transparent; cursor: pointer; }
+.view-toggle button.active { color: #1466a8; background: white; box-shadow: 0 1px 4px rgba(19,50,40,.1); }
+.board-loading { padding: 52px; color: var(--muted); text-align: center; font-size: 12px; }
+.monday-board { padding: 5px 22px 28px; overflow-x: auto; }
+.board-group { --group-color: #579bfc; min-width: 1070px; margin-bottom: 24px; border-left: 5px solid var(--group-color); border-radius: 5px 0 0 5px; }
+.group-heading { width: 100%; height: 38px; display: flex; align-items: center; gap: 8px; padding: 0 9px; border: 0; color: var(--group-color); background: transparent; text-align: left; cursor: pointer; }
+.group-heading strong { font-size: 14px; }
+.group-heading > span:last-child { color: #8b9692; font-size: 9px; font-weight: 500; }
+.group-chevron { font-size: 15px; transition: .2s ease; }
+.group-heading[aria-expanded="false"] .group-chevron { transform: rotate(-90deg); }
+.board-row { min-height: 42px; display: grid; grid-template-columns: 34px minmax(250px, 1.5fr) 150px 126px 108px 150px 132px 34px; align-items: stretch; border-top: 1px solid #e6e9e8; border-right: 1px solid #e6e9e8; background: white; }
+.board-row > * { min-width: 0; border-left: 1px solid #e6e9e8; }
+.board-row:hover:not(.board-header-row) { background: #f7f8f8; box-shadow: inset 0 0 0 1px #d9dddb; }
+.board-header-row { min-height: 32px; color: #6d7874; background: #f7f8f8; font-size: 9px; text-align: center; }
+.board-header-row > span { display: grid; place-items: center; }
+.row-select { display: grid; place-items: center; }
+.row-select input { accent-color: #0073ea; }
+.task-title-input, .plain-cell { width: 100%; border: 0; outline: 0; padding: 0 11px; color: #25332e; background: transparent; font-size: 10px; }
+.task-title-input:focus, .plain-cell:focus { box-shadow: inset 0 0 0 2px #579bfc; background: white; }
+.task-title-input { font-weight: 650; }
+.owner-cell { position: relative; display: flex; align-items: center; gap: 5px; padding: 4px 7px; }
+.owner-cell select { min-width: 0; width: 100%; border: 0; outline: 0; color: #57645f; background: transparent; font-size: 9px; }
+.status-cell, .priority-cell { margin: 4px; border: 0; border-radius: 3px; outline: 0; color: white; text-align: center; text-align-last: center; font-size: 9px; font-weight: 750; cursor: pointer; }
+.status-cell.por-fazer { background: #c4c4c4; }
+.status-cell.em-curso { background: #fdab3d; }
+.status-cell.bloqueado { background: #e2445c; }
+.status-cell.concluido { background: #00c875; }
+.priority-cell.alta { background: #e2445c; }
+.priority-cell.media { background: #a25ddc; }
+.priority-cell.baixa { background: #579bfc; }
+.delete-row { border: 0; color: #9aa3a0; background: transparent; cursor: pointer; font-size: 17px; }
+.delete-row:hover { color: #e2445c; }
+.add-board-row { width: 100%; height: 38px; border: 1px solid #e6e9e8; border-left: 0; color: #89938f; background: white; text-align: left; padding-left: 45px; font-size: 10px; cursor: pointer; }
+.add-board-row:hover { color: #0073ea; background: #f8faf9; }
+.kanban-board { padding: 6px 22px 28px; display: grid; grid-template-columns: repeat(4, minmax(230px, 1fr)); gap: 12px; overflow-x: auto; }
+.kanban-column { min-height: 430px; padding: 10px; border-radius: 10px; background: #f4f6f5; }
+.kanban-column > header { padding: 3px 3px 12px; display: flex; align-items: center; justify-content: space-between; }
+.kanban-column > header strong { font-size: 11px; }
+.kanban-column > header span { min-width: 23px; padding: 2px 6px; border-radius: 999px; color: #68746f; background: white; text-align: center; font-size: 9px; }
+.kanban-column.por-fazer > header { color: #7a8380; }
+.kanban-column.em-curso > header { color: #b97717; }
+.kanban-column.bloqueado > header { color: #b73046; }
+.kanban-column.concluido > header { color: #008f52; }
+.kanban-cards { display: grid; gap: 8px; align-content: start; }
+.kanban-card { padding: 12px; display: grid; gap: 7px; border: 1px solid #e3e7e5; border-radius: 8px; background: white; box-shadow: 0 2px 5px rgba(20,48,39,.05); cursor: grab; }
+.kanban-card:active { cursor: grabbing; }
+.kanban-card strong { line-height: 1.35; font-size: 11px; }
+.kanban-card small { color: var(--muted); font-size: 9px; }
+.kanban-card footer { margin-top: 5px; padding-top: 8px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #eef0ef; color: #78837f; font-size: 8px; }
+.kanban-priority { justify-self: start; padding: 3px 6px; border-radius: 999px; font-size: 7px; font-weight: 800; }
+.kanban-priority.alta { color: #b73046; background: #fbe3e7; }
+.kanban-priority.media { color: #7b3eaa; background: #f0e4f8; }
+.kanban-priority.baixa { color: #2e6da0; background: #e1eef8; }
+.kanban-column > button { width: 100%; margin-top: 9px; padding: 8px; border: 1px dashed #cdd4d1; border-radius: 7px; color: #7d8884; background: transparent; font-size: 9px; cursor: pointer; }
+
 @media (max-width: 1100px) {
   .summary-grid { grid-template-columns: repeat(2, 1fr); }
   .objective-grid { grid-template-columns: 1fr; }
@@ -193,4 +267,12 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .task-row .priority, .task-row .due, .task-row .row-more { display: none; }
   .task-owner > span:last-child:not(.avatar) { display: none; }
   .objective-card { grid-template-columns: 36px 1fr auto; }
+  .board-titlebar { align-items: flex-start; padding: 20px 18px 14px; }
+  .board-titlebar p { max-width: 250px; }
+  .board-view-tabs { padding: 0 13px; }
+  .board-toolbar { padding: 10px 13px; flex-wrap: wrap; }
+  .board-search { order: 3; width: 100%; }
+  .view-toggle { margin-left: auto; }
+  .monday-board, .kanban-board { padding-left: 13px; padding-right: 13px; }
+  .kanban-board { grid-template-columns: repeat(4, 245px); }
 }
