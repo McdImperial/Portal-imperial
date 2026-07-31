@@ -28,6 +28,17 @@ button:focus-visible { outline: 3px solid rgba(76, 145, 119, .32); outline-offse
 .nav-item.active { color: white; background: rgba(255,255,255,.12); box-shadow: inset 3px 0 #f1bf75; }
 .nav-glyph { width: 20px; text-align: center; font-size: 18px; }
 .nav-count { margin-left: auto; min-width: 24px; padding: 2px 7px; border-radius: 999px; background: #f0bd70; color: #173f35; text-align: center; font-size: 12px; font-weight: 800; }
+.sidebar-departments { margin-top: 22px; }
+.sidebar-section-title { display: flex; align-items: center; gap: 9px; margin: 0 9px 9px; color: #82a097; text-transform: uppercase; letter-spacing: 1.2px; font-size: 8px; font-weight: 800; }
+.sidebar-section-title::after { content: ""; height: 1px; flex: 1; background: rgba(255,255,255,.12); }
+.department-list { display: grid; gap: 4px; }
+.department-tab { position: relative; width: 100%; min-height: 37px; display: flex; align-items: center; gap: 9px; padding: 6px 9px; border: 0; border-radius: 9px; color: #a9beb6; background: transparent; cursor: pointer; text-align: left; transition: .18s ease; }
+.department-tab:hover { color: white; background: rgba(255,255,255,.06); }
+.department-tab.selected { color: white; background: rgba(255,255,255,.11); }
+.department-initials { width: 25px; height: 25px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 7px; color: #bdd1c9; background: rgba(255,255,255,.08); font-size: 8px; font-weight: 800; letter-spacing: .3px; }
+.department-tab.selected .department-initials { color: var(--forest); background: #f1bf75; }
+.department-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; font-weight: 650; }
+.department-active-dot { width: 5px; height: 5px; margin-left: auto; border-radius: 50%; background: #75c6a6; box-shadow: 0 0 0 3px rgba(117,198,166,.12); }
 .sidebar-card { margin-top: auto; padding: 18px; border-radius: 14px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.08); }
 .sidebar-card .eyebrow { color: #a8c1b8; }
 .sidebar-card strong { display: block; margin: 7px 0 10px; font-size: 16px; }
@@ -55,16 +66,6 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .primary-button:hover { background: #225346; transform: translateY(-1px); }
 .primary-button span { margin-right: 6px; font-size: 17px; }
 .content { padding: 30px 42px 60px; display: grid; gap: 28px; max-width: 1480px; margin: 0 auto; }
-.department-switcher { display: flex; align-items: center; gap: 22px; padding: 14px 16px; border-radius: 15px; background: #fff; border: 1px solid var(--line); box-shadow: 0 3px 12px rgba(22,54,44,.035); }
-.department-context { min-width: 144px; padding: 2px 12px 2px 4px; border-right: 1px solid var(--line); }
-.department-context strong { display: block; margin-top: 5px; font-family: Georgia, serif; font-size: 15px; font-weight: 500; }
-.department-buttons { min-width: 0; flex: 1; display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; }
-.department-buttons::-webkit-scrollbar { display: none; }
-.department-button { white-space: nowrap; display: inline-flex; align-items: center; gap: 7px; padding: 8px 10px; border: 1px solid transparent; border-radius: 10px; color: #697671; background: #f5f7f5; font-size: 10px; font-weight: 700; cursor: pointer; transition: .18s ease; }
-.department-button:hover { color: var(--forest); background: #eef3f0; }
-.department-button span { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 8px; background: #e4ece8; color: #527568; font-size: 9px; }
-.department-button.selected { color: white; background: var(--forest); border-color: var(--forest); box-shadow: 0 5px 12px rgba(23,63,53,.14); }
-.department-button.selected span { color: var(--forest); background: #f1bf75; }
 .toast { position: fixed; top: 124px; right: 34px; z-index: 20; padding: 13px 17px; border-radius: 10px; background: #173f35; color: white; box-shadow: 0 14px 40px rgba(23,63,53,.22); font-size: 13px; animation: slide-in .25s ease-out; }
 @keyframes slide-in { from { opacity: 0; transform: translateY(-8px); } }
 
@@ -153,23 +154,24 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 }
 
 @media (max-width: 780px) {
-  .app-shell { grid-template-columns: 1fr; padding-bottom: 68px; }
-  .sidebar { position: fixed; z-index: 30; top: auto; bottom: 0; left: 0; right: 0; height: 68px; padding: 8px 10px; flex-direction: row; }
+  .app-shell { grid-template-columns: 1fr; padding-bottom: 124px; }
+  .sidebar { position: fixed; z-index: 30; top: auto; bottom: 0; left: 0; right: 0; height: 124px; padding: 7px 10px 8px; flex-direction: column; }
   .brand, .sidebar-card, .profile { display: none; }
-  .nav-list { width: 100%; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .nav-list { order: 2; width: 100%; grid-template-columns: repeat(4, 1fr); gap: 4px; }
   .nav-item { justify-content: center; flex-direction: column; gap: 3px; padding: 5px; font-size: 10px; }
   .nav-item.active { box-shadow: inset 0 -3px #f1bf75; }
   .nav-count { position: absolute; margin: -24px 0 0 27px; }
+  .sidebar-departments { order: 1; margin: 0 0 5px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .sidebar-section-title { display: none; }
+  .department-list { grid-template-columns: repeat(6, 1fr); gap: 3px; }
+  .department-tab { min-height: 34px; justify-content: center; padding: 4px; }
+  .department-name, .department-active-dot { display: none; }
+  .department-initials { width: 27px; height: 27px; }
   .topbar { height: 92px; padding: 19px 20px; }
   .top-actions .icon-button { display: none; }
   .primary-button { padding: 11px 12px; font-size: 0; }
   .primary-button span { margin: 0; font-size: 18px; }
   .content { padding: 20px 16px 38px; }
-  .department-switcher { align-items: stretch; flex-direction: column; gap: 10px; padding: 13px; }
-  .department-context { border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 10px; }
-  .department-buttons { margin: 0 -2px; padding: 0 2px 2px; }
-  .department-button { font-size: 0; padding: 7px; }
-  .department-button span { font-size: 9px; }
   .summary-grid, .zones-grid { grid-template-columns: 1fr; }
   .metric-card { min-height: 112px; }
   .panel-heading { align-items: flex-start; gap: 14px; flex-direction: column; }

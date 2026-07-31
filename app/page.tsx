@@ -136,6 +136,24 @@ export default function Home() {
             </button>
           ))}
         </nav>
+        <div className="sidebar-departments" aria-label="Departamentos">
+          <div className="sidebar-section-title"><span>Departamentos</span></div>
+          <div className="department-list">
+            {departments.map((item) => (
+              <button
+                key={item.id}
+                className={department === item.id ? "department-tab selected" : "department-tab"}
+                onClick={() => { setDepartment(item.id); setView("resumo"); }}
+                aria-pressed={department === item.id}
+                title={item.label}
+              >
+                <span className="department-initials">{item.short}</span>
+                <span className="department-name">{item.label}</span>
+                {department === item.id && <span className="department-active-dot" />}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="sidebar-card">
           <span className="eyebrow">Julho 2026</span>
           <strong>{completion}% concluído</strong>
@@ -152,7 +170,7 @@ export default function Home() {
       <section className="workspace">
         <header className="topbar">
           <div>
-            <p className="date-line">Sexta-feira · 31 de julho</p>
+            <p className="date-line">Sexta-feira · 31 de julho · {departmentLabel}</p>
             <h1>{viewLabels[view]}</h1>
           </div>
           <div className="top-actions">
@@ -164,20 +182,6 @@ export default function Home() {
         {notice && <div className="toast" role="status">✓ {notice}</div>}
 
         <div className="content">
-          <section className="department-switcher" aria-label="Selecionar departamento">
-            <div className="department-context">
-              <span className="eyebrow">Departamento ativo</span>
-              <strong>{departmentLabel}</strong>
-            </div>
-            <div className="department-buttons">
-              {departments.map((item) => (
-                <button key={item.id} className={department === item.id ? "department-button selected" : "department-button"} onClick={() => setDepartment(item.id)} title={item.label}>
-                  <span>{item.short}</span>{item.label}
-                </button>
-              ))}
-            </div>
-          </section>
-
           {(view === "resumo" || view === "tarefas") && (
             <section className="summary-grid" aria-label="Indicadores principais">
               <article className="metric-card feature">
