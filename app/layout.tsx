@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -12,14 +13,29 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Prumo — Gestão de tarefas e limpeza",
-  description: "Portal de acompanhamento de tarefas, objetivos mensais e áreas de limpeza.",
-  icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "prumo-limpeza.tiagosoutelo.chatgpt.site";
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
+  const imageUrl = `${protocol}://${host}/og.png`;
+
+  return {
+    title: "Prumo — Gestão transversal da empresa",
+    description: "Tarefas, objetivos mensais e áreas de acompanhamento para todos os departamentos.",
+    icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
+    openGraph: {
+      title: "Prumo — Uma visão comum para toda a empresa",
+      description: "Tarefas, objetivos e áreas num único portal transversal.",
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: "Portal Prumo" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Prumo — Uma visão comum para toda a empresa",
+      description: "Tarefas, objetivos e áreas num único portal transversal.",
+      images: [imageUrl],
+    },
+  };
+}
 
 export default function RootLayout({
   children,
