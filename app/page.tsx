@@ -108,6 +108,9 @@ export default function Home() {
   const [notice, setNotice] = useState("");
   const [taskSearch, setTaskSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"Todos" | TaskStatus>("Todos");
+  const [ownerFilter, setOwnerFilter] = useState("Todos");
+  const [sortAsc, setSortAsc] = useState(true);
+  const [hideCompleted, setHideCompleted] = useState(false);
   const [boardMode, setBoardMode] = useState<"tabela" | "kanban">("tabela");
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [dataReady, setDataReady] = useState(false);
@@ -152,15 +155,17 @@ export default function Home() {
   const boardTasks = useMemo(() => scopedTasks.filter((task) => {
     const status = task.status ?? (task.done ? "Concluído" : "Por fazer");
     const matchesStatus = statusFilter === "Todos" || status === statusFilter;
+    const matchesOwner = ownerFilter === "Todos" || task.assigneeName === ownerFilter;
+    const matchesVisibility = !hideCompleted || status !== "Concluído";
     const query = taskSearch.trim().toLocaleLowerCase("pt");
     const matchesSearch = !query || [task.title, task.area, task.assigneeName ?? "", task.due].some((value) => value.toLocaleLowerCase("pt").includes(query));
-    return matchesStatus && matchesSearch;
-  }), [scopedTasks, statusFilter, taskSearch]);
+    return matchesStatus && matchesOwner && matchesVisibility && matchesSearch;
+  }).sort((a, b) => sortAsc ? a.id - b.id : b.id - a.id), [scopedTasks, statusFilter, ownerFilter, hideCompleted, taskSearch, sortAsc]);
 
   const boardGroups = useMemo(() => {
     const groups = [
-      { id: "semanais", label: "Tarefas semanais", color: "#579bfc", tasks: boardTasks.filter((task) => task.due.startsWith("Semanal")) },
-      { id: "mensais", label: "Mensais e quinzenais", color: "#a25ddc", tasks: boardTasks.filter((task) => !task.due.startsWith("Semanal")) },
+      { id: "semanais", label: "Tarefas semanais", color: "#2f93c9", tasks: boardTasks.filter((task) => task.due.startsWith("Semanal")) },
+      { id: "mensais", label: "Tarefas mensais e quinzenais", color: "#579bfc", tasks: boardTasks.filter((task) => !task.due.startsWith("Semanal")) },
     ];
     return groups.filter((group) => group.tasks.length || !taskSearch);
   }, [boardTasks, taskSearch]);
@@ -338,27 +343,17 @@ export default function Home() {
 
           {view === "tarefas" && (
             <section className="board-page" aria-label="Gestão de tarefas">
-              <div className="board-titlebar">
-                <div>
-                  <span className="eyebrow">{departmentLabel}</span>
-                  <h2>Gestão de tarefas</h2>
-                  <p>Organize, atualize e acompanhe o trabalho da equipa num único quadro.</p>
-                </div>
-                <span className="board-count">{boardTasks.length} tarefas</span>
-              </div>
-              <div className="board-view-tabs">
-                <button className={boardMode === "tabela" ? "active" : ""} onClick={() => setBoardMode("tabela")}>Quadro principal</button>
-                <button className={boardMode === "kanban" ? "active" : ""} onClick={() => setBoardMode("kanban")}>Kanban</button>
-                <button className="board-add-view" aria-label="Adicionar visualização">＋</button>
-              </div>
-              <div className="board-toolbar">
-                <button className="board-new" onClick={() => createTask()}>＋ Nova tarefa</button>
-                <label className="board-search"><span>⌕</span><input value={taskSearch} onChange={(event) => setTaskSearch(event.target.value)} placeholder="Pesquisar tarefas" aria-label="Pesquisar tarefas" /></label>
-                <label className="board-filter"><span>≡</span><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "Todos" | TaskStatus)} aria-label="Filtrar por estado"><option>Todos</option>{statusOptions.map((status) => <option key={status}>{status}</option>)}</select></label>
-                <div className="view-toggle" aria-label="Modo de visualização">
-                  <button className={boardMode === "tabela" ? "active" : ""} onClick={() => setBoardMode("tabela")} title="Tabela">▦</button>
-                  <button className={boardMode === "kanban" ? "active" : ""} onClick={() => setBoardMode("kanban")} title="Kanban">▥</button>
-                </div>
+              <div className="monday-toolbar">
+                <label className="view-picker"><span>⌂</span><select value={boardMode} onChange={(event) => setBoardMode(event.target.value as "tabela" | "kanban")} aria-label="Escolher vista"><option value="tabela">Tabela principal</option><option value="kanban">Kanban</option></select></label>
+                <span className="toolbar-divider" />
+                <div className="new-item-split"><button onClick={() => createTask()}>Nova tarefa</button><button onClick={() => createTask("mensais")} aria-label="Adicionar tarefa mensal">⌄</button></div>
+                <label className="toolbar-search"><span>⌕</span><input value={taskSearch} onChange={(event) => setTaskSearch(event.target.value)} placeholder="Pesquisar" aria-label="Pesquisar tarefas" /></label>
+                <label className={ownerFilter !== "Todos" ? "toolbar-control active" : "toolbar-control"}><span>◎</span><select value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)} aria-label="Filtrar por pessoa"><option>Todos</option>{ownerOptions.map((owner) => <option value={owner.name} key={owner.name}>{owner.name}</option>)}</select></label>
+                <label className={statusFilter !== "Todos" ? "toolbar-control active" : "toolbar-control"}><span>▽</span><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "Todos" | TaskStatus)} aria-label="Filtrar por estado"><option>Todos</option>{statusOptions.map((status) => <option key={status}>{status}</option>)}</select></label>
+                <button className="toolbar-action" onClick={() => setSortAsc((current) => !current)}><span>⇅</span> Ordenar</button>
+                <button className={hideCompleted ? "toolbar-action active" : "toolbar-action"} onClick={() => setHideCompleted((current) => !current)}><span>◉</span> Ocultar</button>
+                <button className="toolbar-action group-label"><span>▣</span> Agrupar por</button>
+                <span className="toolbar-more">•••</span>
               </div>
 
               {!dataReady && <div className="board-loading">A carregar o quadro…</div>}
@@ -378,16 +373,17 @@ export default function Home() {
                         const taskStatus = task.status ?? (task.done ? "Concluído" : "Por fazer");
                         return <div className="board-row" key={task.id}>
                           <span className="row-select"><input type="checkbox" checked={taskStatus === "Concluído"} onChange={(event) => updateTask(task.id, { status: event.target.checked ? "Concluído" : "Por fazer" })} aria-label={`Concluir ${task.title}`} /></span>
-                          <input className="task-title-input" defaultValue={task.title} onBlur={(event) => { const value = event.target.value.trim(); if (value && value !== task.title) updateTask(task.id, { title: value }); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} aria-label={`Nome da tarefa ${task.title}`} />
+                          <label className="task-title-cell"><input className="task-title-input" defaultValue={task.title} onBlur={(event) => { const value = event.target.value.trim(); if (value && value !== task.title) updateTask(task.id, { title: value }); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} aria-label={`Nome da tarefa ${task.title}`} /><span title="Abrir atualizações">⊕</span></label>
                           <label className="owner-cell"><span className="avatar small">{task.assignee}</span><select value={task.assigneeName ?? ""} onChange={(event) => { const owner = ownerOptions.find((item) => item.name === event.target.value); if (owner) updateTask(task.id, { assignee: owner.initials, assigneeName: owner.name }); }} aria-label={`Responsável por ${task.title}`}><option value="">Sem responsável</option>{ownerOptions.map((owner) => <option value={owner.name} key={owner.name}>{owner.name}</option>)}</select></label>
                           <select className={`status-cell ${statusClass(taskStatus)}`} value={taskStatus} onChange={(event) => updateTask(task.id, { status: event.target.value as TaskStatus })} aria-label={`Estado de ${task.title}`}>{statusOptions.map((status) => <option value={status} key={status}>{status}</option>)}</select>
                           <select className={`priority-cell ${statusClass(task.priority)}`} value={task.priority} onChange={(event) => updateTask(task.id, { priority: event.target.value as Task["priority"] })} aria-label={`Prioridade de ${task.title}`}><option>Alta</option><option>Média</option><option>Baixa</option></select>
-                          <input className="plain-cell" defaultValue={task.due} onBlur={(event) => { if (event.target.value !== task.due) updateTask(task.id, { due: event.target.value }); }} aria-label={`Periodicidade de ${task.title}`} />
+                          <label className="timeline-cell"><input className="plain-cell" defaultValue={task.due} onBlur={(event) => { if (event.target.value !== task.due) updateTask(task.id, { due: event.target.value }); }} aria-label={`Periodicidade de ${task.title}`} /></label>
                           <input className="plain-cell" defaultValue={task.area} onBlur={(event) => { if (event.target.value !== task.area) updateTask(task.id, { area: event.target.value }); }} aria-label={`Área de ${task.title}`} />
                           <button className="delete-row" onClick={() => deleteTask(task.id)} aria-label={`Apagar ${task.title}`}>×</button>
                         </div>;
                       })}
                       <button className="add-board-row" onClick={() => createTask(group.id as "semanais" | "mensais")}>＋ Adicionar tarefa</button>
+                      <div className="group-summary" aria-label={`Resumo de ${group.label}`}><span /><span /><span /><span className="summary-status"><i style={{ width: `${group.tasks.length ? group.tasks.filter((task) => (task.status ?? (task.done ? "Concluído" : "Por fazer")) === "Concluído").length / group.tasks.length * 100 : 0}%` }} /></span><span /><span className="summary-timeline">{group.tasks.length} tarefas</span><span /><span /></div>
                     </>}
                   </div>
                 ))}
