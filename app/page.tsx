@@ -217,7 +217,7 @@ export default function Home() {
   ];
 
   return (
-    <main className={department === "qualidade" ? "app-shell quality-active" : "app-shell"}>
+    <main className="app-shell">
       <aside className="sidebar" aria-label="Navegação principal">
         <div className="brand">
           <span className="brand-mark">M</span>
@@ -246,12 +246,6 @@ export default function Home() {
                   <span className="department-name">{item.label}</span>
                   {department === item.id && <span className="department-active-dot" />}
                 </button>
-                {item.id === "qualidade" && department === "qualidade" && (
-                  <div className="department-subtabs" aria-label="Secções de Qualidade e Produtos">
-                    <button className={view === "objetivos" ? "department-subtab active" : "department-subtab"} onClick={() => setView("objetivos")}>◎ <span>Objetivos mensais</span></button>
-                    <button className={view === "areas" ? "department-subtab active" : "department-subtab"} onClick={() => setView("areas")}>✦ <span>Áreas Limpeza</span></button>
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -293,6 +287,27 @@ export default function Home() {
               <article className="metric-card"><span className="metric-icon mint">✓</span><div><span className="eyebrow">Concluídas</span><strong>{completed}</strong><p>tarefas este mês</p></div></article>
               <article className="metric-card"><span className="metric-icon coral">!</span><div><span className="eyebrow">Pendentes</span><strong>{pending}</strong><p>{department === "qualidade" ? "registadas na folha GDR" : "2 precisam de atenção"}</p></div></article>
               <article className="metric-card"><span className="metric-icon blue">⌂</span><div><span className="eyebrow">Áreas acompanhadas</span><strong>{activeProfile.zones.filter((zone) => zone.percent >= 80).length}/{activeProfile.zones.length}</strong><p>com progresso ≥ 80%</p></div></article>
+            </section>
+          )}
+
+          {view === "resumo" && department === "qualidade" && (
+            <section className="quality-shortcuts" aria-labelledby="quality-shortcuts-title">
+              <div className="shortcut-heading">
+                <div><span className="eyebrow">Qualidade &amp; Produtos</span><h2 id="quality-shortcuts-title">Acessos rápidos</h2></div>
+                <p>Consulte os objetivos do mês e o estado das áreas de limpeza.</p>
+              </div>
+              <div className="shortcut-actions">
+                <button className="shortcut-button objectives" onClick={() => setView("objetivos")}>
+                  <span className="shortcut-icon">◎</span>
+                  <span className="shortcut-copy"><strong>Objetivos mensais</strong><small>Food, Paper, OPS e Perdas</small></span>
+                  <span className="shortcut-arrow">→</span>
+                </button>
+                <button className="shortcut-button cleaning" onClick={() => setView("areas")}>
+                  <span className="shortcut-icon">✦</span>
+                  <span className="shortcut-copy"><strong>Áreas Limpeza</strong><small>Estado e progresso das 7 áreas</small></span>
+                  <span className="shortcut-arrow">→</span>
+                </button>
+              </div>
             </section>
           )}
 
