@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao" | "segit";
 type TaskStatus = "Por fazer" | "Em curso" | "Bloqueado" | "Concluído";
 
@@ -98,6 +98,7 @@ const viewLabels: Record<View, string> = {
   tarefas: "Todas as tarefas",
   objetivos: "Objetivos mensais",
   areas: "Áreas de acompanhamento",
+  custos: "Custo, Comida e Papel",
 };
 
 export default function Home() {
@@ -251,6 +252,13 @@ export default function Home() {
                   <span className="department-name">{item.label}</span>
                   {department === item.id && <span className="department-active-dot" />}
                 </button>
+                {item.id === "qualidade" && department === "qualidade" && (
+                  <div className="department-subtabs" aria-label="Subsecções de Qualidade e Produtos">
+                    <button className={view === "custos" ? "department-subtab active" : "department-subtab"} onClick={() => setView("custos")}>
+                      ◫ <span>Custo, Comida e Papel</span>
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -299,7 +307,7 @@ export default function Home() {
             <section className="quality-shortcuts" aria-labelledby="quality-shortcuts-title">
               <div className="shortcut-heading">
                 <div><span className="eyebrow">Qualidade &amp; Produtos</span><h2 id="quality-shortcuts-title">Acessos rápidos</h2></div>
-                <p>Consulte os objetivos do mês e o estado das áreas de limpeza.</p>
+                <p>Consulte os objetivos, as áreas de limpeza e os indicadores de custo.</p>
               </div>
               <div className="shortcut-actions">
                 <button className="shortcut-button objectives" onClick={() => setView("objetivos")}>
@@ -310,6 +318,11 @@ export default function Home() {
                 <button className="shortcut-button cleaning" onClick={() => setView("areas")}>
                   <span className="shortcut-icon">✦</span>
                   <span className="shortcut-copy"><strong>Áreas Limpeza</strong><small>Estado e progresso das 7 áreas</small></span>
+                  <span className="shortcut-arrow">→</span>
+                </button>
+                <button className="shortcut-button costs" onClick={() => setView("custos")}>
+                  <span className="shortcut-icon">◫</span>
+                  <span className="shortcut-copy"><strong>Custo, Comida e Papel</strong><small>Acompanhar os três indicadores</small></span>
                   <span className="shortcut-arrow">→</span>
                 </button>
               </div>
@@ -403,6 +416,29 @@ export default function Home() {
                   </section>;
                 })}
               </div>}
+            </section>
+          )}
+
+          {view === "custos" && department === "qualidade" && (
+            <section className="cost-section" aria-labelledby="cost-section-title">
+              <div className="cost-heading">
+                <div><span className="eyebrow">Qualidade &amp; Produtos</span><h2 id="cost-section-title">Custo, Comida e Papel</h2></div>
+                <p>Acompanhamento mensal dos indicadores principais de consumo e operação.</p>
+              </div>
+              <div className="cost-grid">
+                <article className="cost-card cost-total">
+                  <span className="cost-icon">€</span>
+                  <div><span className="eyebrow">Custo</span><strong>Por registar</strong><p>Custo total do mês</p></div>
+                </article>
+                <article className="cost-card cost-food">
+                  <span className="cost-icon">●</span>
+                  <div><span className="eyebrow">Comida</span><strong>—</strong><p>Meta mensal por definir</p></div>
+                </article>
+                <article className="cost-card cost-paper">
+                  <span className="cost-icon">▤</span>
+                  <div><span className="eyebrow">Papel</span><strong>—</strong><p>Meta mensal por definir</p></div>
+                </article>
+              </div>
             </section>
           )}
 
