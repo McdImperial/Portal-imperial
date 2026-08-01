@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import inventoryProductsData from "./data/inventory-products.json";
 
 type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao" | "segit";
@@ -101,16 +102,43 @@ const viewLabels: Record<View, string> = {
   custos: "Custo, Comida, Papel e OPS",
 };
 
-const inventoryReports = [
-  { category: "Comida", detail: "Produtos de comida", net: 4103.45, negative: 3610.47, active: 180, sources: [{ label: "Comida", href: "https://docs.google.com/spreadsheets/d/1chupDnWcKOGlefpQQbCZNExPEqZd72hi/edit?usp=drivesdk" }] },
-  { category: "Papel", detail: "Produtos de papel", net: -822.52, negative: 1158.41, active: 88, sources: [{ label: "Papel", href: "https://docs.google.com/spreadsheets/d/1waXabijRVdBKz81D8wYnPuJZN7lyjXZe/edit?usp=drivesdk" }] },
-  { category: "OPS", detail: "Limpeza + material de escritório", net: -87.74, negative: 1565.92, active: 218, sources: [{ label: "Limpeza", href: "https://docs.google.com/spreadsheets/d/1i4N7dA4AX68Op9VSuI0Wreb4tOG6UUUd/edit?usp=drivesdk" }, { label: "Escritório", href: "https://docs.google.com/spreadsheets/d/1syUvVzvdSCv5KsEz5qAkCK0v_pQ7Gtp9/edit?usp=drivesdk" }] },
-];
+type InventoryCategory = "food" | "paper" | "ops";
+type InventoryStatus = "Todos" | "Ativo" | "Inativo";
+type ProductSortKey = "code" | "description" | "status" | "source" | "openingStock" | "deliveries" | "posUsage" | "expectedStock" | "closingStock" | "deviation" | "deviationEur" | "currentYield";
+type InventoryProduct = {
+  id: string;
+  category: InventoryCategory;
+  source: string;
+  code: string;
+  status: "Ativo" | "Inativo";
+  description: string;
+  unit: string;
+  group: string;
+  openingStock: number;
+  deliveries: number;
+  posUsage: number;
+  expectedStock: number;
+  closingStock: number;
+  deviation: number;
+  deviationEur: number;
+  currentYield: number;
+};
 
-type InventorySortKey = "category" | "net" | "negative" | "active";
+const inventoryProducts = inventoryProductsData as InventoryProduct[];
+const inventoryCategoryLabels: Record<InventoryCategory, string> = { food: "Comida", paper: "Papel", ops: "OPS" };
 
 function formatEuro(value: number) {
   return new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(value);
+}
+
+function formatQuantity(value: number) {
+  return new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 2 }).format(value);
+}
+
+function formatYield(value: number) {
+  if (!value) return "—";
+  const percentage = value <= 3 ? value * 100 : value;
+  return `${new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 1 }).format(percentage)}%`;
 }
 
 export default function Home() {
@@ -124,7 +152,10 @@ export default function Home() {
   const [ownerFilter, setOwnerFilter] = useState("Todos");
   const [sortAsc, setSortAsc] = useState(true);
   const [hideCompleted, setHideCompleted] = useState(false);
-  const [inventorySort, setInventorySort] = useState<{ key: InventorySortKey; direction: "asc" | "desc" }>({ key: "negative", direction: "desc" });
+  const [selectedInventoryCategory, setSelectedInventoryCategory] = useState<InventoryCategory>("food");
+  const [inventorySearch, setInventorySearch] = useState("");
+  const [inventoryStatus, setInventoryStatus] = useState<InventoryStatus>("Todos");
+  const [productSort, setProductSort] = useState<{ key: ProductSortKey; direction: "asc" | "desc" }>({ key: "description", direction: "asc" });
   const [boardMode, setBoardMode] = useState<"tabela" | "kanban">("tabela");
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [dataReady, setDataReady] = useState(false);
@@ -184,14 +215,24 @@ export default function Home() {
     return groups.filter((group) => group.tasks.length || !taskSearch);
   }, [boardTasks, taskSearch]);
 
-  const orderedInventoryReports = useMemo(() => [...inventoryReports].sort((a, b) => {
-    const direction = inventorySort.direction === "asc" ? 1 : -1;
-    if (inventorySort.key === "category") return a.category.localeCompare(b.category, "pt") * direction;
-    return (a[inventorySort.key] - b[inventorySort.key]) * direction;
-  }), [inventorySort]);
+  const visibleInventoryProducts = useMemo(() => {
+    const query = inventorySearch.trim().toLocaleLowerCase("pt");
+    const direction = productSort.direction === "asc" ? 1 : -1;
+    return inventoryProducts.filter((product) => {
+      const matchesCategory = product.category === selectedInventoryCategory;
+      const matchesStatus = inventoryStatus === "Todos" || product.status === inventoryStatus;
+      const matchesSearch = !query || [product.code, product.description, product.source, product.unit, product.group].some((value) => value.toLocaleLowerCase("pt").includes(query));
+      return matchesCategory && matchesStatus && matchesSearch;
+    }).sort((a, b) => {
+      const left = a[productSort.key];
+      const right = b[productSort.key];
+      if (typeof left === "string" && typeof right === "string") return left.localeCompare(right, "pt", { numeric: true }) * direction;
+      return (Number(left) - Number(right)) * direction;
+    });
+  }, [inventorySearch, inventoryStatus, productSort, selectedInventoryCategory]);
 
-  function changeInventorySort(key: InventorySortKey) {
-    setInventorySort((current) => ({ key, direction: current.key === key && current.direction === "desc" ? "asc" : "desc" }));
+  function changeProductSort(key: ProductSortKey) {
+    setProductSort((current) => ({ key, direction: current.key === key && current.direction === "asc" ? "desc" : "asc" }));
   }
 
   async function updateTask(id: number, changes: Partial<Task>) {
@@ -453,36 +494,59 @@ export default function Home() {
                   <span className="cost-icon">€</span>
                   <div><span className="eyebrow">Custo</span><strong>6 334,80 €</strong><p>Desvios negativos totais · 486 referências ativas</p></div>
                 </article>
-                <article className="cost-card cost-food">
+                <button type="button" className={`cost-card cost-selector cost-food ${selectedInventoryCategory === "food" ? "selected" : ""}`} onClick={() => setSelectedInventoryCategory("food")} aria-pressed={selectedInventoryCategory === "food"}>
                   <span className="cost-icon">●</span>
                   <div><span className="eyebrow">Comida</span><strong>3 610,47 €</strong><p>74 referências com desvio negativo · <b>+10,7% vs. junho</b></p></div>
-                </article>
-                <article className="cost-card cost-paper">
+                  <span className="selector-mark" aria-hidden="true">✓</span>
+                </button>
+                <button type="button" className={`cost-card cost-selector cost-paper ${selectedInventoryCategory === "paper" ? "selected" : ""}`} onClick={() => setSelectedInventoryCategory("paper")} aria-pressed={selectedInventoryCategory === "paper"}>
                   <span className="cost-icon">▤</span>
                   <div><span className="eyebrow">Papel</span><strong>1 158,41 €</strong><p>45 referências com desvio negativo · <b>+55,1% vs. junho</b></p></div>
-                </article>
-                <article className="cost-card cost-ops">
+                  <span className="selector-mark" aria-hidden="true">✓</span>
+                </button>
+                <button type="button" className={`cost-card cost-selector cost-ops ${selectedInventoryCategory === "ops" ? "selected" : ""}`} onClick={() => setSelectedInventoryCategory("ops")} aria-pressed={selectedInventoryCategory === "ops"}>
                   <span className="cost-icon">◇</span>
                   <div><span className="eyebrow">OPS</span><strong>1 565,92 €</strong><p>Produtos de limpeza + escritório · 218 referências ativas</p></div>
-                </article>
+                  <span className="selector-mark" aria-hidden="true">✓</span>
+                </button>
               </div>
               <div className="inventory-detail">
-                <div className="inventory-detail-heading"><div><span className="eyebrow">Relatórios MyStore</span><h3>Detalhe por categoria</h3></div><span>Período: 01/07–31/07/2026</span></div>
-                <div className="inventory-table" role="table" aria-label="Detalhe dos relatórios de inventário">
-                  <div className="inventory-row inventory-header" role="row">
-                    <button onClick={() => changeInventorySort("category")}>Categoria <i>{inventorySort.key === "category" ? inventorySort.direction === "asc" ? "↑" : "↓" : "↕"}</i></button>
-                    <button onClick={() => changeInventorySort("net")}>Desvio líquido <i>{inventorySort.key === "net" ? inventorySort.direction === "asc" ? "↑" : "↓" : "↕"}</i></button>
-                    <button onClick={() => changeInventorySort("negative")}>Desvios negativos <i>{inventorySort.key === "negative" ? inventorySort.direction === "asc" ? "↑" : "↓" : "↕"}</i></button>
-                    <button onClick={() => changeInventorySort("active")}>Referências ativas <i>{inventorySort.key === "active" ? inventorySort.direction === "asc" ? "↑" : "↓" : "↕"}</i></button>
-                    <span>Relatórios</span>
+                <div className="inventory-detail-heading">
+                  <div><span className="eyebrow">Relatório MyStore selecionado</span><h3>Produtos — {inventoryCategoryLabels[selectedInventoryCategory]}</h3></div>
+                  <span>Período: 01/07–31/07/2026</span>
+                </div>
+                <div className="inventory-controls">
+                  <label className="inventory-search"><span aria-hidden="true">⌕</span><input type="search" value={inventorySearch} onChange={(event) => setInventorySearch(event.target.value)} placeholder="Pesquisar produto, código ou grupo" aria-label="Pesquisar produtos" /></label>
+                  <label className="inventory-filter">Estado<select value={inventoryStatus} onChange={(event) => setInventoryStatus(event.target.value as InventoryStatus)}><option>Todos</option><option>Ativo</option><option>Inativo</option></select></label>
+                  <strong>{visibleInventoryProducts.length} de {inventoryProducts.filter((product) => product.category === selectedInventoryCategory).length} produtos</strong>
+                </div>
+                <div className="inventory-table" role="table" aria-label={`Produtos de ${inventoryCategoryLabels[selectedInventoryCategory]}`}>
+                  <div className="inventory-product-row inventory-product-header" role="row">
+                    {([
+                      ["code", "Código"], ["description", "Produto"], ["status", "Estado"], ["source", "Origem"],
+                      ["openingStock", "Stock abertura"], ["deliveries", "Entregas"], ["posUsage", "Utilização POS"],
+                      ["expectedStock", "Stock esperado"], ["closingStock", "Stock fecho"], ["deviation", "Desvio"],
+                      ["deviationEur", "Desvio (€)"], ["currentYield", "Rend. atual"],
+                    ] as [ProductSortKey, string][]).map(([key, label]) => <button type="button" onClick={() => changeProductSort(key)} key={key}>{label}<i>{productSort.key === key ? productSort.direction === "asc" ? "↑" : "↓" : "↕"}</i></button>)}
                   </div>
-                  {orderedInventoryReports.map((report) => (
-                    <div className="inventory-row" role="row" key={report.category}>
-                      <span className="inventory-category"><strong>{report.category}</strong><small>{report.detail}</small></span><span>{formatEuro(report.net)}</span><span>{formatEuro(report.negative)}</span><span>{report.active}</span><span className="report-links">{report.sources.map((source) => <a href={source.href} target="_blank" rel="noreferrer" key={source.label}>{source.label} ↗</a>)}</span>
+                  {visibleInventoryProducts.map((product) => (
+                    <div className="inventory-product-row" role="row" key={product.id}>
+                      <span className="product-code">{product.code}</span>
+                      <span className="product-name"><strong>{product.description}</strong><small>{product.unit || "—"} · Grupo {product.group || "—"}</small></span>
+                      <span><i className={`product-status ${product.status === "Ativo" ? "active" : "inactive"}`}>{product.status}</i></span>
+                      <span><i className={`product-source source-${statusClass(product.source)}`}>{product.source}</i></span>
+                      <span>{formatQuantity(product.openingStock)}</span>
+                      <span>{formatQuantity(product.deliveries)}</span>
+                      <span>{formatQuantity(product.posUsage)}</span>
+                      <span>{formatQuantity(product.expectedStock)}</span>
+                      <span>{formatQuantity(product.closingStock)}</span>
+                      <span className={product.deviation < 0 ? "negative-value" : product.deviation > 0 ? "positive-value" : ""}>{formatQuantity(product.deviation)}</span>
+                      <span className={product.deviationEur < 0 ? "negative-value" : product.deviationEur > 0 ? "positive-value" : ""}>{formatEuro(product.deviationEur)}</span>
+                      <span>{formatYield(product.currentYield)}</span>
                     </div>
                   ))}
                 </div>
-                <p className="inventory-note">Fonte: relatórios “Desvio de inventário” do restaurante Imperial. OPS agrega Produtos de Limpeza e Material de Escritório. Selecione um cabeçalho para ordenar a tabela.</p>
+                <p className="inventory-note">Fonte: relatórios “Desvio de inventário” do restaurante Imperial. Selecione Comida, Papel ou OPS nos cartões acima; OPS agrega Produtos de Limpeza e Material de Escritório. Todos os produtos ativos e inativos estão incluídos.</p>
               </div>
             </section>
           )}
