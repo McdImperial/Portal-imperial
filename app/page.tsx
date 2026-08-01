@@ -98,15 +98,20 @@ const viewLabels: Record<View, string> = {
   tarefas: "Todas as tarefas",
   objetivos: "Objetivos mensais",
   areas: "Áreas de acompanhamento",
-  custos: "Custo, Comida e Papel",
+  custos: "Custo, Comida, Papel e OPS",
 };
 
 const inventoryReports = [
-  { category: "Comida", net: "4 103,45 €", negative: "3 610,47 €", active: 180, href: "https://docs.google.com/spreadsheets/d/1chupDnWcKOGlefpQQbCZNExPEqZd72hi/edit?usp=drivesdk" },
-  { category: "Papel", net: "−822,52 €", negative: "1 158,41 €", active: 88, href: "https://docs.google.com/spreadsheets/d/1waXabijRVdBKz81D8wYnPuJZN7lyjXZe/edit?usp=drivesdk" },
-  { category: "Produtos de limpeza", net: "178,19 €", negative: "1 299,99 €", active: 211, href: "https://docs.google.com/spreadsheets/d/1i4N7dA4AX68Op9VSuI0Wreb4tOG6UUUd/edit?usp=drivesdk" },
-  { category: "Material de escritório", net: "−265,93 €", negative: "265,93 €", active: 7, href: "https://docs.google.com/spreadsheets/d/1syUvVzvdSCv5KsEz5qAkCK0v_pQ7Gtp9/edit?usp=drivesdk" },
+  { category: "Comida", detail: "Produtos de comida", net: 4103.45, negative: 3610.47, active: 180, sources: [{ label: "Comida", href: "https://docs.google.com/spreadsheets/d/1chupDnWcKOGlefpQQbCZNExPEqZd72hi/edit?usp=drivesdk" }] },
+  { category: "Papel", detail: "Produtos de papel", net: -822.52, negative: 1158.41, active: 88, sources: [{ label: "Papel", href: "https://docs.google.com/spreadsheets/d/1waXabijRVdBKz81D8wYnPuJZN7lyjXZe/edit?usp=drivesdk" }] },
+  { category: "OPS", detail: "Limpeza + material de escritório", net: -87.74, negative: 1565.92, active: 218, sources: [{ label: "Limpeza", href: "https://docs.google.com/spreadsheets/d/1i4N7dA4AX68Op9VSuI0Wreb4tOG6UUUd/edit?usp=drivesdk" }, { label: "Escritório", href: "https://docs.google.com/spreadsheets/d/1syUvVzvdSCv5KsEz5qAkCK0v_pQ7Gtp9/edit?usp=drivesdk" }] },
 ];
+
+type InventorySortKey = "category" | "net" | "negative" | "active";
+
+function formatEuro(value: number) {
+  return new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(value);
+}
 
 export default function Home() {
   const [view, setView] = useState<View>("resumo");
@@ -119,6 +124,7 @@ export default function Home() {
   const [ownerFilter, setOwnerFilter] = useState("Todos");
   const [sortAsc, setSortAsc] = useState(true);
   const [hideCompleted, setHideCompleted] = useState(false);
+  const [inventorySort, setInventorySort] = useState<{ key: InventorySortKey; direction: "asc" | "desc" }>({ key: "negative", direction: "desc" });
   const [boardMode, setBoardMode] = useState<"tabela" | "kanban">("tabela");
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [dataReady, setDataReady] = useState(false);
@@ -177,6 +183,16 @@ export default function Home() {
     ];
     return groups.filter((group) => group.tasks.length || !taskSearch);
   }, [boardTasks, taskSearch]);
+
+  const orderedInventoryReports = useMemo(() => [...inventoryReports].sort((a, b) => {
+    const direction = inventorySort.direction === "asc" ? 1 : -1;
+    if (inventorySort.key === "category") return a.category.localeCompare(b.category, "pt") * direction;
+    return (a[inventorySort.key] - b[inventorySort.key]) * direction;
+  }), [inventorySort]);
+
+  function changeInventorySort(key: InventorySortKey) {
+    setInventorySort((current) => ({ key, direction: current.key === key && current.direction === "desc" ? "asc" : "desc" }));
+  }
 
   async function updateTask(id: number, changes: Partial<Task>) {
     setTasks((current) => current.map((task) => task.id === id ? { ...task, ...changes, done: changes.status ? changes.status === "Concluído" : task.done } : task));
@@ -262,7 +278,7 @@ export default function Home() {
                 {item.id === "qualidade" && department === "qualidade" && (
                   <div className="department-subtabs" aria-label="Subsecções de Qualidade e Produtos">
                     <button className={view === "custos" ? "department-subtab active" : "department-subtab"} onClick={() => setView("custos")}>
-                      ◫ <span>Custo, Comida e Papel</span>
+                      ◫ <span>Custo, Comida, Papel &amp; OPS</span>
                     </button>
                   </div>
                 )}
@@ -329,7 +345,7 @@ export default function Home() {
                 </button>
                 <button className="shortcut-button costs" onClick={() => setView("custos")}>
                   <span className="shortcut-icon">◫</span>
-                  <span className="shortcut-copy"><strong>Custo, Comida e Papel</strong><small>Acompanhar os três indicadores</small></span>
+                  <span className="shortcut-copy"><strong>Custo, Comida, Papel &amp; OPS</strong><small>Acompanhar desvios por categoria</small></span>
                   <span className="shortcut-arrow">→</span>
                 </button>
               </div>
@@ -429,7 +445,7 @@ export default function Home() {
           {view === "custos" && department === "qualidade" && (
             <section className="cost-section" aria-labelledby="cost-section-title">
               <div className="cost-heading">
-                <div><span className="eyebrow">Dados de julho 2026</span><h2 id="cost-section-title">Custo, Comida e Papel</h2></div>
+                <div><span className="eyebrow">Dados de julho 2026</span><h2 id="cost-section-title">Custo, Comida, Papel e OPS</h2></div>
                 <a className="drive-link" href="https://drive.google.com/drive/folders/1W_C3S1yUFZXGdmETHBesGHwJwk3xoeaZ?usp=sharing" target="_blank" rel="noreferrer">Abrir pasta no Drive ↗</a>
               </div>
               <div className="cost-grid">
@@ -445,18 +461,28 @@ export default function Home() {
                   <span className="cost-icon">▤</span>
                   <div><span className="eyebrow">Papel</span><strong>1 158,41 €</strong><p>45 referências com desvio negativo · <b>+55,1% vs. junho</b></p></div>
                 </article>
+                <article className="cost-card cost-ops">
+                  <span className="cost-icon">◇</span>
+                  <div><span className="eyebrow">OPS</span><strong>1 565,92 €</strong><p>Produtos de limpeza + escritório · 218 referências ativas</p></div>
+                </article>
               </div>
               <div className="inventory-detail">
                 <div className="inventory-detail-heading"><div><span className="eyebrow">Relatórios MyStore</span><h3>Detalhe por categoria</h3></div><span>Período: 01/07–31/07/2026</span></div>
                 <div className="inventory-table" role="table" aria-label="Detalhe dos relatórios de inventário">
-                  <div className="inventory-row inventory-header" role="row"><span>Categoria</span><span>Desvio líquido</span><span>Desvios negativos</span><span>Referências ativas</span><span>Relatório</span></div>
-                  {inventoryReports.map((report) => (
+                  <div className="inventory-row inventory-header" role="row">
+                    <button onClick={() => changeInventorySort("category")}>Categoria <i>{inventorySort.key === "category" ? inventorySort.direction === "asc" ? "↑" : "↓" : "↕"}</i></button>
+                    <button onClick={() => changeInventorySort("net")}>Desvio líquido <i>{inventorySort.key === "net" ? inventorySort.direction === "asc" ? "↑" : "↓" : "↕"}</i></button>
+                    <button onClick={() => changeInventorySort("negative")}>Desvios negativos <i>{inventorySort.key === "negative" ? inventorySort.direction === "asc" ? "↑" : "↓" : "↕"}</i></button>
+                    <button onClick={() => changeInventorySort("active")}>Referências ativas <i>{inventorySort.key === "active" ? inventorySort.direction === "asc" ? "↑" : "↓" : "↕"}</i></button>
+                    <span>Relatórios</span>
+                  </div>
+                  {orderedInventoryReports.map((report) => (
                     <div className="inventory-row" role="row" key={report.category}>
-                      <strong>{report.category}</strong><span>{report.net}</span><span>{report.negative}</span><span>{report.active}</span><a href={report.href} target="_blank" rel="noreferrer">Abrir ↗</a>
+                      <span className="inventory-category"><strong>{report.category}</strong><small>{report.detail}</small></span><span>{formatEuro(report.net)}</span><span>{formatEuro(report.negative)}</span><span>{report.active}</span><span className="report-links">{report.sources.map((source) => <a href={source.href} target="_blank" rel="noreferrer" key={source.label}>{source.label} ↗</a>)}</span>
                     </div>
                   ))}
                 </div>
-                <p className="inventory-note">Fonte: relatórios “Desvio de inventário” do restaurante Imperial. O custo apresentado corresponde à soma dos desvios negativos em euros.</p>
+                <p className="inventory-note">Fonte: relatórios “Desvio de inventário” do restaurante Imperial. OPS agrega Produtos de Limpeza e Material de Escritório. Selecione um cabeçalho para ordenar a tabela.</p>
               </div>
             </section>
           )}
