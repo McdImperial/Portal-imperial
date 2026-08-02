@@ -1,6 +1,7 @@
 import { asc, eq } from "drizzle-orm";
 import { getDb } from "../../../../db";
 import { sharedFolders } from "../../../../db/schema";
+import { requireUser } from "../../auth/_lib";
 
 const defaultFolders = [
   { id: "inventario", name: "Relatórios de inventário", description: "Comida, papel, limpeza e material de escritório", url: "https://drive.google.com/drive/folders/1W_C3S1yUFZXGdmETHBesGHwJwk3xoeaZ?usp=sharing", fileCount: 8 },
@@ -14,8 +15,10 @@ async function ensureFolders() {
   return db.select().from(sharedFolders).orderBy(asc(sharedFolders.name));
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const auth = await requireUser(request);
+    if (auth.error) return auth.error;
     return Response.json({ folders: await ensureFolders() });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "Erro ao carregar pastas" }, { status: 500 });
@@ -24,6 +27,8 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
+    const auth = await requireUser(request, ["admin"]);
+    if (auth.error) return auth.error;
     const payload = (await request.json()) as { folders?: { id: string; fileCount: number }[] };
     if (!payload.folders?.length) return Response.json({ error: "Pastas obrigatórias" }, { status: 400 });
     const db = getDb();

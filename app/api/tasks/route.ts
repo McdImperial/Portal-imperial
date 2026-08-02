@@ -1,6 +1,7 @@
 import { asc, eq } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { tasks } from "../../../db/schema";
+import { requireUser } from "../auth/_lib";
 
 type TaskPayload = {
   id?: number;
@@ -35,8 +36,10 @@ function valuesFrom(payload: TaskPayload, position = 0) {
   };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const auth = await requireUser(request);
+    if (auth.error) return auth.error;
     const rows = await getDb().select().from(tasks).orderBy(asc(tasks.position), asc(tasks.id));
     return Response.json({ tasks: rows.map(clientTask) });
   } catch (error) {
@@ -46,6 +49,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireUser(request, ["admin", "editor"]);
+    if (auth.error) return auth.error;
     const payload = (await request.json()) as TaskPayload | { tasks: TaskPayload[] };
     const db = getDb();
     if ("tasks" in payload) {
@@ -66,6 +71,8 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const auth = await requireUser(request, ["admin", "editor"]);
+    if (auth.error) return auth.error;
     const payload = (await request.json()) as TaskPayload;
     if (!payload.id) return Response.json({ error: "id obrigatório" }, { status: 400 });
     const updates: Record<string, string | number | null> = { updatedAt: new Date().toISOString() };
@@ -81,6 +88,8 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const auth = await requireUser(request, ["admin", "editor"]);
+    if (auth.error) return auth.error;
     const payload = (await request.json()) as { id?: number };
     if (!payload.id) return Response.json({ error: "id obrigatório" }, { status: 400 });
     await getDb().delete(tasks).where(eq(tasks.id, payload.id));

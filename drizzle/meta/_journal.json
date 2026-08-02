@@ -15,6 +15,13 @@
       "when": 1785708504498,
       "tag": "0001_windy_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1785709012604,
+      "tag": "0002_yielding_the_santerians",
+      "breakpoints": true
     }
   ]
 }

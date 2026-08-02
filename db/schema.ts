@@ -24,3 +24,20 @@ export const sharedFolders = sqliteTable("shared_folders", {
   fileCount: integer("file_count").notNull().default(0),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  login: text("login").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  role: text("role").notNull().default("consulta"),
+  status: text("status").notNull().default("pendente"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  approvedAt: text("approved_at"),
+});
+
+export const sessions = sqliteTable("sessions", {
+  id: text("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  expiresAt: text("expires_at").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});

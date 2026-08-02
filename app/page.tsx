@@ -8,6 +8,9 @@ import tellTheArchesDataJson from "./data/tell-the-arches.json";
 type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos" | "r2p" | "tellarches" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao" | "segit";
 type TaskStatus = "Por fazer" | "Em curso" | "Bloqueado" | "Concluído";
+type AppRole = "admin" | "editor" | "consulta";
+type AppUser = { id: number; login: string; role: AppRole; status: string };
+type ManagedUser = AppUser & { createdAt: string; approvedAt: string | null };
 
 type Task = {
   id: number;
@@ -246,8 +249,29 @@ export default function Home() {
   const [sharedFolders, setSharedFolders] = useState<SharedFolder[]>(defaultSharedFolders);
   const [folderDrafts, setFolderDrafts] = useState<Record<string, number>>({});
   const [editingFolderCounts, setEditingFolderCounts] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
+  const [setupRequired, setSetupRequired] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [authLogin, setAuthLogin] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authMessage, setAuthMessage] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
+  const [managedUsers, setManagedUsers] = useState<ManagedUser[]>([]);
 
   useEffect(() => {
+    let active = true;
+    fetch("/api/auth/me").then((response) => response.json()).then((data: { user: AppUser | null; setupRequired: boolean }) => {
+      if (!active) return;
+      setCurrentUser(data.user);
+      setSetupRequired(data.setupRequired);
+      if (data.setupRequired) setAuthMode("register");
+    }).catch(() => setAuthMessage("Não foi possível verificar o acesso.")).finally(() => { if (active) setAuthReady(true); });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser) return;
     let active = true;
     async function loadTasks() {
       try {
@@ -269,15 +293,21 @@ export default function Home() {
     }
     loadTasks();
     return () => { active = false; };
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
+    if (!currentUser) return;
     let active = true;
     fetch("/api/settings/folders").then((response) => response.ok ? response.json() : Promise.reject()).then((data: { folders: SharedFolder[] }) => {
       if (active && data.folders.length) setSharedFolders(data.folders);
     }).catch(() => undefined);
     return () => { active = false; };
-  }, []);
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (view !== "configuracoes" || currentUser?.role !== "admin") return;
+    fetch("/api/auth/users").then((response) => response.ok ? response.json() : Promise.reject()).then((data: { users: ManagedUser[] }) => setManagedUsers(data.users)).catch(() => setNotice("Não foi possível carregar os utilizadores."));
+  }, [view, currentUser]);
 
   const scopedTasks = tasks.filter((task) => department === "global" || task.department === department);
   const pending = scopedTasks.filter((task) => !task.done).length;
@@ -361,6 +391,7 @@ export default function Home() {
   }
 
   async function updateTask(id: number, changes: Partial<Task>) {
+    if (!currentUser || currentUser.role === "consulta") return;
     setTasks((current) => current.map((task) => task.id === id ? { ...task, ...changes, done: changes.status ? changes.status === "Concluído" : task.done } : task));
     try {
       await fetch("/api/tasks", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, ...changes }) });
@@ -370,16 +401,19 @@ export default function Home() {
   }
 
   function toggleTask(id: number) {
+    if (!currentUser || currentUser.role === "consulta") return;
     const task = tasks.find((item) => item.id === id);
     if (task) updateTask(id, { status: task.done ? "Por fazer" : "Concluído", done: !task.done });
   }
 
   function beginFolderUpdate() {
+    if (currentUser?.role !== "admin") return;
     setFolderDrafts(Object.fromEntries(sharedFolders.map((folder) => [folder.id, folder.fileCount])));
     setEditingFolderCounts(true);
   }
 
   async function saveFolderCounts() {
+    if (currentUser?.role !== "admin") return;
     const nextFolders = sharedFolders.map((folder) => ({ ...folder, fileCount: Math.max(0, Math.round(folderDrafts[folder.id] ?? folder.fileCount)), updatedAt: new Date().toISOString() }));
     setSharedFolders(nextFolders);
     setEditingFolderCounts(false);
@@ -395,6 +429,7 @@ export default function Home() {
   }
 
   async function createTask(group: "semanais" | "mensais" = "semanais") {
+    if (!currentUser || currentUser.role === "consulta") return;
     const draft: Omit<Task, "id"> = {
       title: "Nova verificação de rotina",
       area: "Área geral",
@@ -420,17 +455,82 @@ export default function Home() {
   }
 
   async function deleteTask(id: number) {
+    if (!currentUser || currentUser.role === "consulta") return;
     setTasks((current) => current.filter((task) => task.id !== id));
     try { await fetch("/api/tasks", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) }); } catch { setNotice("Tarefa removida apenas nesta sessão."); }
   }
+
+  async function submitAuth(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setAuthBusy(true);
+    setAuthMessage("");
+    try {
+      const response = await fetch(`/api/auth/${authMode === "register" ? "register" : "login"}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ login: authLogin, password: authPassword }) });
+      const data = await response.json() as { user?: AppUser; pending?: boolean; message?: string; error?: string };
+      if (!response.ok) throw new Error(data.error || "Não foi possível concluir o acesso.");
+      if (data.user) {
+        setCurrentUser(data.user);
+        setSetupRequired(false);
+        setAuthPassword("");
+        setNotice("Sessão iniciada com sucesso.");
+      } else {
+        setAuthMessage(data.message || "Pedido enviado para aprovação.");
+        setAuthMode("login");
+        setAuthPassword("");
+      }
+    } catch (error) {
+      setAuthMessage(error instanceof Error ? error.message : "Não foi possível concluir o acesso.");
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setCurrentUser(null);
+    setView("resumo");
+    setDataReady(false);
+    setAuthMessage("");
+    setAuthMode("login");
+  }
+
+  async function updateManagedUser(id: number, changes: { role?: AppRole; status?: "ativo" | "pendente" | "rejeitado" }) {
+    const response = await fetch("/api/auth/users", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, ...changes }) });
+    const data = await response.json() as { user?: ManagedUser; error?: string };
+    if (!response.ok || !data.user) { setNotice(data.error || "Não foi possível atualizar o utilizador."); return; }
+    setManagedUsers((users) => users.map((user) => user.id === id ? data.user! : user));
+    setNotice(changes.status === "ativo" ? "Acesso aprovado." : "Nível de acesso atualizado.");
+  }
+
+  const roleLabel = (role: AppRole) => role === "admin" ? "Administrador" : role === "editor" ? "Editor" : "Consulta";
+  const canEdit = currentUser?.role === "admin" || currentUser?.role === "editor";
 
   const navItems: { id: View; label: string; glyph: string }[] = [
     { id: "resumo", label: "Resumo", glyph: "▦" },
     { id: "tarefas", label: "Tarefas", glyph: "✓" },
     { id: "objetivos", label: "Objetivos", glyph: "◎" },
     { id: "areas", label: "Áreas", glyph: "⌂" },
-    { id: "configuracoes", label: "Configurações", glyph: "⚙" },
+    ...(currentUser?.role === "admin" ? [{ id: "configuracoes" as View, label: "Configurações", glyph: "⚙" }] : []),
   ];
+
+  if (!authReady) return <main className="auth-shell"><div className="auth-card auth-loading"><span className="auth-logo">M</span><p>A preparar o McDonald&apos;s Imperial…</p></div></main>;
+
+  if (!currentUser) return (
+    <main className="auth-shell">
+      <section className="auth-card" aria-labelledby="auth-title">
+        <div className="auth-brand"><span className="auth-logo">M</span><div><strong>McDonald&apos;s Imperial</strong><small>Portal de gestão</small></div></div>
+        <div className="auth-heading"><span className="eyebrow">Acesso reservado</span><h1 id="auth-title">{setupRequired ? "Criar administrador" : authMode === "login" ? "Iniciar sessão" : "Novo utilizador"}</h1><p>{setupRequired ? "A primeira conta ficará definida como administrador do portal." : authMode === "login" ? "Introduza os seus dados de acesso." : "Crie o seu pedido. O administrador terá de aprovar o acesso."}</p></div>
+        <form className="auth-form" onSubmit={submitAuth}>
+          <label>Login<input value={authLogin} onChange={(event) => setAuthLogin(event.target.value)} autoComplete="username" minLength={3} required placeholder="ex.: nome.apelido" /></label>
+          <label>Password<input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} autoComplete={authMode === "login" ? "current-password" : "new-password"} minLength={8} required placeholder="Mínimo de 8 caracteres" /></label>
+          {authMessage && <p className="auth-message" role="status">{authMessage}</p>}
+          <button className="auth-submit" disabled={authBusy}>{authBusy ? "A processar…" : setupRequired ? "Criar conta de administrador" : authMode === "login" ? "Entrar" : "Enviar pedido de acesso"}</button>
+        </form>
+        {!setupRequired && <button className="auth-switch" onClick={() => { setAuthMode((mode) => mode === "login" ? "register" : "login"); setAuthMessage(""); setAuthPassword(""); }}>{authMode === "login" ? "＋ Novo utilizador" : "← Já tenho acesso"}</button>}
+        <small className="auth-footnote">O acesso só é disponibilizado após aprovação. As passwords são protegidas e não ficam visíveis ao administrador.</small>
+      </section>
+    </main>
+  );
 
   return (
     <main className="app-shell">
@@ -496,10 +596,10 @@ export default function Home() {
           <div className="mini-track"><span style={{ width: `${completion}%` }} /></div>
           <small>Bom ritmo. Faltam {pending} tarefas.</small>
         </div>
-        <button className="profile" aria-label="Abrir perfil">
-          <span className="avatar">TS</span>
-          <span><strong>Tiago Soutelo</strong><small>Administrador</small></span>
-          <span className="more">•••</span>
+        <button className="profile" aria-label="Terminar sessão" onClick={logout} title="Terminar sessão">
+          <span className="avatar">{currentUser.login.slice(0, 2).toUpperCase()}</span>
+          <span><strong>{currentUser.login}</strong><small>{roleLabel(currentUser.role)}</small></span>
+          <span className="more">↪</span>
         </button>
       </aside>
 
@@ -511,7 +611,7 @@ export default function Home() {
           </div>
           <div className="top-actions">
             <button className="icon-button" aria-label="Notificações"><span className="notification-dot" />♢</button>
-            <button className="primary-button" onClick={() => createTask()}><span>＋</span> Nova tarefa</button>
+            {canEdit && <button className="primary-button" onClick={() => createTask()}><span>＋</span> Nova tarefa</button>}
           </div>
         </header>
 
@@ -567,7 +667,7 @@ export default function Home() {
               <div className="task-list">
                 {(view === "resumo" ? visibleTasks.slice(0, 5) : visibleTasks).map((task) => (
                   <article className={task.done ? "task-row done" : "task-row"} key={task.id}>
-                    <button className="check" aria-label={`${task.done ? "Reabrir" : "Concluir"} ${task.title}`} onClick={() => toggleTask(task.id)}>{task.done ? "✓" : ""}</button>
+                    <button className="check" disabled={!canEdit} aria-label={`${task.done ? "Reabrir" : "Concluir"} ${task.title}`} onClick={() => toggleTask(task.id)}>{task.done ? "✓" : ""}</button>
                     <div className="task-main"><strong>{task.title}</strong><span>{task.area}</span></div>
                     <span className={`priority ${task.priority.toLowerCase().replace("é", "e")}`}>{task.priority}</span>
                     <span className="due">{task.due}</span>
@@ -582,7 +682,7 @@ export default function Home() {
           )}
 
           {view === "tarefas" && (
-            <section className="board-page" aria-label="Gestão de tarefas">
+            <section className={canEdit ? "board-page" : "board-page read-only"} aria-label="Gestão de tarefas">
               {department === "qualidade" && <div className="board-source-strip">
                 <div><span className="source-mark">QP</span><span><strong>Workflow tarefas · Qualidade &amp; Produtos</strong><small>15 tarefas importadas com responsável, periodicidade e dia programado.</small></span></div>
                 <a href={qualityTasksSourceUrl} target="_blank" rel="noreferrer">Abrir folha fonte ↗</a>
@@ -590,7 +690,7 @@ export default function Home() {
               <div className="monday-toolbar">
                 <label className="view-picker"><span>⌂</span><select value={boardMode} onChange={(event) => setBoardMode(event.target.value as "tabela" | "kanban")} aria-label="Escolher vista"><option value="tabela">Tabela principal</option><option value="kanban">Kanban</option></select></label>
                 <span className="toolbar-divider" />
-                <div className="new-item-split"><button onClick={() => createTask()}>Nova tarefa</button><button onClick={() => createTask("mensais")} aria-label="Adicionar tarefa mensal">⌄</button></div>
+                {canEdit && <div className="new-item-split"><button onClick={() => createTask()}>Nova tarefa</button><button onClick={() => createTask("mensais")} aria-label="Adicionar tarefa mensal">⌄</button></div>}
                 <label className="toolbar-search"><span>⌕</span><input value={taskSearch} onChange={(event) => setTaskSearch(event.target.value)} placeholder="Pesquisar" aria-label="Pesquisar tarefas" /></label>
                 <label className={ownerFilter !== "Todos" ? "toolbar-control active" : "toolbar-control"}><span>◎</span><select value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)} aria-label="Filtrar por pessoa"><option>Todos</option>{ownerOptions.map((owner) => <option value={owner.name} key={owner.name}>{owner.name}</option>)}</select></label>
                 <label className={statusFilter !== "Todos" ? "toolbar-control active" : "toolbar-control"}><span>▽</span><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "Todos" | TaskStatus)} aria-label="Filtrar por estado"><option>Todos</option>{statusOptions.map((status) => <option key={status}>{status}</option>)}</select></label>
@@ -616,17 +716,17 @@ export default function Home() {
                       {group.tasks.map((task) => {
                         const taskStatus = task.status ?? (task.done ? "Concluído" : "Por fazer");
                         return <div className="board-row" key={task.id}>
-                          <span className="row-select"><input type="checkbox" checked={taskStatus === "Concluído"} onChange={(event) => updateTask(task.id, { status: event.target.checked ? "Concluído" : "Por fazer" })} aria-label={`Concluir ${task.title}`} /></span>
-                          <label className="task-title-cell"><input className="task-title-input" defaultValue={task.title} onBlur={(event) => { const value = event.target.value.trim(); if (value && value !== task.title) updateTask(task.id, { title: value }); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} aria-label={`Nome da tarefa ${task.title}`} /><span title="Abrir atualizações">⊕</span></label>
-                          <label className="owner-cell"><span className="avatar small">{task.assignee}</span><select value={task.assigneeName ?? ""} onChange={(event) => { const owner = ownerOptions.find((item) => item.name === event.target.value); if (owner) updateTask(task.id, { assignee: owner.initials, assigneeName: owner.name }); }} aria-label={`Responsável por ${task.title}`}><option value="">Sem responsável</option>{ownerOptions.map((owner) => <option value={owner.name} key={owner.name}>{owner.name}</option>)}</select></label>
-                          <select className={`status-cell ${statusClass(taskStatus)}`} value={taskStatus} onChange={(event) => updateTask(task.id, { status: event.target.value as TaskStatus })} aria-label={`Estado de ${task.title}`}>{statusOptions.map((status) => <option value={status} key={status}>{status}</option>)}</select>
-                          <select className={`priority-cell ${statusClass(task.priority)}`} value={task.priority} onChange={(event) => updateTask(task.id, { priority: event.target.value as Task["priority"] })} aria-label={`Prioridade de ${task.title}`}><option>Alta</option><option>Média</option><option>Baixa</option></select>
-                          <label className="timeline-cell"><input className="plain-cell" defaultValue={task.due} onBlur={(event) => { if (event.target.value !== task.due) updateTask(task.id, { due: event.target.value }); }} aria-label={`Periodicidade de ${task.title}`} /></label>
-                          <input className="plain-cell" defaultValue={task.area} onBlur={(event) => { if (event.target.value !== task.area) updateTask(task.id, { area: event.target.value }); }} aria-label={`Área de ${task.title}`} />
-                          <button className="delete-row" onClick={() => deleteTask(task.id)} aria-label={`Apagar ${task.title}`}>×</button>
+                          <span className="row-select"><input disabled={!canEdit} type="checkbox" checked={taskStatus === "Concluído"} onChange={(event) => updateTask(task.id, { status: event.target.checked ? "Concluído" : "Por fazer" })} aria-label={`Concluir ${task.title}`} /></span>
+                          <label className="task-title-cell"><input disabled={!canEdit} className="task-title-input" defaultValue={task.title} onBlur={(event) => { const value = event.target.value.trim(); if (value && value !== task.title) updateTask(task.id, { title: value }); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} aria-label={`Nome da tarefa ${task.title}`} /><span title="Abrir atualizações">⊕</span></label>
+                          <label className="owner-cell"><span className="avatar small">{task.assignee}</span><select disabled={!canEdit} value={task.assigneeName ?? ""} onChange={(event) => { const owner = ownerOptions.find((item) => item.name === event.target.value); if (owner) updateTask(task.id, { assignee: owner.initials, assigneeName: owner.name }); }} aria-label={`Responsável por ${task.title}`}><option value="">Sem responsável</option>{ownerOptions.map((owner) => <option value={owner.name} key={owner.name}>{owner.name}</option>)}</select></label>
+                          <select disabled={!canEdit} className={`status-cell ${statusClass(taskStatus)}`} value={taskStatus} onChange={(event) => updateTask(task.id, { status: event.target.value as TaskStatus })} aria-label={`Estado de ${task.title}`}>{statusOptions.map((status) => <option value={status} key={status}>{status}</option>)}</select>
+                          <select disabled={!canEdit} className={`priority-cell ${statusClass(task.priority)}`} value={task.priority} onChange={(event) => updateTask(task.id, { priority: event.target.value as Task["priority"] })} aria-label={`Prioridade de ${task.title}`}><option>Alta</option><option>Média</option><option>Baixa</option></select>
+                          <label className="timeline-cell"><input disabled={!canEdit} className="plain-cell" defaultValue={task.due} onBlur={(event) => { if (event.target.value !== task.due) updateTask(task.id, { due: event.target.value }); }} aria-label={`Periodicidade de ${task.title}`} /></label>
+                          <input disabled={!canEdit} className="plain-cell" defaultValue={task.area} onBlur={(event) => { if (event.target.value !== task.area) updateTask(task.id, { area: event.target.value }); }} aria-label={`Área de ${task.title}`} />
+                          {canEdit ? <button className="delete-row" onClick={() => deleteTask(task.id)} aria-label={`Apagar ${task.title}`}>×</button> : <span />}
                         </div>;
                       })}
-                      <button className="add-board-row" onClick={() => createTask(group.id as "semanais" | "mensais")}>＋ Adicionar tarefa</button>
+                      {canEdit && <button className="add-board-row" onClick={() => createTask(group.id as "semanais" | "mensais")}>＋ Adicionar tarefa</button>}
                       <div className="group-summary" aria-label={`Resumo de ${group.label}`}><span /><span /><span /><span className="summary-status"><i style={{ width: `${group.tasks.length ? group.tasks.filter((task) => (task.status ?? (task.done ? "Concluído" : "Por fazer")) === "Concluído").length / group.tasks.length * 100 : 0}%` }} /></span><span /><span className="summary-timeline">{group.tasks.length} tarefas</span><span /><span /></div>
                     </>}
                   </div>
@@ -636,14 +736,14 @@ export default function Home() {
               {dataReady && boardMode === "kanban" && <div className="kanban-board">
                 {statusOptions.map((status) => {
                   const statusTasks = boardTasks.filter((task) => (task.status ?? (task.done ? "Concluído" : "Por fazer")) === status);
-                  return <section className={`kanban-column ${statusClass(status)}`} key={status} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { const id = Number(event.dataTransfer.getData("text/plain")); if (id) updateTask(id, { status }); }}>
+                  return <section className={`kanban-column ${statusClass(status)}`} key={status} onDragOver={(event) => { if (canEdit) event.preventDefault(); }} onDrop={(event) => { if (!canEdit) return; const id = Number(event.dataTransfer.getData("text/plain")); if (id) updateTask(id, { status }); }}>
                     <header><strong>{status}</strong><span>{statusTasks.length}</span></header>
-                    <div className="kanban-cards">{statusTasks.map((task) => <article className="kanban-card" draggable onDragStart={(event) => event.dataTransfer.setData("text/plain", String(task.id))} key={task.id}>
+                    <div className="kanban-cards">{statusTasks.map((task) => <article className="kanban-card" draggable={canEdit} onDragStart={(event) => event.dataTransfer.setData("text/plain", String(task.id))} key={task.id}>
                       <span className={`kanban-priority ${statusClass(task.priority)}`}>{task.priority}</span>
                       <strong>{task.title}</strong><small>{task.area}</small>
                       <footer><span className="avatar small">{task.assignee}</span><span>{task.due}</span></footer>
                     </article>)}</div>
-                    <button onClick={() => createTask(status === "Por fazer" ? "semanais" : "mensais")}>＋ Adicionar</button>
+                    {canEdit && <button onClick={() => createTask(status === "Por fazer" ? "semanais" : "mensais")}>＋ Adicionar</button>}
                   </section>;
                 })}
               </div>}
@@ -832,8 +932,23 @@ export default function Home() {
           {view === "configuracoes" && (
             <section className="settings-section" aria-labelledby="settings-title">
               <div className="settings-heading">
-                <div><span className="eyebrow">Administração do portal</span><h2 id="settings-title">Configurações</h2><p>Gestão das fontes e quantidades de ficheiros utilizados no portal.</p></div>
+                <div><span className="eyebrow">Administração do portal</span><h2 id="settings-title">Configurações</h2><p>Gestão dos utilizadores, níveis de acesso e fontes partilhadas.</p></div>
                 {!editingFolderCounts ? <button className="settings-update-button" onClick={beginFolderUpdate}>↻ Atualizar quantidades</button> : <div className="settings-edit-actions"><button onClick={() => setEditingFolderCounts(false)}>Cancelar</button><button className="save" onClick={saveFolderCounts}>Guardar alterações</button></div>}
+              </div>
+              <div className="settings-card users-settings-card">
+                <div className="settings-card-title"><div><span className="eyebrow">Controlo de acessos</span><h3>Utilizadores</h3></div><span>{managedUsers.filter((user) => user.status === "pendente").length} pedidos pendentes</span></div>
+                <div className="access-levels"><span><b>Administrador</b> gestão total</span><span><b>Editor</b> cria e altera tarefas</span><span><b>Consulta</b> apenas visualização</span></div>
+                <div className="users-table" role="table" aria-label="Gestão de utilizadores">
+                  <div className="user-row user-header" role="row"><span>Utilizador</span><span>Pedido</span><span>Estado</span><span>Nível de acesso</span><span>Ação</span></div>
+                  {managedUsers.map((user) => <div className="user-row" role="row" key={user.id}>
+                    <div className="user-identity"><span className="avatar small">{user.login.slice(0, 2).toUpperCase()}</span><strong>{user.login}</strong>{user.id === currentUser.id && <small>Você</small>}</div>
+                    <span>{new Date(user.createdAt).toLocaleDateString("pt-PT")}</span>
+                    <span className={`user-status ${user.status}`}>{user.status === "ativo" ? "Ativo" : user.status === "pendente" ? "Pendente" : "Recusado"}</span>
+                    <select value={user.role} disabled={user.id === currentUser.id} onChange={(event) => updateManagedUser(user.id, { role: event.target.value as AppRole })} aria-label={`Nível de acesso de ${user.login}`}><option value="admin">Administrador</option><option value="editor">Editor</option><option value="consulta">Consulta</option></select>
+                    <div className="user-actions">{user.status === "pendente" ? <><button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>Aprovar</button><button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Recusar</button></> : user.status === "rejeitado" ? <button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>Reativar</button> : user.id !== currentUser.id ? <button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Desativar</button> : <span>Conta principal</span>}</div>
+                  </div>)}
+                </div>
+                <p className="inventory-note">Os novos utilizadores criam o próprio login e password através do botão “Novo utilizador” no ecrã de acesso. O portal só fica disponível depois da sua aprovação.</p>
               </div>
               <div className="settings-card">
                 <div className="settings-card-title"><div><span className="eyebrow">Google Drive</span><h3>Pastas partilhadas</h3></div><span>{sharedFolders.reduce((sum, folder) => sum + folder.fileCount, 0)} ficheiros registados</span></div>
