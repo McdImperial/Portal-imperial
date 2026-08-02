@@ -177,6 +177,18 @@ function formatR2PDate(date: string) {
   return new Date(`${date}T00:00:00`).toLocaleDateString("pt-PT", { day: "2-digit", month: "short" });
 }
 
+function r2pTargetForMonth(month: number) {
+  return month === 7 || month === 8 ? 230 : 180;
+}
+
+function meetsR2PTarget(value: number, month: number) {
+  return month === 7 || month === 8 ? value < 230 : value <= 180;
+}
+
+function r2pTargetLabel(month: number) {
+  return month === 7 || month === 8 ? "< 230s" : "≤ 180s";
+}
+
 function RankingPodium({ ranking }: { ranking: ManagerRanking[] }) {
   return <div className="ranking-podium">{[1, 0, 2].map((position) => {
     const manager = ranking[position];
@@ -285,6 +297,7 @@ export default function Home() {
 
   const r2pDashboard = useMemo(() => {
     const days = r2pData.days.filter((day) => day.month === r2pMonth);
+    const target = r2pTargetForMonth(r2pMonth);
     const values = days.flatMap((day) => day.hourly.filter((value): value is number => value !== null));
     const dailyAverages = days.map((day) => ({ day, value: average(day.hourly.filter((value): value is number => value !== null)) })).filter((item) => item.value > 0);
     const hourlyRecords = days.flatMap((day) => day.hourly.map((value, index) => value === null ? null : ({ day, hour: r2pData.hours[index], value }))).filter((item): item is { day: R2PDay; hour: string; value: number } => item !== null);
@@ -295,7 +308,8 @@ export default function Home() {
     return {
       days,
       average: average(values),
-      targetRate: values.length ? Math.round((values.filter((value) => value <= 180).length / values.length) * 100) : 0,
+      target,
+      targetRate: values.length ? Math.round((values.filter((value) => meetsR2PTarget(value, r2pMonth)).length / values.length) * 100) : 0,
       bestHour: [...validHours].sort((a, b) => a.value - b.value)[0] ?? { hour: "—", value: 0 },
       bestDay: [...dailyAverages].sort((a, b) => a.value - b.value)[0],
       worstDay: [...dailyAverages].sort((a, b) => b.value - a.value)[0],
@@ -640,6 +654,7 @@ export default function Home() {
               <div className="r2p-heading">
                 <div><span className="eyebrow">Serviço Cliente · Balcão</span><h2 id="r2p-title">Tempos de serviço · R2P</h2><p>Leitura por dia, hora e gerente de turno. Quanto menor o tempo, melhor.</p></div>
                 <div className="r2p-actions">
+                  <span className="r2p-target-badge"><small>Objetivo</small><strong>{r2pTargetLabel(r2pMonth)}</strong></span>
                   <label className="r2p-month-filter">Mês<select value={r2pMonth} onChange={(event) => setR2pMonth(Number(event.target.value))} aria-label="Filtrar R2P por mês">{[...new Set(r2pData.days.map((day) => day.month))].map((month) => <option value={month} key={month}>{monthNames[month - 1]} 2026</option>)}</select></label>
                   <a className="drive-link" href={r2pData.sourceUrl} target="_blank" rel="noreferrer">Abrir fonte ↗</a>
                 </div>
@@ -659,18 +674,18 @@ export default function Home() {
 
               <div className="r2p-visual-grid single">
                 <article className="r2p-chart-card">
-                  <div className="r2p-card-heading"><div><span className="eyebrow">Perfil horário</span><h3>R2P médio por hora</h3></div><span>Meta ≤ 180s</span></div>
+                  <div className="r2p-card-heading"><div><span className="eyebrow">Perfil horário</span><h3>R2P médio por hora</h3></div><span>Meta {r2pTargetLabel(r2pMonth)}</span></div>
                   <div className="r2p-hour-chart" aria-label={`R2P médio por hora em ${monthNames[r2pMonth - 1]}`}>
-                    {r2pDashboard.hourAverages.map((item) => <div className="r2p-hour-bar" key={item.hour}><span className="r2p-bar-value">{item.value || "—"}</span><i className={item.value <= 180 ? "good" : item.value <= 240 ? "attention" : "high"} style={{ height: `${item.value ? Math.max(8, Math.min(100, (item.value / 360) * 100)) : 0}%` }} /><small>{item.hour.slice(0, 2)}</small></div>)}
+                    {r2pDashboard.hourAverages.map((item) => <div className="r2p-hour-bar" key={item.hour}><span className="r2p-bar-value">{item.value || "—"}</span><i className={meetsR2PTarget(item.value, r2pMonth) ? "good" : item.value <= r2pDashboard.target + 60 ? "attention" : "high"} style={{ height: `${item.value ? Math.max(8, Math.min(100, (item.value / 360) * 100)) : 0}%` }} /><small>{item.hour.slice(0, 2)}</small></div>)}
                   </div>
                 </article>
               </div>
 
               <div className="r2p-table-card r2p-heatmap-card">
-                <div className="r2p-table-heading"><div><span className="eyebrow">Dia × hora</span><h3>R2P por hora e por dia</h3></div><div className="heatmap-legend"><span><i className="good" />≤180s</span><span><i className="attention" />181–240s</span><span><i className="high" />&gt;240s</span></div></div>
+                <div className="r2p-table-heading"><div><span className="eyebrow">Dia × hora</span><h3>R2P por hora e por dia</h3></div><div className="heatmap-legend"><span><i className="good" />{r2pTargetLabel(r2pMonth)}</span><span><i className="attention" />{r2pDashboard.target}–{r2pDashboard.target + 60}s</span><span><i className="high" />&gt;{r2pDashboard.target + 60}s</span></div></div>
                 <div className="r2p-heatmap" role="table" aria-label={`R2P por hora e dia em ${monthNames[r2pMonth - 1]}`}>
                   <div className="heatmap-row heatmap-header" role="row"><span>Dia</span>{r2pData.hours.map((hour) => <span key={hour}>{hour.slice(0, 2)}</span>)}</div>
-                  {r2pDashboard.days.map((day) => <div className="heatmap-row" role="row" key={day.date}><span><strong>{new Date(`${day.date}T00:00:00`).toLocaleDateString("pt-PT", { day: "2-digit", month: "short" })}</strong><small>{day.weekday.slice(0, 3)}</small></span>{day.hourly.map((value, index) => <span className={!value ? "empty" : value <= 180 ? "good" : value <= 240 ? "attention" : "high"} title={`${day.date} · ${r2pData.hours[index]} · ${value ?? "sem dados"}${value ? "s" : ""}`} key={`${day.date}-${r2pData.hours[index]}`}>{value ?? "·"}</span>)}</div>)}
+                  {r2pDashboard.days.map((day) => <div className="heatmap-row" role="row" key={day.date}><span><strong>{new Date(`${day.date}T00:00:00`).toLocaleDateString("pt-PT", { day: "2-digit", month: "short" })}</strong><small>{day.weekday.slice(0, 3)}</small></span>{day.hourly.map((value, index) => <span className={!value ? "empty" : meetsR2PTarget(value, r2pMonth) ? "good" : value <= r2pDashboard.target + 60 ? "attention" : "high"} title={`${day.date} · ${r2pData.hours[index]} · ${value ?? "sem dados"}${value ? "s" : ""}`} key={`${day.date}-${r2pData.hours[index]}`}>{value ?? "·"}</span>)}</div>)}
                 </div>
               </div>
 
@@ -678,12 +693,12 @@ export default function Home() {
                 <article className="r2p-table-card">
                   <div className="r2p-table-heading"><div><span className="eyebrow">Pódio mensal</span><h3>{monthNames[r2pMonth - 1]} 2026</h3></div><span>Menor R2P</span></div>
                   <RankingPodium ranking={r2pDashboard.monthlyRanking} />
-                  <div className="manager-ranking"><div className="manager-rank-row header"><span>#</span><span>Restante ranking</span><span>Turnos</span><span>Média</span></div>{r2pDashboard.monthlyRanking.slice(3).map((manager, index) => <div className="manager-rank-row" key={manager.manager}><span>{index + 4}</span><strong>{manager.manager}</strong><span>{manager.shifts}</span><b className={manager.average <= 180 ? "on-target" : "off-target"}>{manager.average}s</b></div>)}</div>
+                  <div className="manager-ranking"><div className="manager-rank-row header"><span>#</span><span>Restante ranking</span><span>Turnos</span><span>Média</span></div>{r2pDashboard.monthlyRanking.slice(3).map((manager, index) => <div className="manager-rank-row" key={manager.manager}><span>{index + 4}</span><strong>{manager.manager}</strong><span>{manager.shifts}</span><b className={meetsR2PTarget(manager.average, r2pMonth) ? "on-target" : "off-target"}>{manager.average}s</b></div>)}</div>
                 </article>
                 <article className="r2p-table-card">
                   <div className="r2p-table-heading"><div><span className="eyebrow">Pódio trimestral</span><h3>{r2pDashboard.quarter}.º trimestre 2026</h3></div><span>Menor R2P</span></div>
                   <RankingPodium ranking={r2pDashboard.quarterlyRanking} />
-                  <div className="manager-ranking"><div className="manager-rank-row header"><span>#</span><span>Restante ranking</span><span>Turnos</span><span>Média</span></div>{r2pDashboard.quarterlyRanking.slice(3).map((manager, index) => <div className="manager-rank-row" key={manager.manager}><span>{index + 4}</span><strong>{manager.manager}</strong><span>{manager.shifts}</span><b className={manager.average <= 180 ? "on-target" : "off-target"}>{manager.average}s</b></div>)}</div>
+                  <div className="manager-ranking"><div className="manager-rank-row header"><span>#</span><span>Restante ranking</span><span>Turnos</span><span>Média</span></div>{r2pDashboard.quarterlyRanking.slice(3).map((manager, index) => <div className="manager-rank-row" key={manager.manager}><span>{index + 4}</span><strong>{manager.manager}</strong><span>{manager.shifts}</span><b className={meetsR2PTarget(manager.average, r2pDashboard.quarter === 3 ? 8 : r2pDashboard.quarter * 3) ? "on-target" : "off-target"}>{manager.average}s</b></div>)}</div>
                 </article>
               </div>
 
@@ -691,9 +706,9 @@ export default function Home() {
                 <div className="r2p-table-heading"><div><span className="eyebrow">Gestão operacional</span><h3>Gerentes por turno e dia</h3></div><span>{r2pDashboard.days.length} dias</span></div>
                 <div className="shift-table" role="table" aria-label="Gerentes e R2P por turno e dia">
                   <div className="shift-row shift-header" role="row"><span>Dia</span><span>Abertura · 08–15</span><span>Intermédio · 15–23</span><span>Fecho · 23–05</span><span>Dia SOS</span><span>Nacional</span></div>
-                  {r2pDashboard.days.map((day) => <div className="shift-row" role="row" key={day.date}><span><strong>{new Date(`${day.date}T00:00:00`).toLocaleDateString("pt-PT", { day: "2-digit", month: "short" })}</strong><small>{day.weekday}</small></span>{day.shifts.map((shift) => <span className="shift-manager" key={shift.name}><strong>{shift.manager || "—"}</strong><small className={shift.value && shift.value <= 180 ? "on-target" : "off-target"}>{shift.value ? `${shift.value}s` : "—"}</small></span>)}<span>{day.sos ? `${day.sos}s` : "—"}</span><span>{day.national ? `${day.national}s` : "—"}</span></div>)}
+                  {r2pDashboard.days.map((day) => <div className="shift-row" role="row" key={day.date}><span><strong>{new Date(`${day.date}T00:00:00`).toLocaleDateString("pt-PT", { day: "2-digit", month: "short" })}</strong><small>{day.weekday}</small></span>{day.shifts.map((shift) => <span className="shift-manager" key={shift.name}><strong>{shift.manager || "—"}</strong><small className={shift.value && meetsR2PTarget(shift.value, r2pMonth) ? "on-target" : "off-target"}>{shift.value ? `${shift.value}s` : "—"}</small></span>)}<span>{day.sos ? `${day.sos}s` : "—"}</span><span>{day.national ? `${day.national}s` : "—"}</span></div>)}
                 </div>
-                <p className="inventory-note">Fonte: “Tempos de Serviço por Hora e GT - Imperial”. Dados publicados em 2 de agosto de 2026; esta página é uma fotografia dos dados e não uma ligação em tempo real. A meta de 180s segue a classificação usada no ficheiro.</p>
+                <p className="inventory-note">Fonte: “Tempos de Serviço por Hora e GT - Imperial”. Dados publicados em 2 de agosto de 2026; esta página é uma fotografia dos dados e não uma ligação em tempo real. O objetivo de julho e agosto é manter o R2P abaixo de 230s; nos restantes meses mantém-se a referência de 180s.</p>
               </div>
             </section>
           )}

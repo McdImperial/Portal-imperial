@@ -149,6 +149,9 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .r2p-heading h2 { margin-top: 6px; font-family: Georgia, serif; font-size: 25px; font-weight: 500; }
 .r2p-heading p { margin: 7px 0 0; color: var(--muted); font-size: 10px; }
 .r2p-actions { display: flex; align-items: center; gap: 9px; }
+.r2p-target-badge { min-height: 36px; padding: 5px 12px; display: grid; align-content: center; gap: 1px; border: 1px solid #b9d9ca; border-radius: 9px; color: #245f48; background: #e6f3ed; }
+.r2p-target-badge small { color: #658076; font-size: 7px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.r2p-target-badge strong { font-size: 11px; line-height: 1; }
 .r2p-month-filter { min-height: 36px; padding: 0 9px 0 11px; display: flex; align-items: center; gap: 8px; border: 1px solid #d8e4de; border-radius: 9px; color: #75827d; background: #f8fbf9; font-size: 9px; font-weight: 800; }
 .r2p-month-filter select { border: 0; outline: 0; color: #214e3f; background: transparent; font-size: 10px; font-weight: 800; }
 .r2p-period-bar { padding: 15px 16px; display: grid; grid-template-columns: 145px 1fr; align-items: center; gap: 16px; border: 1px solid #dfe8e3; border-radius: 14px; background: #f8faf9; }
