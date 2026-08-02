@@ -51,7 +51,7 @@ button:focus-visible { outline: 3px solid rgba(76, 145, 119, .32); outline-offse
 .sidebar-card small { color: #b3c8c0; line-height: 1.5; }
 .mini-track { height: 5px; background: rgba(255,255,255,.12); border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
 .mini-track span { display: block; height: 100%; background: #f0bd70; border-radius: inherit; }
-.profile { color: white; background: transparent; border: 0; border-top: 1px solid rgba(255,255,255,.12); margin-top: 18px; padding: 18px 6px 0; display: flex; align-items: center; gap: 10px; cursor: pointer; text-align: left; }
+.profile { color: white; background: transparent; border: 0; border-top: 1px solid rgba(255,255,255,.12); margin-top: auto; padding: 18px 6px 0; display: flex; align-items: center; gap: 10px; cursor: pointer; text-align: left; }
 .profile > span:nth-child(2) { display: grid; gap: 2px; }
 .profile strong { font-size: 13px; }
 .profile small { color: #99b3aa; font-size: 11px; }

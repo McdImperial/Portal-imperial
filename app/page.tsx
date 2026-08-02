@@ -603,12 +603,6 @@ export default function Home() {
             ))}
           </div>
         </div>
-        <div className="sidebar-card">
-          <span className="eyebrow">Julho 2026</span>
-          <strong>{completion}% concluído</strong>
-          <div className="mini-track"><span style={{ width: `${completion}%` }} /></div>
-          <small>Bom ritmo. Faltam {pending} tarefas.</small>
-        </div>
         <button className="profile" aria-label="Terminar sessão" onClick={logout} title="Terminar sessão">
           <span className="avatar">{currentUser.login.slice(0, 2).toUpperCase()}</span>
           <span><strong>{currentUser.login}</strong><small>{roleLabel(currentUser.role)}</small></span>
