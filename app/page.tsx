@@ -5,7 +5,7 @@ import inventoryProductsData from "./data/inventory-products.json";
 import r2pDataJson from "./data/r2p-data.json";
 import tellTheArchesDataJson from "./data/tell-the-arches.json";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos" | "r2p" | "tellarches";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos" | "r2p" | "tellarches" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao" | "segit";
 type TaskStatus = "Por fazer" | "Em curso" | "Bloqueado" | "Concluído";
 
@@ -104,6 +104,7 @@ const viewLabels: Record<View, string> = {
   custos: "Custo, Comida, Papel e OPS",
   r2p: "Tempos de serviço · R2P",
   tellarches: "Tell The Arches",
+  configuracoes: "Configurações",
 };
 
 type InventoryCategory = "food" | "paper" | "ops";
@@ -148,12 +149,17 @@ type TellTheArchesMonth = {
   weekdays: number[]; dayparts: number[]; satisfactionFactors: Record<string, number>; dissatisfactionFactors: Record<string, number>; reportUrl: string;
 };
 type TellTheArchesData = { folderUrl: string; snapshotDate: string; ytd: TellTheArchesMonth; months: TellTheArchesMonth[] };
+type SharedFolder = { id: string; name: string; description: string; url: string; fileCount: number; updatedAt: string };
 
 const inventoryProducts = inventoryProductsData as InventoryProduct[];
 const inventoryCategoryLabels: Record<InventoryCategory, string> = { food: "Comida", paper: "Papel", ops: "OPS" };
 const r2pData = r2pDataJson as R2PData;
 const tellTheArchesData = tellTheArchesDataJson as TellTheArchesData;
 const qualityTasksSourceUrl = "https://docs.google.com/spreadsheets/d/1aH533lMTXySB8jVm4xRFVNpsoBVuPiqgMbpi_GzWVKY/edit?usp=sharing";
+const defaultSharedFolders: SharedFolder[] = [
+  { id: "inventario", name: "Relatórios de inventário", description: "Comida, papel, limpeza e material de escritório", url: "https://drive.google.com/drive/folders/1W_C3S1yUFZXGdmETHBesGHwJwk3xoeaZ?usp=sharing", fileCount: 8, updatedAt: "2026-08-02T00:00:00.000Z" },
+  { id: "tell-the-arches", name: "Tell The Arches", description: "Relatórios mensais e acumulado YTD", url: "https://drive.google.com/drive/folders/1SAYTBKa7b9Zt7WdoCKFMB3VP4CWbFhTV?usp=sharing", fileCount: 8, updatedAt: "2026-08-02T00:00:00.000Z" },
+];
 const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const weekdayNames = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 const daypartNames = ["Manhã", "Almoço", "Tarde", "Fim de tarde", "Jantar", "Madrugada"];
@@ -237,6 +243,9 @@ export default function Home() {
   const [boardMode, setBoardMode] = useState<"tabela" | "kanban">("tabela");
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [dataReady, setDataReady] = useState(false);
+  const [sharedFolders, setSharedFolders] = useState<SharedFolder[]>(defaultSharedFolders);
+  const [folderDrafts, setFolderDrafts] = useState<Record<string, number>>({});
+  const [editingFolderCounts, setEditingFolderCounts] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -259,6 +268,14 @@ export default function Home() {
       }
     }
     loadTasks();
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/settings/folders").then((response) => response.ok ? response.json() : Promise.reject()).then((data: { folders: SharedFolder[] }) => {
+      if (active && data.folders.length) setSharedFolders(data.folders);
+    }).catch(() => undefined);
     return () => { active = false; };
   }, []);
 
@@ -357,6 +374,26 @@ export default function Home() {
     if (task) updateTask(id, { status: task.done ? "Por fazer" : "Concluído", done: !task.done });
   }
 
+  function beginFolderUpdate() {
+    setFolderDrafts(Object.fromEntries(sharedFolders.map((folder) => [folder.id, folder.fileCount])));
+    setEditingFolderCounts(true);
+  }
+
+  async function saveFolderCounts() {
+    const nextFolders = sharedFolders.map((folder) => ({ ...folder, fileCount: Math.max(0, Math.round(folderDrafts[folder.id] ?? folder.fileCount)), updatedAt: new Date().toISOString() }));
+    setSharedFolders(nextFolders);
+    setEditingFolderCounts(false);
+    try {
+      const response = await fetch("/api/settings/folders", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ folders: nextFolders.map(({ id, fileCount }) => ({ id, fileCount })) }) });
+      if (!response.ok) throw new Error("save failed");
+      const data = await response.json() as { folders: SharedFolder[] };
+      setSharedFolders(data.folders);
+      setNotice("Quantidade de ficheiros atualizada.");
+    } catch {
+      setNotice("Contagens atualizadas nesta sessão; não foi possível guardar.");
+    }
+  }
+
   async function createTask(group: "semanais" | "mensais" = "semanais") {
     const draft: Omit<Task, "id"> = {
       title: "Nova verificação de rotina",
@@ -392,6 +429,7 @@ export default function Home() {
     { id: "tarefas", label: "Tarefas", glyph: "✓" },
     { id: "objetivos", label: "Objetivos", glyph: "◎" },
     { id: "areas", label: "Áreas", glyph: "⌂" },
+    { id: "configuracoes", label: "Configurações", glyph: "⚙" },
   ];
 
   return (
@@ -787,6 +825,27 @@ export default function Home() {
                   {tellTheArchesData.months.map((item) => <div className={tellTheArchesPeriod === "monthly" && item.month === tellTheArchesMonth ? "tell-history-row selected" : "tell-history-row"} role="row" key={item.month}><button type="button" onClick={() => { setTellTheArchesMonth(item.month); setTellTheArchesPeriod("monthly"); }}>{item.label}</button><span>{item.responses}</span><strong>{item.satisfaction}%</strong><span>{item.returnIntent}%</span><span>{item.bottom2}%</span><span>{item.incorrectOrders}%</span><a href={item.reportUrl} target="_blank" rel="noreferrer">Abrir ↗</a></div>)}
                 </div>
                 <p className="inventory-note">Fonte: relatórios mensais e relatório YTD Tell The Arches do restaurante Imperial, disponíveis na pasta partilhada. O YTD cobre 1 de janeiro a 31 de julho de 2026; fotografia consultada em 2 de agosto de 2026.</p>
+              </div>
+            </section>
+          )}
+
+          {view === "configuracoes" && (
+            <section className="settings-section" aria-labelledby="settings-title">
+              <div className="settings-heading">
+                <div><span className="eyebrow">Administração do portal</span><h2 id="settings-title">Configurações</h2><p>Gestão das fontes e quantidades de ficheiros utilizados no portal.</p></div>
+                {!editingFolderCounts ? <button className="settings-update-button" onClick={beginFolderUpdate}>↻ Atualizar quantidades</button> : <div className="settings-edit-actions"><button onClick={() => setEditingFolderCounts(false)}>Cancelar</button><button className="save" onClick={saveFolderCounts}>Guardar alterações</button></div>}
+              </div>
+              <div className="settings-card">
+                <div className="settings-card-title"><div><span className="eyebrow">Google Drive</span><h3>Pastas partilhadas</h3></div><span>{sharedFolders.reduce((sum, folder) => sum + folder.fileCount, 0)} ficheiros registados</span></div>
+                <div className="folder-settings-list">
+                  {sharedFolders.map((folder) => <article className="folder-setting-row" key={folder.id}>
+                    <span className="folder-setting-icon">▣</span>
+                    <div className="folder-setting-copy"><strong>{folder.name}</strong><small>{folder.description}</small><span>Atualizado em {new Date(folder.updatedAt).toLocaleDateString("pt-PT", { day: "2-digit", month: "short", year: "numeric" })}</span></div>
+                    <label className={editingFolderCounts ? "folder-count editing" : "folder-count"}><span>Ficheiros</span>{editingFolderCounts ? <input type="number" min="0" value={folderDrafts[folder.id] ?? folder.fileCount} onChange={(event) => setFolderDrafts((current) => ({ ...current, [folder.id]: Number(event.target.value) }))} aria-label={`Quantidade de ficheiros em ${folder.name}`} /> : <strong>{folder.fileCount}</strong>}</label>
+                    <a href={folder.url} target="_blank" rel="noreferrer">Abrir pasta ↗</a>
+                  </article>)}
+                </div>
+                <p className="inventory-note">Utilize “Atualizar quantidades” para corrigir manualmente a contagem quando forem adicionados ou removidos ficheiros nas pastas do Drive.</p>
               </div>
             </section>
           )}
