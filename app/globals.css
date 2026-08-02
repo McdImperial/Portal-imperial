@@ -176,6 +176,9 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .tell-arches-heading h2 { margin-top: 6px; font-family: Georgia, serif; font-size: 25px; font-weight: 500; }
 .tell-arches-heading p { margin: 7px 0 0; color: var(--muted); font-size: 10px; }
 .tell-arches-actions { display: flex; align-items: center; gap: 9px; }
+.tell-period-toggle { height: 36px; padding: 3px; display: flex; align-items: center; border: 1px solid #d8e4de; border-radius: 9px; background: #f2f6f4; }
+.tell-period-toggle button { height: 28px; padding: 0 12px; border: 0; border-radius: 6px; color: #708078; background: transparent; cursor: pointer; font-size: 9px; font-weight: 800; }
+.tell-period-toggle button.active { color: white; background: #34775d; box-shadow: 0 2px 6px rgba(29,82,61,.16); }
 .tell-arches-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .tell-metric { min-height: 126px; padding: 19px; display: flex; align-items: center; gap: 14px; border: 1px solid #dfe8e3; border-radius: 14px; background: #f8faf9; }
 .tell-metric.satisfaction { border-color: #cce4d8; background: #e7f3ed; }
@@ -219,6 +222,7 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .attention-panel { background: #fffaf8; }
 .negative-factors i b { background: #df8c77; }
 .tell-history > .tell-panel-heading { padding: 17px 18px 14px; background: #fafcfb; }
+.tell-ytd-link { color: #2f7058 !important; font-size: 9px !important; font-weight: 800; text-decoration: none; }
 .tell-history-table { overflow-x: auto; border-top: 1px solid var(--line); }
 .tell-history-row { min-width: 820px; min-height: 47px; display: grid; grid-template-columns: 1.3fr repeat(5, 1fr) .8fr; align-items: center; border-bottom: 1px solid var(--line); font-size: 9px; }
 .tell-history-row.header { min-height: 36px; color: #73817c; background: #f3f6f4; font-size: 8px; font-weight: 800; }
