@@ -5,6 +5,7 @@ import { sessions, users } from "../../../db/schema";
 export type AppRole = "admin" | "editor" | "consulta";
 const COOKIE = "imperial_session";
 const SESSION_SECONDS = 60 * 60 * 24 * 30;
+const PBKDF2_ITERATIONS = 100_000;
 
 const encoder = new TextEncoder();
 const toHex = (bytes: Uint8Array) => Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -17,7 +18,7 @@ async function sha256(value: string) {
 export async function hashPassword(password: string) {
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: 210_000 }, key, 256);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: PBKDF2_ITERATIONS }, key, 256);
   return `${toHex(salt)}:${toHex(new Uint8Array(bits))}`;
 }
 
@@ -25,7 +26,7 @@ export async function verifyPassword(password: string, stored: string) {
   const [saltHex, expected] = stored.split(":");
   if (!saltHex || !expected) return false;
   const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: fromHex(saltHex), iterations: 210_000 }, key, 256));
+  const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: fromHex(saltHex), iterations: PBKDF2_ITERATIONS }, key, 256));
   const actual = toHex(bits);
   if (actual.length !== expected.length) return false;
   let difference = 0;
