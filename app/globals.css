@@ -577,6 +577,30 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .objective-kpi-gold { background: #fbf0d9; border-color: #eeddbb; }
 .objective-kpi-blue { background: #e5f1f6; border-color: #cfe2ea; }
 .objective-kpi-orange { background: #fbe9df; border-color: #f0d4c5; }
+.objective-topic-grid { padding: 22px 24px 24px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; border-top: 1px solid var(--line); background: #f8faf9; }
+.objective-topic-card { min-height: 245px; padding: 17px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #dfe6e2; border-top: 4px solid #d5a23d; border-radius: 14px; background: white; box-shadow: 0 4px 14px rgba(22,54,44,.045); }
+.objective-topic-card.complete { border-top-color: #3b9249; }
+.objective-topic-card.pending { border-top-color: #cbd5d1; }
+.objective-topic-head { min-height: 44px; display: flex; align-items: center; gap: 10px; }
+.objective-topic-head > div { min-width: 0; display: grid; gap: 3px; }
+.objective-topic-head small, .objective-topic-values small, .objective-topic-points small, .objective-topic-progress small { color: #87938e; text-transform: uppercase; letter-spacing: .5px; font-size: 7px; font-weight: 800; }
+.objective-topic-head h3 { margin: 0; overflow: hidden; color: var(--ink); text-overflow: ellipsis; font-size: 13px; white-space: nowrap; }
+.objective-topic-symbol { width: 34px; height: 34px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 10px; color: #9f731e; background: #fbf0d9; font-weight: 900; }
+.objective-topic-card.complete .objective-topic-symbol { color: #267554; background: #e3f2eb; }
+.objective-topic-card.pending .objective-topic-symbol { color: #8b9893; background: #edf1ef; }
+.objective-classification-badge { margin-left: auto; padding: 5px 8px; border-radius: 999px; color: #bf6a0d; background: #fff0d9; font-size: 8px; font-weight: 800; }
+.objective-topic-values { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.objective-topic-values > div { padding: 12px; display: grid; gap: 5px; border-radius: 10px; background: #f4f7f5; }
+.objective-topic-values strong { color: var(--ink); font-family: Georgia, "Times New Roman", serif; font-size: 19px; font-weight: 500; }
+.objective-topic-points { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.objective-topic-points > span { display: grid; gap: 4px; }
+.objective-topic-points strong { color: #315a4c; font-size: 13px; }
+.objective-topic-progress { margin-top: auto; display: grid; gap: 8px; }
+.objective-topic-progress > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.objective-topic-progress strong { color: #7f8c87; font-size: 9px; }
+.objective-topic-card.complete .objective-topic-progress strong { color: #287654; }
+.objective-topic-progress > i { height: 8px; overflow: hidden; border-radius: 999px; background: #e7ece9; }
+.objective-topic-progress em { display: block; height: 100%; border-radius: inherit; background: #3b9249; }
 .objectives-total { min-width: 120px; padding: 12px 15px; display: grid; gap: 4px; border-radius: 11px; color: #285746; background: #e7f3ed; text-align: right; }
 .objectives-total span { text-transform: uppercase; letter-spacing: .7px; font-size: 7px; font-weight: 800; }
 .objectives-total strong { font-family: Georgia, "Times New Roman", serif; font-size: 22px; }
@@ -616,6 +640,7 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .r2p-period-bar { grid-template-columns: 1fr; }
   .objective-grid { grid-template-columns: 1fr; }
   .objectives-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .objective-topic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 780px) {
@@ -658,6 +683,7 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .settings-section { padding: 18px; }
   .restaurant-objectives-heading { padding: 18px; align-items: stretch; flex-direction: column; }
   .objectives-kpi-grid { padding: 0 18px 18px; grid-template-columns: 1fr; }
+  .objective-topic-grid { padding: 18px; grid-template-columns: 1fr; }
   .objectives-total { text-align: left; }
   .settings-heading, .settings-card-title { align-items: flex-start; flex-direction: column; }
   .settings-update-button, .settings-edit-actions { width: 100%; }

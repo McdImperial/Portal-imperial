@@ -1040,13 +1040,22 @@ export default function Home() {
                 <article className="objective-kpi objective-kpi-blue"><span>✓</span><div><small>Pontos atingidos</small><strong>{imperialObjectives.reduce((sum, item) => sum + (item.achievedPoints ?? 0), 0)}</strong><p>resultados já registados</p></div></article>
                 <article className="objective-kpi objective-kpi-orange"><span>↗</span><div><small>Progresso registado</small><strong>50%</strong><p>melhor resultado atual</p></div></article>
               </div>
-              <div className="objectives-table-scroll">
-                <div className="objectives-data-table" role="table" aria-label="Objetivos mensais">
-                  <div className="objective-data-row objective-data-header" role="row"><span>Tema objetivo</span><span>Objetivo</span><span>Resultado</span><span>Classificação</span><span>Pontos possíveis</span><span>Pontos atingidos</span><span>% atingido</span></div>
-                  {imperialObjectives.map((item) => <div className="objective-data-row" role="row" key={item.theme}>
-                    <strong className="objective-theme"><i className={item.achievedPercent !== undefined ? "complete" : item.target ? "planned" : "empty"} />{item.theme}</strong><span>{item.target ?? ""}</span><span>{item.result ?? ""}</span><span className={item.classification ? "objective-classification" : ""}>{item.classification ?? ""}</span><span>{item.possiblePoints ?? ""}</span><span>{item.achievedPoints ?? ""}</span><span className="objective-attainment">{item.achievedPercent !== undefined ? <><b>{item.achievedPercent}%</b><i><em style={{ width: `${item.achievedPercent}%` }} /></i></> : <small>Por atualizar</small>}</span>
-                  </div>)}
-                </div>
+              <div className="objective-topic-grid" aria-label="Objetivos agrupados por tema">
+                {imperialObjectives.map((item) => <article className={item.achievedPercent !== undefined ? "objective-topic-card complete" : item.target ? "objective-topic-card planned" : "objective-topic-card pending"} key={item.theme}>
+                  <div className="objective-topic-head"><span className="objective-topic-symbol">{item.achievedPercent !== undefined ? "✓" : item.target ? "◎" : "·"}</span><div><small>Tema objetivo</small><h3>{item.theme}</h3></div>{item.classification && <span className="objective-classification-badge">{item.classification}</span>}</div>
+                  <div className="objective-topic-values">
+                    <div><small>Objetivo</small><strong>{item.target ?? "—"}</strong></div>
+                    <div><small>Resultado</small><strong>{item.result ?? "—"}</strong></div>
+                  </div>
+                  <div className="objective-topic-points">
+                    <span><small>Pontos possíveis</small><strong>{item.possiblePoints ?? "—"}</strong></span>
+                    <span><small>Pontos atingidos</small><strong>{item.achievedPoints ?? "—"}</strong></span>
+                  </div>
+                  <div className="objective-topic-progress">
+                    <div><small>Progresso</small><strong>{item.achievedPercent !== undefined ? `${item.achievedPercent}%` : "Por atualizar"}</strong></div>
+                    <i><em style={{ width: `${item.achievedPercent ?? 0}%` }} /></i>
+                  </div>
+                </article>)}
               </div>
               <p className="inventory-note">Os campos sem resultado permanecem assinalados como “Por atualizar”.</p>
             </section>
