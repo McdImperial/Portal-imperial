@@ -578,13 +578,24 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .objective-export span { margin-right: 5px; font-size: 13px; }
 .objective-export:hover:not(:disabled) { background: #183e2d; }
 .objective-export:disabled { cursor: not-allowed; opacity: .42; }
-.objectives-kpi-grid { padding: 0 24px 22px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.objectives-kpi-grid { padding: 0 24px 22px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
 .objective-kpi { min-height: 112px; padding: 16px; display: flex; align-items: center; gap: 13px; border: 1px solid transparent; border-radius: 14px; }
 .objective-kpi > span { width: 38px; height: 38px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 11px; background: rgba(255,255,255,.75); font-weight: 900; }
 .objective-kpi > div { display: grid; gap: 3px; }
 .objective-kpi small { color: #60716a; text-transform: uppercase; letter-spacing: .55px; font-size: 7px; font-weight: 800; }
 .objective-kpi strong { color: var(--ink); font-family: Georgia, "Times New Roman", serif; font-size: 25px; font-weight: 500; }
+.objective-kpi-value { display: flex; align-items: baseline; gap: 8px; }
+.objective-kpi-value b { padding: 3px 7px; border-radius: 999px; color: #52645d; background: rgba(255,255,255,.72); font-size: 9px; }
 .objective-kpi p { margin: 0; color: #73817c; font-size: 8px; }
+.objective-kpi-month { background: #f3efe5; border-color: #e2d9c4; }
+.objective-kpi-superado { background: #e3f2e9; border-color: #c7e2d3; }
+.objective-kpi-superado .objective-kpi-value b { color: #246c49; }
+.objective-kpi-atingido { background: #e4f1f7; border-color: #c9dfe9; }
+.objective-kpi-atingido .objective-kpi-value b { color: #2b6c89; }
+.objective-kpi-proximo { background: #fff0d9; border-color: #efd8ad; }
+.objective-kpi-proximo .objective-kpi-value b { color: #a66d14; }
+.objective-kpi-nao { background: #f9e5e5; border-color: #ebcaca; }
+.objective-kpi-nao .objective-kpi-value b { color: #a44141; }
 .objective-kpi-green { background: #e6f3ed; border-color: #cfe6dc; }
 .objective-kpi-gold { background: #fbf0d9; border-color: #eeddbb; }
 .objective-kpi-blue { background: #e5f1f6; border-color: #cfe2ea; }

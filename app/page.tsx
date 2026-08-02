@@ -404,6 +404,27 @@ export default function Home() {
       points,
       objectives: selectedObjectives.filter((item) => item.possiblePoints === points).sort((a, b) => objectiveResultOrder.indexOf(getObjectiveResult(a)) - objectiveResultOrder.indexOf(getObjectiveResult(b))),
     })), [selectedObjectives]);
+  const objectiveStats = useMemo(() => {
+    const total = selectedObjectives.length;
+    const possiblePoints = selectedObjectives.reduce((sum, item) => sum + (item.possiblePoints ?? 0), 0);
+    const achievedPoints = selectedObjectives.reduce((sum, item) => sum + (item.achievedPoints ?? 0), 0);
+    const count = (result: ObjectiveResult) => selectedObjectives.filter((item) => getObjectiveResult(item) === result).length;
+    const percent = (value: number) => total ? Math.round((value / total) * 100) : 0;
+    const superados = count("Superado");
+    const atingidos = count("Atingido");
+    const proximos = count("Próximo");
+    const naoAtingidos = count("Não Atingido");
+    return {
+      total,
+      possiblePoints,
+      achievedPoints,
+      monthlyPercent: possiblePoints ? Math.round((achievedPoints / possiblePoints) * 100) : 0,
+      superados: { count: superados, percent: percent(superados) },
+      atingidos: { count: atingidos, percent: percent(atingidos) },
+      proximos: { count: proximos, percent: percent(proximos) },
+      naoAtingidos: { count: naoAtingidos, percent: percent(naoAtingidos) },
+    };
+  }, [selectedObjectives]);
 
   const visibleTasks = useMemo(() => {
     if (filter === "pendentes") return scopedTasks.filter((task) => !task.done);
@@ -1115,10 +1136,11 @@ export default function Home() {
                 </div>
               </div>
               <div className="objectives-kpi-grid" aria-label="Resumo dos objetivos">
-                <article className="objective-kpi objective-kpi-green"><span>◎</span><div><small>Objetivos</small><strong>{selectedObjectives.length}</strong><p>indicadores acompanhados</p></div></article>
-                <article className="objective-kpi objective-kpi-gold"><span>★</span><div><small>Pontos possíveis</small><strong>{selectedObjectives.reduce((sum, item) => sum + (item.possiblePoints ?? 0), 0)}</strong><p>pontuação total disponível</p></div></article>
-                <article className="objective-kpi objective-kpi-blue"><span>✓</span><div><small>Pontos atingidos</small><strong>{selectedObjectives.reduce((sum, item) => sum + (item.achievedPoints ?? 0), 0)}</strong><p>resultados já registados</p></div></article>
-                <article className="objective-kpi objective-kpi-orange"><span>↗</span><div><small>Progresso registado</small><strong>{selectedObjectives.length ? Math.max(...selectedObjectives.map((item) => item.achievedPercent ?? 0)) : 0}%</strong><p>melhor resultado atual</p></div></article>
+                <article className="objective-kpi objective-kpi-month"><span>◎</span><div><small>Percentagem mensal</small><strong>{objectiveStats.monthlyPercent}%</strong><p>{objectiveStats.achievedPoints} de {objectiveStats.possiblePoints} pontos</p></div></article>
+                <article className="objective-kpi objective-kpi-superado"><span>★</span><div><small>Superados</small><div className="objective-kpi-value"><strong>{objectiveStats.superados.count}</strong><b>{objectiveStats.superados.percent}%</b></div><p>do total de objetivos</p></div></article>
+                <article className="objective-kpi objective-kpi-atingido"><span>✓</span><div><small>Atingidos</small><div className="objective-kpi-value"><strong>{objectiveStats.atingidos.count}</strong><b>{objectiveStats.atingidos.percent}%</b></div><p>do total de objetivos</p></div></article>
+                <article className="objective-kpi objective-kpi-proximo"><span>↗</span><div><small>Próximos</small><div className="objective-kpi-value"><strong>{objectiveStats.proximos.count}</strong><b>{objectiveStats.proximos.percent}%</b></div><p>do total de objetivos</p></div></article>
+                <article className="objective-kpi objective-kpi-nao"><span>!</span><div><small>Não atingidos</small><div className="objective-kpi-value"><strong>{objectiveStats.naoAtingidos.count}</strong><b>{objectiveStats.naoAtingidos.percent}%</b></div><p>do total de objetivos</p></div></article>
               </div>
               <div className="objective-topic-grid" aria-label="Objetivos agrupados por tema">
                 {!selectedObjectives.length && <div className="objective-empty"><span>◷</span><div><strong>Sem objetivos importados</strong><p>Ainda não existem dados para {selectedObjectiveMonth.label}. Selecione outro mês.</p></div></div>}
