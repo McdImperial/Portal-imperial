@@ -741,10 +741,6 @@ export default function Home() {
             <p className="date-line">Sexta-feira · 31 de julho · {departmentLabel}</p>
             <h1>{viewLabels[view]}</h1>
           </div>
-          <div className="top-actions">
-            <button className="icon-button" aria-label="Notificações"><span className="notification-dot" />♢</button>
-            {canEdit && <button className="primary-button" onClick={() => createTask()}><span>＋</span> Nova tarefa</button>}
-          </div>
         </header>
 
         {notice && <div className="toast" role="status">✓ {notice}</div>}
