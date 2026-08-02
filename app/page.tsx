@@ -192,6 +192,8 @@ const qualityTasksSourceUrl = "https://docs.google.com/spreadsheets/d/1aH533lMTX
 const defaultSharedFolders: SharedFolder[] = [
   { id: "inventario", name: "Relatórios de inventário", description: "Comida, papel, limpeza e material de escritório", url: "https://drive.google.com/drive/folders/1W_C3S1yUFZXGdmETHBesGHwJwk3xoeaZ?usp=sharing", fileCount: 8, updatedAt: "2026-08-02T00:00:00.000Z" },
   { id: "tell-the-arches", name: "Tell The Arches", description: "Relatórios mensais e acumulado YTD", url: "https://drive.google.com/drive/folders/1SAYTBKa7b9Zt7WdoCKFMB3VP4CWbFhTV?usp=sharing", fileCount: 8, updatedAt: "2026-08-02T00:00:00.000Z" },
+  { id: "gdr-servico-cliente", name: "GDR Serviço Cliente", description: "Folha GDR e pasta Tell The Arches", url: "https://drive.google.com/drive/folders/1SF6Mk9dVDmUaQ5EyB_LLbkDFOVfdQdP8?usp=sharing", fileCount: 2, updatedAt: "2026-08-02T21:32:55.889Z" },
+  { id: "gdr-qualidade-produtos", name: "GDR Qualidade & Produtos", description: "Folha GDR e relatórios de custo de inventário", url: "https://drive.google.com/drive/folders/1yD7oRRAMcCJlVAlw_6wWUCEkuMvCArlW?usp=sharing", fileCount: 2, updatedAt: "2026-08-01T09:35:24.409Z" },
 ];
 const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const weekdayNames = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];

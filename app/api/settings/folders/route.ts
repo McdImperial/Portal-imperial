@@ -6,12 +6,16 @@ import { requireUser } from "../../auth/_lib";
 const defaultFolders = [
   { id: "inventario", name: "Relatórios de inventário", description: "Comida, papel, limpeza e material de escritório", url: "https://drive.google.com/drive/folders/1W_C3S1yUFZXGdmETHBesGHwJwk3xoeaZ?usp=sharing", fileCount: 8 },
   { id: "tell-the-arches", name: "Tell The Arches", description: "Relatórios mensais e acumulado YTD", url: "https://drive.google.com/drive/folders/1SAYTBKa7b9Zt7WdoCKFMB3VP4CWbFhTV?usp=sharing", fileCount: 8 },
+  { id: "gdr-servico-cliente", name: "GDR Serviço Cliente", description: "Folha GDR e pasta Tell The Arches", url: "https://drive.google.com/drive/folders/1SF6Mk9dVDmUaQ5EyB_LLbkDFOVfdQdP8?usp=sharing", fileCount: 2 },
+  { id: "gdr-qualidade-produtos", name: "GDR Qualidade & Produtos", description: "Folha GDR e relatórios de custo de inventário", url: "https://drive.google.com/drive/folders/1yD7oRRAMcCJlVAlw_6wWUCEkuMvCArlW?usp=sharing", fileCount: 2 },
 ];
 
 async function ensureFolders() {
   const db = getDb();
-  const existing = await db.select({ id: sharedFolders.id }).from(sharedFolders).limit(1);
-  if (!existing.length) await db.insert(sharedFolders).values(defaultFolders);
+  const existing = await db.select({ id: sharedFolders.id }).from(sharedFolders);
+  const existingIds = new Set(existing.map((folder) => folder.id));
+  const missingFolders = defaultFolders.filter((folder) => !existingIds.has(folder.id));
+  if (missingFolders.length) await db.insert(sharedFolders).values(missingFolders);
   return db.select().from(sharedFolders).orderBy(asc(sharedFolders.name));
 }
 
