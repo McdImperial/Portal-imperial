@@ -1039,7 +1039,7 @@ export default function Home() {
                 <div className="objectives-data-table" role="table" aria-label="Objetivos do restaurante Imperial">
                   <div className="objective-data-row objective-data-header" role="row"><span>Restaurante</span><span>Tema objetivo</span><span>Objetivo</span><span>Resultado</span><span>Classificação</span><span>Pontos possíveis</span><span>Pontos atingidos</span><span>% objetivos atingidos</span></div>
                   {imperialObjectives.map((item) => <div className="objective-data-row" role="row" key={item.theme}>
-                    <strong>Imperial</strong><strong>{item.theme}</strong><span>{item.target ?? "—"}</span><span>{item.result ?? "—"}</span><span className={item.classification ? "objective-classification" : ""}>{item.classification ?? "—"}</span><span>{item.possiblePoints ?? "—"}</span><span>{item.achievedPoints ?? "—"}</span><span className="objective-attainment">{item.achievedPercent !== undefined ? <><b>{item.achievedPercent}%</b><i><em style={{ width: `${item.achievedPercent}%` }} /></i></> : "—"}</span>
+                    <strong>Imperial</strong><strong>{item.theme}</strong><span>{item.target ?? ""}</span><span>{item.result ?? ""}</span><span className={item.classification ? "objective-classification" : ""}>{item.classification ?? ""}</span><span>{item.possiblePoints ?? ""}</span><span>{item.achievedPoints ?? ""}</span><span className="objective-attainment">{item.achievedPercent !== undefined ? <><b>{item.achievedPercent}%</b><i><em style={{ width: `${item.achievedPercent}%` }} /></i></> : null}</span>
                   </div>)}
                 </div>
               </div>
