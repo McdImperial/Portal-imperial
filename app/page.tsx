@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import inventoryProductsData from "./data/inventory-products.json";
 import r2pDataJson from "./data/r2p-data.json";
+import tellTheArchesDataJson from "./data/tell-the-arches.json";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos" | "r2p" | "telartes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos" | "r2p" | "tellarches";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao" | "segit";
 type TaskStatus = "Por fazer" | "Em curso" | "Bloqueado" | "Concluído";
 
@@ -102,7 +103,7 @@ const viewLabels: Record<View, string> = {
   areas: "Áreas de acompanhamento",
   custos: "Custo, Comida, Papel e OPS",
   r2p: "Tempos de serviço · R2P",
-  telartes: "Tel de Artes",
+  tellarches: "Tell The Arches",
 };
 
 type InventoryCategory = "food" | "paper" | "ops";
@@ -141,11 +142,20 @@ type R2PDay = {
 
 type R2PData = { sourceUrl: string; snapshotDate: string; hours: string[]; days: R2PDay[] };
 type ManagerRanking = { manager: string; shifts: number; average: number };
+type TellTheArchesMonth = {
+  month: number; label: string; responses: number; satisfaction: number; satisfactionDelta: number; bottom2: number; bottom2Delta: number;
+  returnIntent: number; returnDelta: number; recognition: number; incorrectOrders: number; incorrectDelta: number;
+  weekdays: number[]; dayparts: number[]; satisfactionFactors: Record<string, number>; dissatisfactionFactors: Record<string, number>; reportUrl: string;
+};
+type TellTheArchesData = { folderUrl: string; snapshotDate: string; months: TellTheArchesMonth[] };
 
 const inventoryProducts = inventoryProductsData as InventoryProduct[];
 const inventoryCategoryLabels: Record<InventoryCategory, string> = { food: "Comida", paper: "Papel", ops: "OPS" };
 const r2pData = r2pDataJson as R2PData;
+const tellTheArchesData = tellTheArchesDataJson as TellTheArchesData;
 const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+const weekdayNames = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+const daypartNames = ["Manhã", "Almoço", "Tarde", "Fim de tarde", "Jantar", "Madrugada"];
 
 function formatEuro(value: number) {
   return new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(value);
@@ -221,6 +231,7 @@ export default function Home() {
   const [inventoryStatus, setInventoryStatus] = useState<InventoryStatus>("Todos");
   const [productSort, setProductSort] = useState<{ key: ProductSortKey; direction: "asc" | "desc" }>({ key: "description", direction: "asc" });
   const [r2pMonth, setR2pMonth] = useState(8);
+  const [tellTheArchesMonth, setTellTheArchesMonth] = useState(7);
   const [boardMode, setBoardMode] = useState<"tabela" | "kanban">("tabela");
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [dataReady, setDataReady] = useState(false);
@@ -323,6 +334,8 @@ export default function Home() {
     };
   }, [r2pMonth]);
 
+  const tellTheArchesDashboard = tellTheArchesData.months.find((item) => item.month === tellTheArchesMonth) ?? tellTheArchesData.months.at(-1)!;
+
   function changeProductSort(key: ProductSortKey) {
     setProductSort((current) => ({ key, direction: current.key === key && current.direction === "asc" ? "desc" : "asc" }));
   }
@@ -420,8 +433,8 @@ export default function Home() {
                     <button className={view === "r2p" ? "department-subtab active" : "department-subtab"} onClick={() => setView("r2p")}>
                       ◷ <span>Tempos de serviço · R2P</span>
                     </button>
-                    <button className={view === "telartes" ? "department-subtab active" : "department-subtab"} onClick={() => setView("telartes")}>
-                      ◈ <span>Tel de Artes</span>
+                    <button className={view === "tellarches" ? "department-subtab active" : "department-subtab"} onClick={() => setView("tellarches")}>
+                      ◈ <span>Tell The Arches</span>
                     </button>
                   </div>
                 )}
@@ -717,19 +730,48 @@ export default function Home() {
             </section>
           )}
 
-          {view === "telartes" && department === "cliente" && (
-            <section className="tel-artes-section" aria-labelledby="tel-artes-title">
-              <div className="tel-artes-heading">
-                <div>
-                  <span className="eyebrow">Serviço Cliente</span>
-                  <h2 id="tel-artes-title">Tel de Artes</h2>
-                  <p>Espaço dedicado ao acompanhamento de Tel de Artes.</p>
+          {view === "tellarches" && department === "cliente" && (
+            <section className="tell-arches-section" aria-labelledby="tell-arches-title">
+              <div className="tell-arches-heading">
+                <div><span className="eyebrow">Serviço Cliente · Voz do cliente</span><h2 id="tell-arches-title">Tell The Arches</h2><p>Resultados mensais de satisfação e experiência do restaurante Imperial.</p></div>
+                <div className="tell-arches-actions">
+                  <label className="r2p-month-filter">Mês<select value={tellTheArchesMonth} onChange={(event) => setTellTheArchesMonth(Number(event.target.value))} aria-label="Filtrar Tell The Arches por mês">{tellTheArchesData.months.map((item) => <option value={item.month} key={item.month}>{item.label} 2026</option>)}</select></label>
+                  <a className="drive-link" href={tellTheArchesData.folderUrl} target="_blank" rel="noreferrer">Abrir pasta ↗</a>
                 </div>
-                <span className="tel-artes-status"><i /> Separador criado</span>
               </div>
-              <div className="tel-artes-empty">
-                <span className="tel-artes-icon">◈</span>
-                <div><strong>Área pronta para receber informação</strong><p>Aqui poderá centralizar os registos, indicadores e tarefas associados a Tel de Artes.</p></div>
+
+              <div className="tell-arches-metrics">
+                <article className="tell-metric satisfaction"><span className="tell-metric-icon">★</span><div><span className="eyebrow">Satisfação geral</span><strong>{tellTheArchesDashboard.satisfaction}%</strong><small className={tellTheArchesDashboard.satisfactionDelta >= 0 ? "positive" : "negative"}>{tellTheArchesDashboard.satisfactionDelta >= 0 ? "↑" : "↓"} {Math.abs(tellTheArchesDashboard.satisfactionDelta)} p.p. vs. mês anterior</small></div></article>
+                <article className="tell-metric"><span className="tell-metric-icon">↺</span><div><span className="eyebrow">Probabilidade de regressar</span><strong>{tellTheArchesDashboard.returnIntent}%</strong><small className={tellTheArchesDashboard.returnDelta >= 0 ? "positive" : "negative"}>{tellTheArchesDashboard.returnDelta >= 0 ? "↑" : "↓"} {Math.abs(tellTheArchesDashboard.returnDelta)} p.p.</small></div></article>
+                <article className="tell-metric attention"><span className="tell-metric-icon">!</span><div><span className="eyebrow">Avaliações Bottom-2-Box</span><strong>{tellTheArchesDashboard.bottom2}%</strong><small className={tellTheArchesDashboard.bottom2Delta <= 0 ? "positive" : "negative"}>{tellTheArchesDashboard.bottom2Delta > 0 ? "↑" : tellTheArchesDashboard.bottom2Delta < 0 ? "↓" : "—"} {Math.abs(tellTheArchesDashboard.bottom2Delta)} p.p.</small></div></article>
+                <article className="tell-metric attention"><span className="tell-metric-icon">×</span><div><span className="eyebrow">Pedidos incorretos</span><strong>{tellTheArchesDashboard.incorrectOrders}%</strong><small className={tellTheArchesDashboard.incorrectDelta <= 0 ? "positive" : "negative"}>{tellTheArchesDashboard.incorrectDelta > 0 ? "↑" : tellTheArchesDashboard.incorrectDelta < 0 ? "↓" : "—"} {Math.abs(tellTheArchesDashboard.incorrectDelta)} p.p.</small></div></article>
+              </div>
+
+              <div className="tell-arches-grid">
+                <article className="tell-panel trend-panel">
+                  <div className="tell-panel-heading"><div><span className="eyebrow">Evolução 2026</span><h3>Satisfação geral</h3></div><span>{tellTheArchesDashboard.responses} respostas em {tellTheArchesDashboard.label.toLowerCase()}</span></div>
+                  <div className="tell-trend" aria-label="Evolução mensal da satisfação geral">{tellTheArchesData.months.map((item) => <button type="button" className={item.month === tellTheArchesMonth ? "selected" : ""} onClick={() => setTellTheArchesMonth(item.month)} key={item.month}><span>{item.satisfaction}%</span><i style={{height:`${item.satisfaction}%`}} /><small>{item.label.slice(0,3)}</small></button>)}</div>
+                </article>
+                <article className="tell-panel recognition-panel"><span className="recognition-icon">✦</span><div><span className="eyebrow">Reconhecimento da equipa</span><strong>{tellTheArchesDashboard.recognition}</strong><p>comentários positivos em {tellTheArchesDashboard.label.toLowerCase()}</p></div></article>
+              </div>
+
+              <div className="tell-arches-grid breakdowns">
+                <article className="tell-panel"><div className="tell-panel-heading"><div><span className="eyebrow">Satisfação</span><h3>Por dia da semana</h3></div><span>Top-Box</span></div><div className="tell-bars">{weekdayNames.map((label,index) => <div className="tell-bar-row" key={label}><span>{label}</span><i><b style={{width:`${tellTheArchesDashboard.weekdays[index]}%`}} /></i><strong>{tellTheArchesDashboard.weekdays[index]}%</strong></div>)}</div></article>
+                <article className="tell-panel"><div className="tell-panel-heading"><div><span className="eyebrow">Satisfação</span><h3>Por período do dia</h3></div><span>Top-Box</span></div><div className="tell-bars">{daypartNames.map((label,index) => <div className="tell-bar-row" key={label}><span>{label}</span><i><b style={{width:`${tellTheArchesDashboard.dayparts[index]}%`}} /></i><strong>{tellTheArchesDashboard.dayparts[index]}%</strong></div>)}</div></article>
+              </div>
+
+              <div className="tell-arches-grid breakdowns">
+                <article className="tell-panel"><div className="tell-panel-heading"><div><span className="eyebrow">Celebra o sucesso</span><h3>O que mais satisfaz</h3></div><span>Comentários</span></div><div className="factor-list positive-factors">{Object.entries(tellTheArchesDashboard.satisfactionFactors).sort((a,b)=>b[1]-a[1]).map(([label,value]) => <div key={label}><span>{label}</span><i><b style={{width:`${Math.min(100,value*2.2)}%`}} /></i><strong>{value}%</strong></div>)}</div></article>
+                <article className="tell-panel attention-panel"><div className="tell-panel-heading"><div><span className="eyebrow">Precisa de atenção</span><h3>Fatores de insatisfação</h3></div><span>Comentários</span></div><div className="factor-list negative-factors">{Object.entries(tellTheArchesDashboard.dissatisfactionFactors).sort((a,b)=>b[1]-a[1]).map(([label,value]) => <div key={label}><span>{label}</span><i><b style={{width:`${Math.min(100,value*10)}%`}} /></i><strong>{value}%</strong></div>)}</div></article>
+              </div>
+
+              <div className="tell-history">
+                <div className="tell-panel-heading"><div><span className="eyebrow">Relatórios 2026</span><h3>Histórico mensal</h3></div><span>Janeiro–julho</span></div>
+                <div className="tell-history-table" role="table" aria-label="Histórico mensal Tell The Arches">
+                  <div className="tell-history-row header" role="row"><span>Mês</span><span>Respostas</span><span>Satisfação</span><span>Regresso</span><span>Bottom-2</span><span>Pedidos incorretos</span><span>Relatório</span></div>
+                  {tellTheArchesData.months.map((item) => <div className={item.month === tellTheArchesMonth ? "tell-history-row selected" : "tell-history-row"} role="row" key={item.month}><button type="button" onClick={() => setTellTheArchesMonth(item.month)}>{item.label}</button><span>{item.responses}</span><strong>{item.satisfaction}%</strong><span>{item.returnIntent}%</span><span>{item.bottom2}%</span><span>{item.incorrectOrders}%</span><a href={item.reportUrl} target="_blank" rel="noreferrer">Abrir ↗</a></div>)}
+                </div>
+                <p className="inventory-note">Fonte: relatórios mensais Tell The Arches do restaurante Imperial, disponíveis na pasta partilhada. Dados de janeiro a julho de 2026; fotografia consultada em 2 de agosto de 2026.</p>
               </div>
             </section>
           )}
