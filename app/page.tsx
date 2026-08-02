@@ -127,27 +127,25 @@ type RestaurantObjective = {
 type ObjectiveResult = "Superado" | "Atingido" | "Próximo" | "Não Atingido" | "Por atualizar";
 
 const imperialObjectives: RestaurantObjective[] = [
-  { theme: "Delivery T Time", target: "20", possiblePoints: 0 },
-  { theme: "Delivery C Sat", target: "4.2", possiblePoints: 30 },
-  { theme: "Delivery Exatidão", target: "2.2", possiblePoints: 40 },
-  { theme: "Turnover", target: "4.17", result: "4.35", classification: "Próximo", possiblePoints: 80, achievedPoints: 40, achievedPercent: 50 },
-  { theme: "Staffing", target: "20", possiblePoints: 45 },
-  { theme: "Food" },
-  { theme: "Paper" },
-  { theme: "Perdas", target: "0.45", possiblePoints: 20 },
-  { theme: "AOLs", target: "89", possiblePoints: 60 },
-  { theme: "OPS", target: "3850", possiblePoints: 40 },
-  { theme: "Qualitativo", target: "100", possiblePoints: 100 },
-  { theme: "Extras" },
-  { theme: "MDO", target: "11.29", possiblePoints: 100 },
-  { theme: "Delivery R Time", target: "5", possiblePoints: 45 },
-  { theme: "R2P Dia", target: "230", possiblePoints: 100 },
+  { theme: "MDO", target: "11,29", result: "10,9", classification: "Superado", possiblePoints: 100, achievedPoints: 100, achievedPercent: 100 },
+  { theme: "Turnover", target: "4,2", result: "3,13", classification: "Superado", possiblePoints: 80, achievedPoints: 80, achievedPercent: 100 },
+  { theme: "Food", possiblePoints: 80 },
+  { theme: "Paper", possiblePoints: 40 },
+  { theme: "Staffing", target: "20", result: "15", classification: "Superado", possiblePoints: 45, achievedPoints: 45, achievedPercent: 100 },
+  { theme: "OPS", target: "3 850", result: "4 956,12", classification: "Não Atingido", possiblePoints: 40, achievedPoints: 0, achievedPercent: 0 },
+  { theme: "R2P Dia", target: "230", result: "281", classification: "Não Atingido", possiblePoints: 100, achievedPoints: 0, achievedPercent: 0 },
   { theme: "OCM Rest", target: "75", possiblePoints: 0 },
+  { theme: "Perdas", target: "0,45", result: "0,43", classification: "Atingido", possiblePoints: 20, achievedPoints: 15, achievedPercent: 75 },
+  { theme: "Delivery Exatidão", target: "2,2", possiblePoints: 40 },
+  { theme: "Delivery R Time", target: "5,0", result: "5,2", classification: "Próximo", possiblePoints: 45, achievedPoints: 0, achievedPercent: 50 },
+  { theme: "Delivery C SAT", target: "4,20", classification: "Próximo", possiblePoints: 30, achievedPoints: 0, achievedPercent: 50 },
+  { theme: "Delivery T Time", target: "20", result: "22,7", classification: "Próximo", possiblePoints: 0, achievedPoints: 0, achievedPercent: 50 },
+  { theme: "AOLs", target: "89", result: "85,5", classification: "Próximo", possiblePoints: 60, achievedPoints: 0, achievedPercent: 50 },
 ];
 
 const objectiveVisuals: Record<string, { icon: string; label: string; tone: string }> = {
   "Delivery T Time": { icon: "⏱️", label: "Cronómetro de entrega", tone: "blue" },
-  "Delivery C Sat": { icon: "😊", label: "Satisfação do cliente", tone: "mint" },
+  "Delivery C SAT": { icon: "😊", label: "Satisfação do cliente", tone: "mint" },
   "Delivery Exatidão": { icon: "🎯", label: "Exatidão do pedido", tone: "coral" },
   Turnover: { icon: "🔄", label: "Rotatividade da equipa", tone: "purple" },
   Staffing: { icon: "👥", label: "Equipa", tone: "blue" },
@@ -230,6 +228,7 @@ const inventoryCategoryLabels: Record<InventoryCategory, string> = { food: "Comi
 const r2pData = r2pDataJson as R2PData;
 const tellTheArchesData = tellTheArchesDataJson as TellTheArchesData;
 const qualityTasksSourceUrl = "https://docs.google.com/spreadsheets/d/1aH533lMTXySB8jVm4xRFVNpsoBVuPiqgMbpi_GzWVKY/edit?usp=sharing";
+const objectivesSourceUrl = "https://docs.google.com/spreadsheets/d/1xrRSvUDCORagI5FmL0scOvWB7Df-5d3zULKJ0K5w-1s/edit?usp=sharing";
 const defaultSharedFolders: SharedFolder[] = [
   { id: "inventario", name: "Relatórios de inventário", description: "Comida, papel, limpeza e material de escritório", url: "https://drive.google.com/drive/folders/1W_C3S1yUFZXGdmETHBesGHwJwk3xoeaZ?usp=sharing", fileCount: 8, updatedAt: "2026-08-02T00:00:00.000Z" },
   { id: "tell-the-arches", name: "Tell The Arches", description: "Relatórios mensais e acumulado YTD", url: "https://drive.google.com/drive/folders/1SAYTBKa7b9Zt7WdoCKFMB3VP4CWbFhTV?usp=sharing", fileCount: 8, updatedAt: "2026-08-02T00:00:00.000Z" },
@@ -1087,7 +1086,7 @@ export default function Home() {
                 <article className="objective-kpi objective-kpi-green"><span>◎</span><div><small>Objetivos</small><strong>{imperialObjectives.length}</strong><p>indicadores acompanhados</p></div></article>
                 <article className="objective-kpi objective-kpi-gold"><span>★</span><div><small>Pontos possíveis</small><strong>{imperialObjectives.reduce((sum, item) => sum + (item.possiblePoints ?? 0), 0)}</strong><p>pontuação total disponível</p></div></article>
                 <article className="objective-kpi objective-kpi-blue"><span>✓</span><div><small>Pontos atingidos</small><strong>{imperialObjectives.reduce((sum, item) => sum + (item.achievedPoints ?? 0), 0)}</strong><p>resultados já registados</p></div></article>
-                <article className="objective-kpi objective-kpi-orange"><span>↗</span><div><small>Progresso registado</small><strong>50%</strong><p>melhor resultado atual</p></div></article>
+                <article className="objective-kpi objective-kpi-orange"><span>↗</span><div><small>Progresso registado</small><strong>{Math.max(...imperialObjectives.map((item) => item.achievedPercent ?? 0))}%</strong><p>melhor resultado atual</p></div></article>
               </div>
               <div className="objective-topic-grid" aria-label="Objetivos agrupados por tema">
                 {objectivePointGroups.map((group) => <section className="objective-score-row" key={group.points ?? "sem-pontos"}>
@@ -1109,7 +1108,7 @@ export default function Home() {
                 </article>; })}</div>
                 </section>)}
               </div>
-              <p className="inventory-note">Os campos sem resultado permanecem assinalados como “Por atualizar”.</p>
+              <p className="inventory-note">Fonte: folha “Jul 26” do ficheiro de seguimento. Os campos sem resultado permanecem assinalados como “Por atualizar”. <a href={objectivesSourceUrl} target="_blank" rel="noreferrer">Abrir ficheiro fonte ↗</a></p>
             </section>
           )}
 
