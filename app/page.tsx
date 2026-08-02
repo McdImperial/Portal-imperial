@@ -138,6 +138,8 @@ const imperialObjectives: RestaurantObjective[] = [
   { theme: "OCM Rest", target: "75", possiblePoints: 0 },
 ];
 
+const sortedImperialObjectives = [...imperialObjectives].sort((a, b) => (b.possiblePoints ?? -1) - (a.possiblePoints ?? -1));
+
 type InventoryCategory = "food" | "paper" | "ops";
 type InventoryStatus = "Todos" | "Ativo" | "Inativo";
 type ProductSortKey = "code" | "description" | "status" | "source" | "openingStock" | "deliveries" | "posUsage" | "expectedStock" | "closingStock" | "deviation" | "deviationEur" | "currentYield";
@@ -1041,7 +1043,7 @@ export default function Home() {
                 <article className="objective-kpi objective-kpi-orange"><span>↗</span><div><small>Progresso registado</small><strong>50%</strong><p>melhor resultado atual</p></div></article>
               </div>
               <div className="objective-topic-grid" aria-label="Objetivos agrupados por tema">
-                {imperialObjectives.map((item) => <article className={item.achievedPercent !== undefined ? "objective-topic-card complete" : item.target ? "objective-topic-card planned" : "objective-topic-card pending"} key={item.theme}>
+                {sortedImperialObjectives.map((item) => <article className={item.achievedPercent !== undefined ? "objective-topic-card complete" : item.target ? "objective-topic-card planned" : "objective-topic-card pending"} key={item.theme}>
                   <div className="objective-topic-head"><span className="objective-topic-symbol">{item.achievedPercent !== undefined ? "✓" : item.target ? "◎" : "·"}</span><div><small>Tema objetivo</small><h3>{item.theme}</h3></div>{item.classification && <span className="objective-classification-badge">{item.classification}</span>}</div>
                   <div className="objective-topic-values">
                     <div><small>Objetivo</small><strong>{item.target ?? "—"}</strong></div>
