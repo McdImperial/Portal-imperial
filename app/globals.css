@@ -514,8 +514,9 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .department-name, .department-active-dot { display: none; }
   .department-initials { width: 27px; height: 27px; }
   .department-subtabs { position: fixed; z-index: 31; left: 0; right: 0; bottom: 124px; height: 44px; margin: 0; padding: 5px 10px; border: 0; background: #12372e; box-shadow: 0 -8px 22px rgba(13,43,35,.16); }
-  .department-subtabs:has(.department-subtab + .department-subtab) { grid-template-columns: repeat(2, 1fr); }
+  .department-subtabs { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); }
   .department-subtab { height: 34px; text-align: center; padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04); }
+  .department-subtab span { display: inline-block; max-width: calc(100% - 18px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
   .app-shell:has(.department-subtabs) { padding-bottom: 168px; }
   .topbar { height: 92px; padding: 19px 20px; }
   .top-actions .icon-button { display: none; }

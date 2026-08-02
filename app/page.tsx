@@ -423,21 +423,22 @@ export default function Home() {
                   <span className="department-name">{item.label}</span>
                   {department === item.id && <span className="department-active-dot" />}
                 </button>
-                {item.id === "qualidade" && department === "qualidade" && (
-                  <div className="department-subtabs" aria-label="Subsecções de Qualidade e Produtos">
-                    <button className={view === "custos" ? "department-subtab active" : "department-subtab"} onClick={() => setView("custos")}>
-                      ◫ <span>Custo, Comida, Papel &amp; OPS</span>
+                {item.id !== "global" && department === item.id && (
+                  <div className="department-subtabs" aria-label={`Subsecções de ${item.label}`}>
+                    <button className={view === "tarefas" ? "department-subtab active" : "department-subtab"} onClick={() => setView("tarefas")}>
+                      ✓ <span>Tarefas</span>
                     </button>
-                  </div>
-                )}
-                {item.id === "cliente" && department === "cliente" && (
-                  <div className="department-subtabs" aria-label="Subsecções de Serviço Cliente">
+                    {item.id === "qualidade" && <button className={view === "custos" ? "department-subtab active" : "department-subtab"} onClick={() => setView("custos")}>
+                      ◫ <span>Custo, Comida, Papel &amp; OPS</span>
+                    </button>}
+                    {item.id === "cliente" && <>
                     <button className={view === "r2p" ? "department-subtab active" : "department-subtab"} onClick={() => setView("r2p")}>
                       ◷ <span>Tempos de serviço · R2P</span>
                     </button>
                     <button className={view === "tellarches" ? "department-subtab active" : "department-subtab"} onClick={() => setView("tellarches")}>
                       ◈ <span>Tell The Arches</span>
                     </button>
+                    </>}
                   </div>
                 )}
               </div>
