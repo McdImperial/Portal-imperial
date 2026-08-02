@@ -1032,18 +1032,23 @@ export default function Home() {
           {view === "objetivos" && (
             <section className="restaurant-objectives" aria-labelledby="restaurant-objectives-title">
               <div className="restaurant-objectives-heading">
-                <div><span className="eyebrow">Restaurante Imperial</span><h2 id="restaurant-objectives-title">Objetivos</h2><p>Metas, resultados e pontuação do plano de objetivos.</p></div>
-                <div className="objectives-total"><span>Pontos possíveis</span><strong>{imperialObjectives.reduce((sum, item) => sum + (item.possiblePoints ?? 0), 0)}</strong></div>
+                <div><span className="eyebrow">Julho 2026</span><h2 id="restaurant-objectives-title">Objetivos mensais</h2><p>Leitura rápida das metas, resultados e pontuação.</p></div>
+              </div>
+              <div className="objectives-kpi-grid" aria-label="Resumo dos objetivos">
+                <article className="objective-kpi objective-kpi-green"><span>◎</span><div><small>Objetivos</small><strong>{imperialObjectives.length}</strong><p>indicadores acompanhados</p></div></article>
+                <article className="objective-kpi objective-kpi-gold"><span>★</span><div><small>Pontos possíveis</small><strong>{imperialObjectives.reduce((sum, item) => sum + (item.possiblePoints ?? 0), 0)}</strong><p>pontuação total disponível</p></div></article>
+                <article className="objective-kpi objective-kpi-blue"><span>✓</span><div><small>Pontos atingidos</small><strong>{imperialObjectives.reduce((sum, item) => sum + (item.achievedPoints ?? 0), 0)}</strong><p>resultados já registados</p></div></article>
+                <article className="objective-kpi objective-kpi-orange"><span>↗</span><div><small>Progresso registado</small><strong>50%</strong><p>melhor resultado atual</p></div></article>
               </div>
               <div className="objectives-table-scroll">
-                <div className="objectives-data-table" role="table" aria-label="Objetivos do restaurante Imperial">
-                  <div className="objective-data-row objective-data-header" role="row"><span>Restaurante</span><span>Tema objetivo</span><span>Objetivo</span><span>Resultado</span><span>Classificação</span><span>Pontos possíveis</span><span>Pontos atingidos</span><span>% objetivos atingidos</span></div>
+                <div className="objectives-data-table" role="table" aria-label="Objetivos mensais">
+                  <div className="objective-data-row objective-data-header" role="row"><span>Tema objetivo</span><span>Objetivo</span><span>Resultado</span><span>Classificação</span><span>Pontos possíveis</span><span>Pontos atingidos</span><span>% atingido</span></div>
                   {imperialObjectives.map((item) => <div className="objective-data-row" role="row" key={item.theme}>
-                    <strong>Imperial</strong><strong>{item.theme}</strong><span>{item.target ?? ""}</span><span>{item.result ?? ""}</span><span className={item.classification ? "objective-classification" : ""}>{item.classification ?? ""}</span><span>{item.possiblePoints ?? ""}</span><span>{item.achievedPoints ?? ""}</span><span className="objective-attainment">{item.achievedPercent !== undefined ? <><b>{item.achievedPercent}%</b><i><em style={{ width: `${item.achievedPercent}%` }} /></i></> : null}</span>
+                    <strong className="objective-theme"><i className={item.achievedPercent !== undefined ? "complete" : item.target ? "planned" : "empty"} />{item.theme}</strong><span>{item.target ?? ""}</span><span>{item.result ?? ""}</span><span className={item.classification ? "objective-classification" : ""}>{item.classification ?? ""}</span><span>{item.possiblePoints ?? ""}</span><span>{item.achievedPoints ?? ""}</span><span className="objective-attainment">{item.achievedPercent !== undefined ? <><b>{item.achievedPercent}%</b><i><em style={{ width: `${item.achievedPercent}%` }} /></i></> : <small>Por atualizar</small>}</span>
                   </div>)}
                 </div>
               </div>
-              <p className="inventory-note">Informação refletida a partir do quadro de objetivos partilhado para o restaurante Imperial.</p>
+              <p className="inventory-note">Os campos sem resultado permanecem assinalados como “Por atualizar”.</p>
             </section>
           )}
 
