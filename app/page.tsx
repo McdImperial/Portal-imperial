@@ -265,7 +265,10 @@ export default function Home() {
       if (!active) return;
       setCurrentUser(data.user);
       setSetupRequired(data.setupRequired);
-      if (data.setupRequired) setAuthMode("register");
+      if (data.setupRequired) {
+        setAuthMode("register");
+        setAuthLogin("tiago.soutelo@pt.mcd.com");
+      }
     }).catch(() => setAuthMessage("Não foi possível verificar o acesso.")).finally(() => { if (active) setAuthReady(true); });
     return () => { active = false; };
   }, []);
@@ -521,7 +524,7 @@ export default function Home() {
         <div className="auth-brand"><span className="auth-logo">M</span><div><strong>McDonald&apos;s Imperial</strong><small>Portal de gestão</small></div></div>
         <div className="auth-heading"><span className="eyebrow">Acesso reservado</span><h1 id="auth-title">{setupRequired ? "Criar administrador" : authMode === "login" ? "Iniciar sessão" : "Novo utilizador"}</h1><p>{setupRequired ? "A primeira conta ficará definida como administrador do portal." : authMode === "login" ? "Introduza o seu email e password." : "Crie o seu pedido com um endereço de email. O administrador terá de aprovar o acesso."}</p></div>
         <form className="auth-form" onSubmit={submitAuth}>
-          <label>Email<input type="email" value={authLogin} onChange={(event) => setAuthLogin(event.target.value)} autoComplete="email" required placeholder="ex.: nome@empresa.pt" /></label>
+          <label>{setupRequired ? "Email do administrador" : "Email"}<input type="email" value={authLogin} onChange={(event) => setAuthLogin(event.target.value)} autoComplete="email" required readOnly={setupRequired} placeholder="ex.: nome@empresa.pt" /></label>
           <label>Password<input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} autoComplete={authMode === "login" ? "current-password" : "new-password"} minLength={8} required placeholder="Mínimo de 8 caracteres" /></label>
           {authMessage && <p className="auth-message" role="status">{authMessage}</p>}
           <button className="auth-submit" disabled={authBusy}>{authBusy ? "A processar…" : setupRequired ? "Criar conta de administrador" : authMode === "login" ? "Entrar" : "Enviar pedido de acesso"}</button>
