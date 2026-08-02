@@ -172,12 +172,15 @@ function getObjectiveResult(item: RestaurantObjective): ObjectiveResult {
 }
 
 const objectiveResultOrder: ObjectiveResult[] = ["Superado", "Atingido", "Próximo", "Não Atingido", "Por atualizar"];
-const objectivePointGroups = [...new Set(imperialObjectives.map((item) => item.possiblePoints))]
-  .sort((a, b) => (b ?? -1) - (a ?? -1))
-  .map((points) => ({
-    points,
-    objectives: imperialObjectives.filter((item) => item.possiblePoints === points).sort((a, b) => objectiveResultOrder.indexOf(getObjectiveResult(a)) - objectiveResultOrder.indexOf(getObjectiveResult(b))),
-  }));
+const objectiveMonthOptions = [
+  { value: "2026-01", label: "Janeiro 2026" }, { value: "2026-02", label: "Fevereiro 2026" },
+  { value: "2026-03", label: "Março 2026" }, { value: "2026-04", label: "Abril 2026" },
+  { value: "2026-05", label: "Maio 2026" }, { value: "2026-06", label: "Junho 2026" },
+  { value: "2026-07", label: "Julho 2026" }, { value: "2026-08", label: "Agosto 2026" },
+  { value: "2026-09", label: "Setembro 2026" }, { value: "2026-10", label: "Outubro 2026" },
+  { value: "2026-11", label: "Novembro 2026" }, { value: "2026-12", label: "Dezembro 2026" },
+];
+const objectivesByMonth: Record<string, RestaurantObjective[]> = { "2026-07": imperialObjectives };
 
 type InventoryCategory = "food" | "paper" | "ops";
 type InventoryStatus = "Todos" | "Ativo" | "Inativo";
@@ -315,6 +318,7 @@ export default function Home() {
   const [r2pMonth, setR2pMonth] = useState(8);
   const [tellTheArchesMonth, setTellTheArchesMonth] = useState(7);
   const [tellTheArchesPeriod, setTellTheArchesPeriod] = useState<"monthly" | "ytd">("monthly");
+  const [objectiveMonth, setObjectiveMonth] = useState("2026-07");
   const [boardMode, setBoardMode] = useState<"tabela" | "kanban">("tabela");
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [dataReady, setDataReady] = useState(false);
@@ -392,6 +396,14 @@ export default function Home() {
   const completion = scopedTasks.length ? Math.round((completed / scopedTasks.length) * 100) : 0;
   const activeProfile = departmentProfiles[department];
   const departmentLabel = departments.find((item) => item.id === department)?.label ?? "Visão global";
+  const selectedObjectiveMonth = objectiveMonthOptions.find((item) => item.value === objectiveMonth) ?? objectiveMonthOptions[6];
+  const selectedObjectives = objectivesByMonth[objectiveMonth] ?? [];
+  const objectivePointGroups = useMemo(() => [...new Set(selectedObjectives.map((item) => item.possiblePoints))]
+    .sort((a, b) => (b ?? -1) - (a ?? -1))
+    .map((points) => ({
+      points,
+      objectives: selectedObjectives.filter((item) => item.possiblePoints === points).sort((a, b) => objectiveResultOrder.indexOf(getObjectiveResult(a)) - objectiveResultOrder.indexOf(getObjectiveResult(b))),
+    })), [selectedObjectives]);
 
   const visibleTasks = useMemo(() => {
     if (filter === "pendentes") return scopedTasks.filter((task) => !task.done);
@@ -465,6 +477,22 @@ export default function Home() {
 
   function changeProductSort(key: ProductSortKey) {
     setProductSort((current) => ({ key, direction: current.key === key && current.direction === "asc" ? "desc" : "asc" }));
+  }
+
+  function exportObjectives() {
+    if (!selectedObjectives.length) return;
+    const headers = ["Mês", "Tema objetivo", "Objetivo", "Resultado", "Classificação", "Pontos possíveis", "Pontos atingidos", "% atingido"];
+    const rows = selectedObjectives.map((item) => [selectedObjectiveMonth.label, item.theme, item.target ?? "", item.result ?? "", getObjectiveResult(item), item.possiblePoints ?? "", item.achievedPoints ?? "", item.achievedPercent ?? ""]);
+    const csvCell = (value: string | number) => `"${String(value).replaceAll('"', '""')}"`;
+    const csv = `\uFEFF${[headers, ...rows].map((row) => row.map(csvCell).join(";")).join("\n")}`;
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `objetivos-${objectiveMonth}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setNotice(`Objetivos de ${selectedObjectiveMonth.label} exportados.`);
+    window.setTimeout(() => setNotice(""), 2400);
   }
 
   async function updateTask(id: number, changes: Partial<Task>) {
@@ -1080,15 +1108,20 @@ export default function Home() {
           {view === "objetivos" && (
             <section className="restaurant-objectives" aria-labelledby="restaurant-objectives-title">
               <div className="restaurant-objectives-heading">
-                <div><span className="eyebrow">Julho 2026</span><h2 id="restaurant-objectives-title">Objetivos mensais</h2><p>Leitura rápida das metas, resultados e pontuação.</p></div>
+                <div><span className="eyebrow">{selectedObjectiveMonth.label}</span><h2 id="restaurant-objectives-title">Objetivos mensais</h2><p>Leitura rápida das metas, resultados e pontuação.</p></div>
+                <div className="objective-toolbar">
+                  <label><span>Mês</span><select value={objectiveMonth} onChange={(event) => setObjectiveMonth(event.target.value)} aria-label="Filtrar objetivos por mês">{objectiveMonthOptions.map((month) => <option value={month.value} key={month.value}>{month.label}</option>)}</select></label>
+                  <button type="button" className="objective-export" onClick={exportObjectives} disabled={!selectedObjectives.length}><span>⇩</span> Exportar CSV</button>
+                </div>
               </div>
               <div className="objectives-kpi-grid" aria-label="Resumo dos objetivos">
-                <article className="objective-kpi objective-kpi-green"><span>◎</span><div><small>Objetivos</small><strong>{imperialObjectives.length}</strong><p>indicadores acompanhados</p></div></article>
-                <article className="objective-kpi objective-kpi-gold"><span>★</span><div><small>Pontos possíveis</small><strong>{imperialObjectives.reduce((sum, item) => sum + (item.possiblePoints ?? 0), 0)}</strong><p>pontuação total disponível</p></div></article>
-                <article className="objective-kpi objective-kpi-blue"><span>✓</span><div><small>Pontos atingidos</small><strong>{imperialObjectives.reduce((sum, item) => sum + (item.achievedPoints ?? 0), 0)}</strong><p>resultados já registados</p></div></article>
-                <article className="objective-kpi objective-kpi-orange"><span>↗</span><div><small>Progresso registado</small><strong>{Math.max(...imperialObjectives.map((item) => item.achievedPercent ?? 0))}%</strong><p>melhor resultado atual</p></div></article>
+                <article className="objective-kpi objective-kpi-green"><span>◎</span><div><small>Objetivos</small><strong>{selectedObjectives.length}</strong><p>indicadores acompanhados</p></div></article>
+                <article className="objective-kpi objective-kpi-gold"><span>★</span><div><small>Pontos possíveis</small><strong>{selectedObjectives.reduce((sum, item) => sum + (item.possiblePoints ?? 0), 0)}</strong><p>pontuação total disponível</p></div></article>
+                <article className="objective-kpi objective-kpi-blue"><span>✓</span><div><small>Pontos atingidos</small><strong>{selectedObjectives.reduce((sum, item) => sum + (item.achievedPoints ?? 0), 0)}</strong><p>resultados já registados</p></div></article>
+                <article className="objective-kpi objective-kpi-orange"><span>↗</span><div><small>Progresso registado</small><strong>{selectedObjectives.length ? Math.max(...selectedObjectives.map((item) => item.achievedPercent ?? 0)) : 0}%</strong><p>melhor resultado atual</p></div></article>
               </div>
               <div className="objective-topic-grid" aria-label="Objetivos agrupados por tema">
+                {!selectedObjectives.length && <div className="objective-empty"><span>◷</span><div><strong>Sem objetivos importados</strong><p>Ainda não existem dados para {selectedObjectiveMonth.label}. Selecione outro mês.</p></div></div>}
                 {objectivePointGroups.map((group) => <section className="objective-score-row" key={group.points ?? "sem-pontos"}>
                   <div className="objective-score-heading"><span>{group.points === undefined ? "Sem pontuação definida" : `${group.points} pontos possíveis`}</span><small>{group.objectives.length} {group.objectives.length === 1 ? "objetivo" : "objetivos"}</small></div>
                   <div className="objective-score-cards">{group.objectives.map((item) => { const result = getObjectiveResult(item); const visual = objectiveVisuals[item.theme] ?? { icon: "◎", label: item.theme, tone: "mint" }; return <article className={`objective-topic-card result-${statusClass(result)}`} key={item.theme}>
@@ -1108,7 +1141,7 @@ export default function Home() {
                 </article>; })}</div>
                 </section>)}
               </div>
-              <p className="inventory-note">Fonte: folha “Jul 26” do ficheiro de seguimento. Os campos sem resultado permanecem assinalados como “Por atualizar”. <a href={objectivesSourceUrl} target="_blank" rel="noreferrer">Abrir ficheiro fonte ↗</a></p>
+              <p className="inventory-note">Fonte: ficheiro de seguimento de objetivos. Os campos sem resultado permanecem assinalados como “Por atualizar”. <a href={objectivesSourceUrl} target="_blank" rel="noreferrer">Abrir ficheiro fonte ↗</a></p>
             </section>
           )}
 

@@ -569,6 +569,15 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .restaurant-objectives-heading { padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .restaurant-objectives-heading h2 { margin: 5px 0; font-family: Georgia, "Times New Roman", serif; font-size: 24px; font-weight: 500; }
 .restaurant-objectives-heading p { margin: 0; color: var(--muted); font-size: 10px; }
+.objective-toolbar { display: flex; align-items: flex-end; gap: 10px; }
+.objective-toolbar label { display: grid; gap: 5px; }
+.objective-toolbar label > span { color: #73817c; text-transform: uppercase; letter-spacing: .6px; font-size: 7px; font-weight: 800; }
+.objective-toolbar select, .objective-export { min-height: 38px; border-radius: 9px; font: inherit; font-size: 9px; font-weight: 750; }
+.objective-toolbar select { min-width: 145px; padding: 0 30px 0 11px; border: 1px solid #d7e1dc; color: #294c40; background: white; }
+.objective-export { padding: 0 14px; border: 0; color: white; background: #24573f; cursor: pointer; }
+.objective-export span { margin-right: 5px; font-size: 13px; }
+.objective-export:hover:not(:disabled) { background: #183e2d; }
+.objective-export:disabled { cursor: not-allowed; opacity: .42; }
 .objectives-kpi-grid { padding: 0 24px 22px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .objective-kpi { min-height: 112px; padding: 16px; display: flex; align-items: center; gap: 13px; border: 1px solid transparent; border-radius: 14px; }
 .objective-kpi > span { width: 38px; height: 38px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 11px; background: rgba(255,255,255,.75); font-weight: 900; }
@@ -581,6 +590,11 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .objective-kpi-blue { background: #e5f1f6; border-color: #cfe2ea; }
 .objective-kpi-orange { background: #fbe9df; border-color: #f0d4c5; }
 .objective-topic-grid { padding: 18px 20px 20px; display: grid; gap: 16px; border-top: 1px solid var(--line); background: #f8faf9; }
+.objective-empty { min-height: 150px; display: flex; align-items: center; justify-content: center; gap: 12px; color: #566a62; text-align: left; }
+.objective-empty > span { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; color: #8d6a25; background: #fbf0d9; font-size: 18px; }
+.objective-empty > div { display: grid; gap: 4px; }
+.objective-empty strong { font-size: 11px; }
+.objective-empty p { margin: 0; color: #87938e; font-size: 9px; }
 .objective-score-row { display: grid; gap: 8px; }
 .objective-score-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #315a4c; }
 .objective-score-heading span { font-size: 10px; font-weight: 900; }
@@ -704,6 +718,8 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .tell-trend { gap: 4px; }
   .settings-section { padding: 18px; }
   .restaurant-objectives-heading { padding: 18px; align-items: stretch; flex-direction: column; }
+  .objective-toolbar { align-items: stretch; flex-direction: column; }
+  .objective-toolbar select, .objective-export { width: 100%; }
   .objectives-kpi-grid { padding: 0 18px 18px; grid-template-columns: 1fr; }
   .objective-topic-grid { padding: 18px; }
   .objective-score-cards { grid-template-columns: 1fr; }
