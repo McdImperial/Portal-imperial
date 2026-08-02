@@ -1,0 +1,78 @@
+{
+  "2026-04": {
+    "monthlyPercent": 67.8,
+    "objectives": [
+      { "theme": "MDO", "target": "12,65", "result": "12,62", "classification": "Atingido", "possiblePoints": 100, "achievedPoints": 75, "achievedPercent": 75 },
+      { "theme": "Turnover", "target": "4,17", "result": "10,47", "classification": "Não Atingido", "possiblePoints": 80, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "Food", "target": "25,78", "result": "25,57", "classification": "Superado", "possiblePoints": 80, "achievedPoints": 80, "achievedPercent": 100 },
+      { "theme": "Paper", "target": "2,36", "result": "2,40", "classification": "Atingido", "possiblePoints": 40, "achievedPoints": 30, "achievedPercent": 75 },
+      { "theme": "Staffing", "target": "25", "result": "28", "classification": "Próximo", "possiblePoints": 45, "achievedPoints": 23, "achievedPercent": 50 },
+      { "theme": "OPS", "target": "3 850,00", "result": "2 814,19", "classification": "Superado", "possiblePoints": 40, "achievedPoints": 40, "achievedPercent": 100 },
+      { "theme": "R2P Dia", "target": "191", "result": "201", "classification": "Próximo", "possiblePoints": 100, "achievedPoints": 50, "achievedPercent": 50 },
+      { "theme": "OCM Rest", "target": "75", "result": "75", "classification": "Atingido", "possiblePoints": 0, "achievedPoints": 0, "achievedPercent": 75 },
+      { "theme": "Perdas", "target": "0,45", "result": "0,44", "classification": "Atingido", "possiblePoints": 20, "achievedPoints": 15, "achievedPercent": 75 },
+      { "theme": "Delivery Exatidão", "target": "2,7", "result": "1,95", "classification": "Superado", "possiblePoints": 40, "achievedPoints": 40, "achievedPercent": 100 },
+      { "theme": "Delivery R Time", "target": "4,7", "result": "5,6", "classification": "Próximo", "possiblePoints": 45, "achievedPoints": 23, "achievedPercent": 50 },
+      { "theme": "Delivery C SAT", "target": "4,25", "result": "4,19", "classification": "Próximo", "possiblePoints": 30, "achievedPoints": 15, "achievedPercent": 50 },
+      { "theme": "Delivery T Time", "target": "20,00", "result": "20,50", "classification": "Próximo", "possiblePoints": 0, "achievedPoints": 0, "achievedPercent": 50 },
+      { "theme": "AOLs", "target": "89,00", "result": "95,73", "classification": "Superado", "possiblePoints": 60, "achievedPoints": 60, "achievedPercent": 100 }
+    ]
+  },
+  "2026-05": {
+    "monthlyPercent": 39.7,
+    "objectives": [
+      { "theme": "MDO", "target": "11,29", "result": "11,97", "classification": "Não Atingido", "possiblePoints": 100, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "Turnover", "target": "4,2", "result": "5,16", "classification": "Não Atingido", "possiblePoints": 80, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "Food", "target": "25,84", "result": "25,99", "classification": "Não Atingido", "possiblePoints": 80, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "Paper", "target": "2,4", "result": "2,43", "classification": "Atingido", "possiblePoints": 40, "achievedPoints": 30, "achievedPercent": 75 },
+      { "theme": "Staffing", "target": "20", "result": "16,13", "classification": "Atingido", "possiblePoints": 45, "achievedPoints": 34, "achievedPercent": 75 },
+      { "theme": "OPS", "target": "3 850", "result": "5 071", "classification": "Não Atingido", "possiblePoints": 40, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "R2P Dia", "target": "232", "result": "242", "classification": "Próximo", "possiblePoints": 100, "achievedPoints": 50, "achievedPercent": 50 },
+      { "theme": "OCM Rest", "target": "75", "result": "70", "classification": "Não Atingido", "possiblePoints": 0, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "Perdas", "target": "0,45", "result": "0,47", "classification": "Próximo", "possiblePoints": 20, "achievedPoints": 10, "achievedPercent": 50 },
+      { "theme": "Delivery Exatidão", "target": "2,2", "result": "2,29", "classification": "Próximo", "possiblePoints": 40, "achievedPoints": 20, "achievedPercent": 50 },
+      { "theme": "Delivery R Time", "target": "5,0", "result": "5,5", "classification": "Próximo", "possiblePoints": 45, "achievedPoints": 23, "achievedPercent": 50 },
+      { "theme": "Delivery C SAT", "target": "4,20", "result": "4,06", "classification": "Próximo", "possiblePoints": 30, "achievedPoints": 15, "achievedPercent": 50 },
+      { "theme": "Delivery T Time", "target": "20", "result": "21,6", "classification": "Próximo", "possiblePoints": 0, "achievedPoints": 0, "achievedPercent": 50 },
+      { "theme": "AOLs", "target": "89", "result": "94,88", "classification": "Superado", "possiblePoints": 60, "achievedPoints": 60, "achievedPercent": 100 }
+    ]
+  },
+  "2026-06": {
+    "monthlyPercent": 42.3,
+    "objectives": [
+      { "theme": "MDO", "target": "11,29", "result": "13,01", "classification": "Não Atingido", "possiblePoints": 100, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "Turnover", "target": "4,2", "result": "11,12", "classification": "Não Atingido", "possiblePoints": 80, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "Food", "target": "25,58", "result": "25,63", "classification": "Superado", "possiblePoints": 80, "achievedPoints": 80, "achievedPercent": 100 },
+      { "theme": "Paper", "target": "2,4", "result": "2,4", "classification": "Atingido", "possiblePoints": 40, "achievedPoints": 30, "achievedPercent": 75 },
+      { "theme": "Staffing", "target": "20", "result": "8,34", "classification": "Superado", "possiblePoints": 45, "achievedPoints": 45, "achievedPercent": 100 },
+      { "theme": "OPS", "target": "3 850", "result": "4 051,48", "classification": "Não Atingido", "possiblePoints": 40, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "R2P Dia", "target": "235", "result": "236", "classification": "Próximo", "possiblePoints": 100, "achievedPoints": 50, "achievedPercent": 50 },
+      { "theme": "OCM Rest", "target": "75", "result": "52", "classification": "Não Atingido", "possiblePoints": 0, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "Perdas", "target": "0,45", "result": "0,45", "classification": "Atingido", "possiblePoints": 20, "achievedPoints": 15, "achievedPercent": 75 },
+      { "theme": "Delivery Exatidão", "target": "2,2", "result": "2,05", "classification": "Atingido", "possiblePoints": 40, "achievedPoints": 30, "achievedPercent": 75 },
+      { "theme": "Delivery R Time", "target": "5,0", "result": "5,5", "classification": "Próximo", "possiblePoints": 45, "achievedPoints": 23, "achievedPercent": 50 },
+      { "theme": "Delivery C SAT", "target": "4,20", "result": "4,05", "classification": "Próximo", "possiblePoints": 30, "achievedPoints": 15, "achievedPercent": 50 },
+      { "theme": "Delivery T Time", "target": "20", "result": "22,8", "classification": "Próximo", "possiblePoints": 0, "achievedPoints": 0, "achievedPercent": 50 },
+      { "theme": "AOLs", "target": "89", "result": "70,95", "classification": "Não Atingido", "possiblePoints": 60, "achievedPoints": 0, "achievedPercent": 0 }
+    ]
+  },
+  "2026-07": {
+    "monthlyPercent": 65.1,
+    "objectives": [
+      { "theme": "MDO", "target": "11,29", "result": "10,9", "classification": "Superado", "possiblePoints": 100, "achievedPoints": 100, "achievedPercent": 100 },
+      { "theme": "Turnover", "target": "4,2", "result": "3,13", "classification": "Superado", "possiblePoints": 80, "achievedPoints": 80, "achievedPercent": 100 },
+      { "theme": "Food", "target": "25,58", "result": "25,27", "classification": "Superado", "possiblePoints": 80, "achievedPoints": 80, "achievedPercent": 100 },
+      { "theme": "Paper", "target": "2,4", "result": "2,34", "classification": "Atingido", "possiblePoints": 40, "achievedPoints": 30, "achievedPercent": 75 },
+      { "theme": "Staffing", "target": "20", "result": "15", "classification": "Superado", "possiblePoints": 45, "achievedPoints": 45, "achievedPercent": 100 },
+      { "theme": "OPS", "target": "3 850", "result": "4 956,12", "classification": "Não Atingido", "possiblePoints": 40, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "R2P Dia", "target": "235", "result": "281", "classification": "Não Atingido", "possiblePoints": 100, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "OCM Rest", "target": "75", "result": "66", "classification": "Não Atingido", "possiblePoints": 0, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "Perdas", "target": "0,45", "result": "0,43", "classification": "Atingido", "possiblePoints": 20, "achievedPoints": 15, "achievedPercent": 75 },
+      { "theme": "Delivery Exatidão", "target": "2,2", "result": "2,1", "classification": "Superado", "possiblePoints": 40, "achievedPoints": 40, "achievedPercent": 100 },
+      { "theme": "Delivery R Time", "target": "5,0", "result": "5,2", "classification": "Próximo", "possiblePoints": 45, "achievedPoints": 23, "achievedPercent": 50 },
+      { "theme": "Delivery C SAT", "target": "4,20", "result": "4", "classification": "Não Atingido", "possiblePoints": 30, "achievedPoints": 0, "achievedPercent": 0 },
+      { "theme": "Delivery T Time", "target": "20", "result": "22,7", "classification": "Próximo", "possiblePoints": 0, "achievedPoints": 0, "achievedPercent": 50 },
+      { "theme": "AOLs", "target": "89", "result": "85,5", "classification": "Próximo", "possiblePoints": 60, "achievedPoints": 30, "achievedPercent": 50 }
+    ]
+  }
+}
