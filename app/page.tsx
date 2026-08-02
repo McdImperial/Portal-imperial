@@ -938,20 +938,33 @@ export default function Home() {
                 <div><span className="eyebrow">Administração do portal</span><h2 id="settings-title">Configurações</h2><p>Gestão dos utilizadores, níveis de acesso e fontes partilhadas.</p></div>
                 {!editingFolderCounts ? <button className="settings-update-button" onClick={beginFolderUpdate}>↻ Atualizar quantidades</button> : <div className="settings-edit-actions"><button onClick={() => setEditingFolderCounts(false)}>Cancelar</button><button className="save" onClick={saveFolderCounts}>Guardar alterações</button></div>}
               </div>
+              <div className="settings-card users-settings-card requests-card">
+                <div className="settings-card-title"><div><span className="eyebrow">Aprovação do administrador</span><h3>Pedidos de acesso</h3></div><span className={managedUsers.some((user) => user.status === "pendente") ? "pending-count has-pending" : "pending-count"}>{managedUsers.filter((user) => user.status === "pendente").length} pendentes</span></div>
+                <div className="users-table" role="table" aria-label="Pedidos de acesso pendentes">
+                  <div className="user-row request-row user-header" role="row"><span>Email</span><span>Data do pedido</span><span>Nível a atribuir</span><span>Validação</span></div>
+                  {managedUsers.filter((user) => user.status === "pendente").map((user) => <div className="user-row request-row" role="row" key={user.id}>
+                    <div className="user-identity"><span className="avatar small">{user.login.slice(0, 2).toUpperCase()}</span><strong>{user.login}</strong></div>
+                    <span>{new Date(user.createdAt).toLocaleDateString("pt-PT")}</span>
+                    <select value={user.role} onChange={(event) => updateManagedUser(user.id, { role: event.target.value as AppRole })} aria-label={`Nível de acesso a atribuir a ${user.login}`}><option value="admin">Administrador</option><option value="editor">Editor</option><option value="consulta">Consulta</option></select>
+                    <div className="user-actions"><button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>✓ Aprovar</button><button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Recusar</button></div>
+                  </div>)}
+                  {!managedUsers.some((user) => user.status === "pendente") && <div className="users-empty"><span>✓</span><div><strong>Sem pedidos pendentes</strong><small>Os novos pedidos aparecerão automaticamente nesta lista.</small></div></div>}
+                </div>
+              </div>
               <div className="settings-card users-settings-card">
-                <div className="settings-card-title"><div><span className="eyebrow">Controlo de acessos</span><h3>Utilizadores</h3></div><span>{managedUsers.filter((user) => user.status === "pendente").length} pedidos pendentes</span></div>
+                <div className="settings-card-title"><div><span className="eyebrow">Controlo de acessos</span><h3>Lista de utilizadores</h3></div><span>{managedUsers.filter((user) => user.status !== "pendente").length} utilizadores</span></div>
                 <div className="access-levels"><span><b>Administrador</b> gestão total</span><span><b>Editor</b> cria e altera tarefas</span><span><b>Consulta</b> apenas visualização</span></div>
-                <div className="users-table" role="table" aria-label="Gestão de utilizadores">
-                  <div className="user-row user-header" role="row"><span>Email</span><span>Pedido</span><span>Estado</span><span>Nível de acesso</span><span>Ação</span></div>
-                  {managedUsers.map((user) => <div className="user-row" role="row" key={user.id}>
+                <div className="users-table" role="table" aria-label="Lista de utilizadores validados">
+                  <div className="user-row user-header" role="row"><span>Email</span><span>Registo</span><span>Estado</span><span>Nível de acesso</span><span>Ação</span></div>
+                  {managedUsers.filter((user) => user.status !== "pendente").map((user) => <div className="user-row" role="row" key={user.id}>
                     <div className="user-identity"><span className="avatar small">{user.login.slice(0, 2).toUpperCase()}</span><strong>{user.login}</strong>{user.id === currentUser.id && <small>Você</small>}</div>
                     <span>{new Date(user.createdAt).toLocaleDateString("pt-PT")}</span>
-                    <span className={`user-status ${user.status}`}>{user.status === "ativo" ? "Ativo" : user.status === "pendente" ? "Pendente" : "Recusado"}</span>
+                    <span className={`user-status ${user.status}`}>{user.status === "ativo" ? "Ativo" : "Recusado"}</span>
                     <select value={user.role} disabled={user.id === currentUser.id} onChange={(event) => updateManagedUser(user.id, { role: event.target.value as AppRole })} aria-label={`Nível de acesso de ${user.login}`}><option value="admin">Administrador</option><option value="editor">Editor</option><option value="consulta">Consulta</option></select>
-                    <div className="user-actions">{user.status === "pendente" ? <><button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>Aprovar</button><button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Recusar</button></> : user.status === "rejeitado" ? <button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>Reativar</button> : user.id !== currentUser.id ? <button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Desativar</button> : <span>Conta principal</span>}</div>
+                    <div className="user-actions">{user.status === "rejeitado" ? <button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>Reativar</button> : user.id !== currentUser.id ? <button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Desativar</button> : <span>Conta principal</span>}</div>
                   </div>)}
                 </div>
-                <p className="inventory-note">Os novos utilizadores criam o próprio login e password através do botão “Novo utilizador” no ecrã de acesso. O portal só fica disponível depois da sua aprovação.</p>
+                <p className="inventory-note">Os novos utilizadores criam o próprio email e password através do botão “Novo utilizador”. O portal só fica disponível depois da validação do administrador.</p>
               </div>
               <div className="settings-card">
                 <div className="settings-card-title"><div><span className="eyebrow">Google Drive</span><h3>Pastas partilhadas</h3></div><span>{sharedFolders.reduce((sum, folder) => sum + folder.fileCount, 0)} ficheiros registados</span></div>
