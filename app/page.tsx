@@ -530,7 +530,7 @@ export default function Home() {
           <button className="auth-submit" disabled={authBusy}>{authBusy ? "A processar…" : setupRequired ? "Criar conta de administrador" : authMode === "login" ? "Entrar" : "Enviar pedido de acesso"}</button>
         </form>
         {!setupRequired && <button className="auth-switch" onClick={() => { setAuthMode((mode) => mode === "login" ? "register" : "login"); setAuthMessage(""); setAuthPassword(""); }}>{authMode === "login" ? "＋ Novo utilizador" : "← Já tenho acesso"}</button>}
-        <small className="auth-footnote">O acesso só é disponibilizado após aprovação. As passwords são protegidas e não ficam visíveis ao administrador.</small>
+        <small className="auth-footnote">{!setupRequired && authMode === "login" ? "A sessão permanece ativa durante 24 horas neste dispositivo." : "O acesso só é disponibilizado após aprovação. As passwords são protegidas e não ficam visíveis ao administrador."}</small>
       </section>
     </main>
   );

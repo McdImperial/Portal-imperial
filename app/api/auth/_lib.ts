@@ -4,7 +4,7 @@ import { sessions, users } from "../../../db/schema";
 
 export type AppRole = "admin" | "editor" | "consulta";
 const COOKIE = "imperial_session";
-const SESSION_SECONDS = 60 * 60 * 24 * 30;
+const SESSION_SECONDS = 60 * 60 * 24;
 const PBKDF2_ITERATIONS = 100_000;
 
 const encoder = new TextEncoder();
@@ -64,7 +64,8 @@ export async function getCurrentUser(request: Request) {
   if (!token) return null;
   const db = getDb();
   const [session] = await db.select().from(sessions).where(eq(sessions.id, await sha256(token))).limit(1);
-  if (!session || Date.parse(session.expiresAt) <= Date.now()) {
+  const sessionIsOlderThanOneDay = session && Date.parse(session.createdAt) + SESSION_SECONDS * 1000 <= Date.now();
+  if (!session || Date.parse(session.expiresAt) <= Date.now() || sessionIsOlderThanOneDay) {
     if (session) await db.delete(sessions).where(eq(sessions.id, session.id));
     return null;
   }
