@@ -27,6 +27,7 @@ export const sharedFolders = sqliteTable("shared_folders", {
 
 export const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull().default(""),
   login: text("login").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   role: text("role").notNull().default("consulta"),

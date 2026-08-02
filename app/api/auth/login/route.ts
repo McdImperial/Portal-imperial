@@ -11,5 +11,5 @@ export async function POST(request: Request) {
   if (user.status === "pendente") return Response.json({ error: "O seu acesso ainda aguarda aprovação do administrador." }, { status: 403 });
   if (user.status !== "ativo") return Response.json({ error: "Este acesso não está ativo. Contacte o administrador." }, { status: 403 });
   const session = await createSession(user.id);
-  return Response.json({ user: { id: user.id, login: user.login, role: user.role, status: user.status } }, { headers: { "Set-Cookie": sessionCookie(session.token) } });
+  return Response.json({ user: { id: user.id, name: user.name, login: user.login, role: user.role, status: user.status } }, { headers: { "Set-Cookie": sessionCookie(session.token) } });
 }

@@ -14,7 +14,7 @@ function encodePayload(value: unknown) {
 
 export async function GET() {
   if (!env.SHARED_AUTH_SECRET) return Response.json({ error: "Sincronização não configurada." }, { status: 503 });
-  const rows = await getDb().select({ login: users.login, passwordHash: users.passwordHash, role: users.role, status: users.status }).from(users);
+  const rows = await getDb().select({ name: users.name, login: users.login, passwordHash: users.passwordHash, role: users.role, status: users.status }).from(users);
   const payload = encodePayload({ generatedAt: new Date().toISOString(), users: rows });
   const key = await crypto.subtle.importKey("raw", encoder.encode(env.SHARED_AUTH_SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const signature = toHex(new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(payload))));

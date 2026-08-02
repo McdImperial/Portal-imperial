@@ -3,7 +3,7 @@ import { getDb } from "../../../../db";
 import { sessions, users } from "../../../../db/schema";
 import { AppRole, requireUser } from "../_lib";
 
-const safeFields = { id: users.id, login: users.login, role: users.role, status: users.status, createdAt: users.createdAt, approvedAt: users.approvedAt };
+const safeFields = { id: users.id, name: users.name, login: users.login, role: users.role, status: users.status, createdAt: users.createdAt, approvedAt: users.approvedAt };
 
 export async function GET(request: Request) {
   const auth = await requireUser(request, ["admin"]);

@@ -550,6 +550,9 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .user-header { min-height: 37px; color: #87928e; background: #fafcfb; text-transform: uppercase; letter-spacing: .5px; font-size: 7px; font-weight: 800; }
 .user-identity { display: flex; align-items: center; gap: 9px; color: var(--ink); }
 .user-identity small { padding: 2px 5px; border-radius: 999px; color: #2f7058; background: #e7f3ed; font-size: 7px; }
+.user-identity-copy { min-width: 0; display: grid; gap: 3px; }
+.user-identity-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-identity-copy small { padding: 0; color: #7d8985; background: transparent; }
 .user-status { justify-self: start; padding: 4px 7px; border-radius: 999px; font-size: 7px; font-weight: 800; }
 .user-status.ativo { color: #267554; background: #dff2e8; }
 .user-status.pendente { color: #986315; background: #fff0ce; }
@@ -577,18 +580,30 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .objective-kpi-gold { background: #fbf0d9; border-color: #eeddbb; }
 .objective-kpi-blue { background: #e5f1f6; border-color: #cfe2ea; }
 .objective-kpi-orange { background: #fbe9df; border-color: #f0d4c5; }
-.objective-topic-grid { padding: 18px 20px 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap: 10px; border-top: 1px solid var(--line); background: #f8faf9; }
+.objective-topic-grid { padding: 18px 20px 20px; display: grid; gap: 16px; border-top: 1px solid var(--line); background: #f8faf9; }
+.objective-score-row { display: grid; gap: 8px; }
+.objective-score-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #315a4c; }
+.objective-score-heading span { font-size: 10px; font-weight: 900; }
+.objective-score-heading small { color: #89958f; font-size: 8px; }
+.objective-score-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap: 10px; }
 .objective-topic-card { min-height: 202px; padding: 13px; display: flex; flex-direction: column; gap: 11px; border: 1px solid #dfe6e2; border-top: 4px solid #d5a23d; border-radius: 12px; background: white; box-shadow: 0 3px 10px rgba(22,54,44,.04); }
-.objective-topic-card.complete { border-top-color: #3b9249; }
-.objective-topic-card.pending { border-top-color: #cbd5d1; }
+.objective-topic-card.result-superado { border-top-color: #287654; }
+.objective-topic-card.result-atingido { border-top-color: #4b9b5b; }
+.objective-topic-card.result-proximo { border-top-color: #d5a23d; }
+.objective-topic-card.result-nao-atingido { border-top-color: #c75959; }
+.objective-topic-card.result-por-atualizar { border-top-color: #cbd5d1; }
 .objective-topic-head { min-height: 38px; display: flex; align-items: center; gap: 9px; }
 .objective-topic-head > div { min-width: 0; display: grid; gap: 3px; }
 .objective-topic-head small, .objective-topic-values small, .objective-topic-points small, .objective-topic-progress small { color: #87938e; text-transform: uppercase; letter-spacing: .5px; font-size: 7px; font-weight: 800; }
 .objective-topic-head h3 { margin: 0; overflow: hidden; color: var(--ink); text-overflow: ellipsis; font-size: 12px; white-space: nowrap; }
 .objective-topic-symbol { width: 30px; height: 30px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 9px; color: #9f731e; background: #fbf0d9; font-weight: 900; }
-.objective-topic-card.complete .objective-topic-symbol { color: #267554; background: #e3f2eb; }
-.objective-topic-card.pending .objective-topic-symbol { color: #8b9893; background: #edf1ef; }
+.objective-topic-card.result-superado .objective-topic-symbol, .objective-topic-card.result-atingido .objective-topic-symbol { color: #267554; background: #e3f2eb; }
+.objective-topic-card.result-nao-atingido .objective-topic-symbol { color: #a44141; background: #f9e7e7; }
+.objective-topic-card.result-por-atualizar .objective-topic-symbol { color: #8b9893; background: #edf1ef; }
 .objective-classification-badge { margin-left: auto; padding: 5px 8px; border-radius: 999px; color: #bf6a0d; background: #fff0d9; font-size: 8px; font-weight: 800; }
+.objective-classification-badge.result-superado, .objective-classification-badge.result-atingido { color: #267554; background: #e3f2eb; }
+.objective-classification-badge.result-nao-atingido { color: #a44141; background: #f9e7e7; }
+.objective-classification-badge.result-por-atualizar { color: #7c8984; background: #edf1ef; }
 .objective-topic-values { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .objective-topic-values > div { padding: 9px 10px; display: grid; gap: 3px; border-radius: 9px; background: #f4f7f5; }
 .objective-topic-values strong { color: var(--ink); font-family: Georgia, "Times New Roman", serif; font-size: 17px; font-weight: 500; }
@@ -598,7 +613,9 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .objective-topic-progress { margin-top: auto; display: grid; gap: 8px; }
 .objective-topic-progress > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .objective-topic-progress strong { color: #7f8c87; font-size: 9px; }
-.objective-topic-card.complete .objective-topic-progress strong { color: #287654; }
+.objective-topic-card.result-superado .objective-topic-progress strong, .objective-topic-card.result-atingido .objective-topic-progress strong { color: #287654; }
+.objective-topic-card.result-proximo .objective-topic-progress strong { color: #a66d14; }
+.objective-topic-card.result-nao-atingido .objective-topic-progress strong { color: #a44141; }
 .objective-topic-progress > i { height: 8px; overflow: hidden; border-radius: 999px; background: #e7ece9; }
 .objective-topic-progress em { display: block; height: 100%; border-radius: inherit; background: #3b9249; }
 .objectives-total { min-width: 120px; padding: 12px 15px; display: grid; gap: 4px; border-radius: 11px; color: #285746; background: #e7f3ed; text-align: right; }
@@ -682,7 +699,8 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .settings-section { padding: 18px; }
   .restaurant-objectives-heading { padding: 18px; align-items: stretch; flex-direction: column; }
   .objectives-kpi-grid { padding: 0 18px 18px; grid-template-columns: 1fr; }
-  .objective-topic-grid { padding: 18px; grid-template-columns: 1fr; }
+  .objective-topic-grid { padding: 18px; }
+  .objective-score-cards { grid-template-columns: 1fr; }
   .objectives-total { text-align: left; }
   .settings-heading, .settings-card-title { align-items: flex-start; flex-direction: column; }
   .settings-update-button, .settings-edit-actions { width: 100%; }

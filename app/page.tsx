@@ -9,7 +9,7 @@ type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos" | "r2p" | "t
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao" | "segit";
 type TaskStatus = "Por fazer" | "Em curso" | "Bloqueado" | "Concluído";
 type AppRole = "admin" | "editor" | "consulta";
-type AppUser = { id: number; login: string; role: AppRole; status: string };
+type AppUser = { id: number; name: string; login: string; role: AppRole; status: string };
 type ManagedUser = AppUser & { createdAt: string; approvedAt: string | null };
 
 type Task = {
@@ -71,6 +71,11 @@ function statusClass(status: string) {
   return status.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replaceAll(" ", "-");
 }
 
+function userInitials(name: string, email: string) {
+  const initials = name.trim().split(/\s+/).filter(Boolean).map((part) => part[0]).slice(0, 2).join("");
+  return (initials || email.slice(0, 2)).toUpperCase();
+}
+
 const departmentProfiles = {
   global: {
     objectives: [{ label: "Execução transversal", value: 76, target: "Meta: 90%", tone: "mint" }, { label: "Objetivos no verde", value: 84, target: "Meta: 90%", tone: "blue" }, { label: "Planos sem desvios", value: 71, target: "Meta: 85%", tone: "amber" }],
@@ -119,6 +124,8 @@ type RestaurantObjective = {
   achievedPercent?: number;
 };
 
+type ObjectiveResult = "Superado" | "Atingido" | "Próximo" | "Não Atingido" | "Por atualizar";
+
 const imperialObjectives: RestaurantObjective[] = [
   { theme: "Delivery T Time", target: "20", possiblePoints: 0 },
   { theme: "Delivery C Sat", target: "4.2", possiblePoints: 30 },
@@ -138,7 +145,22 @@ const imperialObjectives: RestaurantObjective[] = [
   { theme: "OCM Rest", target: "75", possiblePoints: 0 },
 ];
 
-const sortedImperialObjectives = [...imperialObjectives].sort((a, b) => (b.possiblePoints ?? -1) - (a.possiblePoints ?? -1));
+function getObjectiveResult(item: RestaurantObjective): ObjectiveResult {
+  if (item.classification === "Superado" || item.classification === "Atingido" || item.classification === "Próximo" || item.classification === "Não Atingido") return item.classification;
+  if (item.achievedPercent === undefined) return "Por atualizar";
+  if (item.achievedPercent > 100) return "Superado";
+  if (item.achievedPercent >= 100) return "Atingido";
+  if (item.achievedPercent >= 50) return "Próximo";
+  return "Não Atingido";
+}
+
+const objectiveResultOrder: ObjectiveResult[] = ["Superado", "Atingido", "Próximo", "Não Atingido", "Por atualizar"];
+const objectivePointGroups = [...new Set(imperialObjectives.map((item) => item.possiblePoints))]
+  .sort((a, b) => (b ?? -1) - (a ?? -1))
+  .map((points) => ({
+    points,
+    objectives: imperialObjectives.filter((item) => item.possiblePoints === points).sort((a, b) => objectiveResultOrder.indexOf(getObjectiveResult(a)) - objectiveResultOrder.indexOf(getObjectiveResult(b))),
+  }));
 
 type InventoryCategory = "food" | "paper" | "ops";
 type InventoryStatus = "Todos" | "Ativo" | "Inativo";
@@ -285,6 +307,7 @@ export default function Home() {
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
   const [setupRequired, setSetupRequired] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [authName, setAuthName] = useState("");
   const [authLogin, setAuthLogin] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authMessage, setAuthMessage] = useState("");
@@ -299,6 +322,7 @@ export default function Home() {
       setSetupRequired(data.setupRequired);
       if (data.setupRequired) {
         setAuthMode("register");
+        setAuthName("Tiago Soutelo");
         setAuthLogin("tiago.soutelo@pt.mcd.com");
       }
     }).catch(() => setAuthMessage("Não foi possível verificar o acesso.")).finally(() => { if (active) setAuthReady(true); });
@@ -500,7 +524,7 @@ export default function Home() {
     setAuthBusy(true);
     setAuthMessage("");
     try {
-      const response = await fetch(`/api/auth/${authMode === "register" ? "register" : "login"}/`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ login: authLogin, password: authPassword }) });
+      const response = await fetch(`/api/auth/${authMode === "register" ? "register" : "login"}/`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: authName, login: authLogin, password: authPassword }) });
       const data = await response.json() as { user?: AppUser; pending?: boolean; message?: string; error?: string };
       if (!response.ok) throw new Error(data.error || "Não foi possível concluir o acesso.");
       if (data.user) {
@@ -511,6 +535,7 @@ export default function Home() {
       } else {
         setAuthMessage(data.message || "Pedido enviado para aprovação.");
         setAuthMode("login");
+        setAuthName("");
         setAuthPassword("");
       }
     } catch (error) {
@@ -564,14 +589,15 @@ export default function Home() {
     <main className="auth-shell">
       <section className="auth-card" aria-labelledby="auth-title">
         <div className="auth-brand"><span className="auth-logo">M</span><div><strong>McDonald&apos;s Imperial</strong><small>Portal de gestão</small></div></div>
-        <div className="auth-heading"><span className="eyebrow">Acesso reservado</span><h1 id="auth-title">{setupRequired ? "Criar administrador" : authMode === "login" ? "Iniciar sessão" : "Novo utilizador"}</h1><p>{setupRequired ? "A primeira conta ficará definida como administrador do portal." : authMode === "login" ? "Introduza o seu email e password." : "Crie o seu pedido com um endereço de email. O administrador terá de aprovar o acesso."}</p></div>
+        <div className="auth-heading"><span className="eyebrow">Acesso reservado</span><h1 id="auth-title">{setupRequired ? "Criar administrador" : authMode === "login" ? "Iniciar sessão" : "Novo utilizador"}</h1><p>{setupRequired ? "A primeira conta ficará definida como administrador do portal." : authMode === "login" ? "Introduza o seu email e password." : "Preencha o nome, email e password. O administrador terá de aprovar o acesso."}</p></div>
         <form className="auth-form" onSubmit={submitAuth}>
+          {(setupRequired || authMode === "register") && <label>Nome completo<input type="text" value={authName} onChange={(event) => setAuthName(event.target.value)} autoComplete="name" minLength={2} maxLength={80} required readOnly={setupRequired} placeholder="ex.: Tiago Soutelo" /></label>}
           <label>{setupRequired ? "Email do administrador" : "Email"}<input type="email" value={authLogin} onChange={(event) => setAuthLogin(event.target.value)} autoComplete="email" required readOnly={setupRequired} placeholder="ex.: nome@empresa.pt" /></label>
           <label>Password<input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} autoComplete={authMode === "login" ? "current-password" : "new-password"} minLength={8} required placeholder="Mínimo de 8 caracteres" /></label>
           {authMessage && <p className="auth-message" role="status">{authMessage}</p>}
           <button className="auth-submit" disabled={authBusy}>{authBusy ? "A processar…" : setupRequired ? "Criar conta de administrador" : authMode === "login" ? "Entrar" : "Enviar pedido de acesso"}</button>
         </form>
-        {!setupRequired && <button className="auth-switch" onClick={() => { setAuthMode((mode) => mode === "login" ? "register" : "login"); setAuthMessage(""); setAuthPassword(""); }}>{authMode === "login" ? "＋ Novo utilizador" : "← Já tenho acesso"}</button>}
+        {!setupRequired && <button className="auth-switch" onClick={() => { setAuthMode((mode) => mode === "login" ? "register" : "login"); setAuthName(""); setAuthMessage(""); setAuthPassword(""); }}>{authMode === "login" ? "＋ Novo utilizador" : "← Já tenho acesso"}</button>}
         <small className="auth-footnote">{!setupRequired && authMode === "login" ? "A sessão permanece ativa durante 24 horas neste dispositivo." : "O acesso só é disponibilizado após aprovação. As passwords são protegidas e não ficam visíveis ao administrador."}</small>
       </section>
     </main>
@@ -636,8 +662,8 @@ export default function Home() {
           </div>
         </div>
         <button className="profile" aria-label="Terminar sessão" onClick={logout} title="Terminar sessão">
-          <span className="avatar">{currentUser.login.slice(0, 2).toUpperCase()}</span>
-          <span><strong>{currentUser.login}</strong><small>{roleLabel(currentUser.role)}</small></span>
+          <span className="avatar">{userInitials(currentUser.name, currentUser.login)}</span>
+          <span><strong>{currentUser.name || currentUser.login}</strong><small>{currentUser.login} · {roleLabel(currentUser.role)}</small></span>
           <span className="more">↪</span>
         </button>
       </aside>
@@ -977,9 +1003,9 @@ export default function Home() {
               <div className="settings-card users-settings-card requests-card">
                 <div className="settings-card-title"><div><span className="eyebrow">Aprovação do administrador</span><h3>Pedidos de acesso</h3></div><span className={managedUsers.some((user) => user.status === "pendente") ? "pending-count has-pending" : "pending-count"}>{managedUsers.filter((user) => user.status === "pendente").length} pendentes</span></div>
                 <div className="users-table" role="table" aria-label="Pedidos de acesso pendentes">
-                  <div className="user-row request-row user-header" role="row"><span>Email</span><span>Data do pedido</span><span>Nível a atribuir</span><span>Validação</span></div>
+                  <div className="user-row request-row user-header" role="row"><span>Utilizador</span><span>Data do pedido</span><span>Nível a atribuir</span><span>Validação</span></div>
                   {managedUsers.filter((user) => user.status === "pendente").map((user) => <div className="user-row request-row" role="row" key={user.id}>
-                    <div className="user-identity"><span className="avatar small">{user.login.slice(0, 2).toUpperCase()}</span><strong>{user.login}</strong></div>
+                    <div className="user-identity"><span className="avatar small">{userInitials(user.name, user.login)}</span><span className="user-identity-copy"><strong>{user.name || "Sem nome"}</strong><small>{user.login}</small></span></div>
                     <span>{new Date(user.createdAt).toLocaleDateString("pt-PT")}</span>
                     <select value={user.role} onChange={(event) => updateManagedUser(user.id, { role: event.target.value as AppRole })} aria-label={`Nível de acesso a atribuir a ${user.login}`}><option value="admin">Administrador</option><option value="editor">Editor</option><option value="consulta">Consulta</option></select>
                     <div className="user-actions"><button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>✓ Aprovar</button><button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Recusar</button></div>
@@ -991,16 +1017,16 @@ export default function Home() {
                 <div className="settings-card-title"><div><span className="eyebrow">Controlo de acessos</span><h3>Lista de utilizadores</h3></div><span>{managedUsers.filter((user) => user.status !== "pendente").length} utilizadores</span></div>
                 <div className="access-levels"><span><b>Administrador</b> gestão total</span><span><b>Editor</b> cria e altera tarefas</span><span><b>Consulta</b> apenas visualização</span></div>
                 <div className="users-table" role="table" aria-label="Lista de utilizadores validados">
-                  <div className="user-row user-header" role="row"><span>Email</span><span>Registo</span><span>Estado</span><span>Nível de acesso</span><span>Ação</span></div>
+                  <div className="user-row user-header" role="row"><span>Utilizador</span><span>Registo</span><span>Estado</span><span>Nível de acesso</span><span>Ação</span></div>
                   {managedUsers.filter((user) => user.status !== "pendente").map((user) => <div className="user-row" role="row" key={user.id}>
-                    <div className="user-identity"><span className="avatar small">{user.login.slice(0, 2).toUpperCase()}</span><strong>{user.login}</strong>{user.id === currentUser.id && <small>Você</small>}</div>
+                    <div className="user-identity"><span className="avatar small">{userInitials(user.name, user.login)}</span><span className="user-identity-copy"><strong>{user.name || "Sem nome"}</strong><small>{user.login}</small></span>{user.id === currentUser.id && <small>Você</small>}</div>
                     <span>{new Date(user.createdAt).toLocaleDateString("pt-PT")}</span>
                     <span className={`user-status ${user.status}`}>{user.status === "ativo" ? "Ativo" : "Recusado"}</span>
                     <select value={user.role} disabled={user.id === currentUser.id} onChange={(event) => updateManagedUser(user.id, { role: event.target.value as AppRole })} aria-label={`Nível de acesso de ${user.login}`}><option value="admin">Administrador</option><option value="editor">Editor</option><option value="consulta">Consulta</option></select>
                     <div className="user-actions">{user.status === "rejeitado" ? <button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>Reativar</button> : user.id !== currentUser.id ? <button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Desativar</button> : <span>Conta principal</span>}<button className="delete-user" disabled={user.id === currentUser.id} onClick={() => deleteManagedUser(user)} title={user.id === currentUser.id ? "A conta em utilização não pode ser eliminada" : `Eliminar ${user.login}`}>Eliminar</button></div>
                   </div>)}
                 </div>
-                <p className="inventory-note">Os novos utilizadores criam o próprio email e password através do botão “Novo utilizador”. O portal só fica disponível depois da validação do administrador.</p>
+                <p className="inventory-note">Os novos utilizadores registam nome, email e password através do botão “Novo utilizador”. O portal só fica disponível depois da validação do administrador.</p>
               </div>
               <div className="settings-card">
                 <div className="settings-card-title"><div><span className="eyebrow">Google Drive</span><h3>Pastas partilhadas</h3></div><span>{sharedFolders.reduce((sum, folder) => sum + folder.fileCount, 0)} ficheiros registados</span></div>
@@ -1045,8 +1071,10 @@ export default function Home() {
                 <article className="objective-kpi objective-kpi-orange"><span>↗</span><div><small>Progresso registado</small><strong>50%</strong><p>melhor resultado atual</p></div></article>
               </div>
               <div className="objective-topic-grid" aria-label="Objetivos agrupados por tema">
-                {sortedImperialObjectives.map((item) => <article className={item.achievedPercent !== undefined ? "objective-topic-card complete" : item.target ? "objective-topic-card planned" : "objective-topic-card pending"} key={item.theme}>
-                  <div className="objective-topic-head"><span className="objective-topic-symbol">{item.achievedPercent !== undefined ? "✓" : item.target ? "◎" : "·"}</span><div><small>Tema objetivo</small><h3>{item.theme}</h3></div>{item.classification && <span className="objective-classification-badge">{item.classification}</span>}</div>
+                {objectivePointGroups.map((group) => <section className="objective-score-row" key={group.points ?? "sem-pontos"}>
+                  <div className="objective-score-heading"><span>{group.points === undefined ? "Sem pontuação definida" : `${group.points} pontos possíveis`}</span><small>{group.objectives.length} {group.objectives.length === 1 ? "objetivo" : "objetivos"}</small></div>
+                  <div className="objective-score-cards">{group.objectives.map((item) => { const result = getObjectiveResult(item); return <article className={`objective-topic-card result-${statusClass(result)}`} key={item.theme}>
+                  <div className="objective-topic-head"><span className="objective-topic-symbol">{item.achievedPercent !== undefined ? "✓" : item.target ? "◎" : "·"}</span><div><small>Tema objetivo</small><h3>{item.theme}</h3></div><span className={`objective-classification-badge result-${statusClass(result)}`}>{result}</span></div>
                   <div className="objective-topic-values">
                     <div><small>Objetivo</small><strong>{item.target ?? "—"}</strong></div>
                     <div><small>Resultado</small><strong>{item.result ?? "—"}</strong></div>
@@ -1056,10 +1084,11 @@ export default function Home() {
                     <span><small>Pontos atingidos</small><strong>{item.achievedPoints ?? "—"}</strong></span>
                   </div>
                   <div className="objective-topic-progress">
-                    <div><small>Progresso</small><strong>{item.achievedPercent !== undefined ? `${item.achievedPercent}%` : "Por atualizar"}</strong></div>
+                    <div><small>Resultado</small><strong>{result}</strong></div>
                     <i><em style={{ width: `${item.achievedPercent ?? 0}%` }} /></i>
                   </div>
-                </article>)}
+                </article>; })}</div>
+                </section>)}
               </div>
               <p className="inventory-note">Os campos sem resultado permanecem assinalados como “Por atualizar”.</p>
             </section>

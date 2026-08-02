@@ -18,5 +18,5 @@ export async function POST(request: Request) {
   if (user.status !== "ativo") {
     return Response.json({ error: user.status === "pendente" ? "O acesso no Imperial ainda aguarda aprovação." : "O acesso no Imperial não está ativo." }, { status: 403 });
   }
-  return Response.json({ user: { id: user.id, login: user.login, role: user.role, status: user.status } });
+  return Response.json({ user: { id: user.id, name: user.name, login: user.login, role: user.role, status: user.status } });
 }
