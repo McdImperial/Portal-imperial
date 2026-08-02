@@ -153,6 +153,7 @@ const inventoryProducts = inventoryProductsData as InventoryProduct[];
 const inventoryCategoryLabels: Record<InventoryCategory, string> = { food: "Comida", paper: "Papel", ops: "OPS" };
 const r2pData = r2pDataJson as R2PData;
 const tellTheArchesData = tellTheArchesDataJson as TellTheArchesData;
+const qualityTasksSourceUrl = "https://docs.google.com/spreadsheets/d/1aH533lMTXySB8jVm4xRFVNpsoBVuPiqgMbpi_GzWVKY/edit?usp=sharing";
 const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const weekdayNames = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 const daypartNames = ["Manhã", "Almoço", "Tarde", "Fim de tarde", "Jantar", "Madrugada"];
@@ -544,6 +545,10 @@ export default function Home() {
 
           {view === "tarefas" && (
             <section className="board-page" aria-label="Gestão de tarefas">
+              {department === "qualidade" && <div className="board-source-strip">
+                <div><span className="source-mark">QP</span><span><strong>Workflow tarefas · Qualidade &amp; Produtos</strong><small>15 tarefas importadas com responsável, periodicidade e dia programado.</small></span></div>
+                <a href={qualityTasksSourceUrl} target="_blank" rel="noreferrer">Abrir folha fonte ↗</a>
+              </div>}
               <div className="monday-toolbar">
                 <label className="view-picker"><span>⌂</span><select value={boardMode} onChange={(event) => setBoardMode(event.target.value as "tabela" | "kanban")} aria-label="Escolher vista"><option value="tabela">Tabela principal</option><option value="kanban">Kanban</option></select></label>
                 <span className="toolbar-divider" />

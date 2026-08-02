@@ -385,6 +385,13 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .zone-track span.attention { background: #e37c65; }
 
 .board-page { min-width: 0; min-height: 620px; background: #fff; border: 1px solid #e4e7ef; border-radius: 10px; box-shadow: 0 3px 12px rgba(22,54,44,.04); overflow: hidden; }
+.board-source-strip { min-height: 58px; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; border-bottom: 1px solid #dfe8e3; background: #f4faf7; }
+.board-source-strip > div { min-width: 0; display: flex; align-items: center; gap: 10px; }
+.board-source-strip > div > span:last-child { min-width: 0; display: grid; gap: 3px; }
+.board-source-strip strong { overflow: hidden; color: #285543; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.board-source-strip small { color: #718078; font-size: 8px; }
+.board-source-strip a { flex: 0 0 auto; color: #2f7058; font-size: 9px; font-weight: 800; text-decoration: none; }
+.source-mark { width: 31px; height: 31px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 8px; color: white; background: #34775d; font-size: 8px; font-weight: 900; }
 .board-titlebar { padding: 24px 26px 17px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
 .board-titlebar h2 { margin: 5px 0 5px; font-family: Georgia, serif; font-size: 25px; font-weight: 500; }
 .board-titlebar p { margin: 0; color: var(--muted); font-size: 11px; }
@@ -562,6 +569,8 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .task-owner > span:last-child:not(.avatar) { display: none; }
   .objective-card { grid-template-columns: 36px 1fr auto; }
   .board-titlebar { align-items: flex-start; padding: 20px 18px 14px; }
+  .board-source-strip { align-items: flex-start; flex-direction: column; }
+  .board-source-strip a { width: 100%; padding: 7px 9px; border-radius: 7px; background: #e7f3ed; text-align: center; }
   .board-titlebar p { max-width: 250px; }
   .board-view-tabs { padding: 0 13px; }
   .board-toolbar { padding: 10px 13px; flex-wrap: wrap; }
