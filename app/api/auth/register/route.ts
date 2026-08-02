@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as { login?: string; password?: string };
     const login = body.login?.trim().toLowerCase() || "";
     const password = body.password || "";
-    if (!/^[a-z0-9._-]{3,40}$/.test(login)) return Response.json({ error: "O login deve ter 3 a 40 caracteres e usar apenas letras, números, ponto, hífen ou underscore." }, { status: 400 });
+    if (login.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(login)) return Response.json({ error: "Introduza um endereço de email válido." }, { status: 400 });
     if (password.length < 8) return Response.json({ error: "A password deve ter pelo menos 8 caracteres." }, { status: 400 });
     const db = getDb();
     const existing = await db.select({ id: users.id }).from(users).limit(1);

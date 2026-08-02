@@ -519,9 +519,9 @@ export default function Home() {
     <main className="auth-shell">
       <section className="auth-card" aria-labelledby="auth-title">
         <div className="auth-brand"><span className="auth-logo">M</span><div><strong>McDonald&apos;s Imperial</strong><small>Portal de gestão</small></div></div>
-        <div className="auth-heading"><span className="eyebrow">Acesso reservado</span><h1 id="auth-title">{setupRequired ? "Criar administrador" : authMode === "login" ? "Iniciar sessão" : "Novo utilizador"}</h1><p>{setupRequired ? "A primeira conta ficará definida como administrador do portal." : authMode === "login" ? "Introduza os seus dados de acesso." : "Crie o seu pedido. O administrador terá de aprovar o acesso."}</p></div>
+        <div className="auth-heading"><span className="eyebrow">Acesso reservado</span><h1 id="auth-title">{setupRequired ? "Criar administrador" : authMode === "login" ? "Iniciar sessão" : "Novo utilizador"}</h1><p>{setupRequired ? "A primeira conta ficará definida como administrador do portal." : authMode === "login" ? "Introduza o seu email e password." : "Crie o seu pedido com um endereço de email. O administrador terá de aprovar o acesso."}</p></div>
         <form className="auth-form" onSubmit={submitAuth}>
-          <label>Login<input value={authLogin} onChange={(event) => setAuthLogin(event.target.value)} autoComplete="username" minLength={3} required placeholder="ex.: nome.apelido" /></label>
+          <label>Email<input type="email" value={authLogin} onChange={(event) => setAuthLogin(event.target.value)} autoComplete="email" required placeholder="ex.: nome@empresa.pt" /></label>
           <label>Password<input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} autoComplete={authMode === "login" ? "current-password" : "new-password"} minLength={8} required placeholder="Mínimo de 8 caracteres" /></label>
           {authMessage && <p className="auth-message" role="status">{authMessage}</p>}
           <button className="auth-submit" disabled={authBusy}>{authBusy ? "A processar…" : setupRequired ? "Criar conta de administrador" : authMode === "login" ? "Entrar" : "Enviar pedido de acesso"}</button>
@@ -939,7 +939,7 @@ export default function Home() {
                 <div className="settings-card-title"><div><span className="eyebrow">Controlo de acessos</span><h3>Utilizadores</h3></div><span>{managedUsers.filter((user) => user.status === "pendente").length} pedidos pendentes</span></div>
                 <div className="access-levels"><span><b>Administrador</b> gestão total</span><span><b>Editor</b> cria e altera tarefas</span><span><b>Consulta</b> apenas visualização</span></div>
                 <div className="users-table" role="table" aria-label="Gestão de utilizadores">
-                  <div className="user-row user-header" role="row"><span>Utilizador</span><span>Pedido</span><span>Estado</span><span>Nível de acesso</span><span>Ação</span></div>
+                  <div className="user-row user-header" role="row"><span>Email</span><span>Pedido</span><span>Estado</span><span>Nível de acesso</span><span>Ação</span></div>
                   {managedUsers.map((user) => <div className="user-row" role="row" key={user.id}>
                     <div className="user-identity"><span className="avatar small">{user.login.slice(0, 2).toUpperCase()}</span><strong>{user.login}</strong>{user.id === currentUser.id && <small>Você</small>}</div>
                     <span>{new Date(user.createdAt).toLocaleDateString("pt-PT")}</span>
