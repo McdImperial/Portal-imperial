@@ -261,7 +261,7 @@ export default function Home() {
 
   useEffect(() => {
     let active = true;
-    fetch("/api/auth/me").then((response) => response.json()).then((data: { user: AppUser | null; setupRequired: boolean }) => {
+    fetch("/api/auth/me/").then((response) => response.json()).then((data: { user: AppUser | null; setupRequired: boolean }) => {
       if (!active) return;
       setCurrentUser(data.user);
       setSetupRequired(data.setupRequired);
@@ -306,7 +306,7 @@ export default function Home() {
 
   useEffect(() => {
     if (view !== "configuracoes" || currentUser?.role !== "admin") return;
-    fetch("/api/auth/users").then((response) => response.ok ? response.json() : Promise.reject()).then((data: { users: ManagedUser[] }) => setManagedUsers(data.users)).catch(() => setNotice("Não foi possível carregar os utilizadores."));
+    fetch("/api/auth/users/").then((response) => response.ok ? response.json() : Promise.reject()).then((data: { users: ManagedUser[] }) => setManagedUsers(data.users)).catch(() => setNotice("Não foi possível carregar os utilizadores."));
   }, [view, currentUser]);
 
   const scopedTasks = tasks.filter((task) => department === "global" || task.department === department);
@@ -465,7 +465,7 @@ export default function Home() {
     setAuthBusy(true);
     setAuthMessage("");
     try {
-      const response = await fetch(`/api/auth/${authMode === "register" ? "register" : "login"}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ login: authLogin, password: authPassword }) });
+      const response = await fetch(`/api/auth/${authMode === "register" ? "register" : "login"}/`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ login: authLogin, password: authPassword }) });
       const data = await response.json() as { user?: AppUser; pending?: boolean; message?: string; error?: string };
       if (!response.ok) throw new Error(data.error || "Não foi possível concluir o acesso.");
       if (data.user) {
@@ -486,7 +486,7 @@ export default function Home() {
   }
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/api/auth/logout/", { method: "POST" });
     setCurrentUser(null);
     setView("resumo");
     setDataReady(false);
@@ -495,7 +495,7 @@ export default function Home() {
   }
 
   async function updateManagedUser(id: number, changes: { role?: AppRole; status?: "ativo" | "pendente" | "rejeitado" }) {
-    const response = await fetch("/api/auth/users", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, ...changes }) });
+    const response = await fetch("/api/auth/users/", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, ...changes }) });
     const data = await response.json() as { user?: ManagedUser; error?: string };
     if (!response.ok || !data.user) { setNotice(data.error || "Não foi possível atualizar o utilizador."); return; }
     setManagedUsers((users) => users.map((user) => user.id === id ? data.user! : user));
