@@ -562,6 +562,26 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .delete-user { border: 1px solid #e8c9cd; color: #a42638; background: #fff; }
 .delete-user:hover:not(:disabled) { color: white; background: #b73046; }
 .delete-user:disabled { cursor: not-allowed; opacity: .35; }
+.restaurant-objectives { overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: 0 3px 12px rgba(22,54,44,.035); }
+.restaurant-objectives-heading { padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.restaurant-objectives-heading h2 { margin: 5px 0; font-family: Georgia, "Times New Roman", serif; font-size: 24px; font-weight: 500; }
+.restaurant-objectives-heading p { margin: 0; color: var(--muted); font-size: 10px; }
+.objectives-total { min-width: 120px; padding: 12px 15px; display: grid; gap: 4px; border-radius: 11px; color: #285746; background: #e7f3ed; text-align: right; }
+.objectives-total span { text-transform: uppercase; letter-spacing: .7px; font-size: 7px; font-weight: 800; }
+.objectives-total strong { font-family: Georgia, "Times New Roman", serif; font-size: 22px; }
+.objectives-table-scroll { overflow-x: auto; border-top: 1px solid var(--line); }
+.objectives-data-table { min-width: 1040px; }
+.objective-data-row { min-height: 52px; display: grid; grid-template-columns: .8fr 1.15fr .7fr .7fr 1.15fr .8fr .8fr 1fr; align-items: center; border-bottom: 1px solid #e2e7e4; color: #3f4b47; font-size: 10px; }
+.objective-data-row > * { min-width: 0; padding: 12px 14px; }
+.objective-data-row > strong { color: var(--ink); font-weight: 700; }
+.objective-data-header { min-height: 46px; color: white; background: #24573f; text-transform: uppercase; letter-spacing: .35px; font-size: 7px; font-weight: 800; }
+.objective-data-header > * { color: white; }
+.objective-data-row:not(.objective-data-header):nth-child(odd) { background: #fbfcfb; }
+.objective-classification { color: #ed8613; font-weight: 800; }
+.objective-attainment { display: flex; align-items: center; gap: 8px; }
+.objective-attainment b { min-width: 27px; }
+.objective-attainment i { width: 70px; height: 8px; overflow: hidden; border-radius: 999px; background: #e3e8e5; }
+.objective-attainment em { display: block; height: 100%; background: #3b9249; }
 .pending-count { padding: 5px 8px; border-radius: 999px; background: #eef2f0; }
 .pending-count.has-pending { color: #986315; background: #fff0ce; font-weight: 800; }
 .users-empty { min-height: 92px; padding: 18px; display: flex; align-items: center; justify-content: center; gap: 12px; color: #60716a; }
@@ -618,6 +638,8 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .tell-metric { min-height: 104px; }
   .tell-trend { gap: 4px; }
   .settings-section { padding: 18px; }
+  .restaurant-objectives-heading { padding: 18px; align-items: stretch; flex-direction: column; }
+  .objectives-total { text-align: left; }
   .settings-heading, .settings-card-title { align-items: flex-start; flex-direction: column; }
   .settings-update-button, .settings-edit-actions { width: 100%; }
   .settings-edit-actions button { flex: 1; }

@@ -110,6 +110,35 @@ const viewLabels: Record<View, string> = {
   configuracoes: "Configurações",
 };
 
+type RestaurantObjective = {
+  theme: string;
+  target?: string;
+  result?: string;
+  classification?: string;
+  possiblePoints?: number;
+  achievedPoints?: number;
+  achievedPercent?: number;
+};
+
+const imperialObjectives: RestaurantObjective[] = [
+  { theme: "Delivery T Time", target: "20", possiblePoints: 0 },
+  { theme: "Delivery C Sat", target: "4.2", possiblePoints: 30 },
+  { theme: "Delivery Exatidão", target: "2.2", possiblePoints: 40 },
+  { theme: "Turnover", target: "4.17", result: "4.35", classification: "Próximo", possiblePoints: 80, achievedPoints: 40, achievedPercent: 50 },
+  { theme: "Staffing", target: "20", possiblePoints: 45 },
+  { theme: "Food" },
+  { theme: "Paper" },
+  { theme: "Perdas", target: "0.45", possiblePoints: 20 },
+  { theme: "AOLs", target: "89", possiblePoints: 60 },
+  { theme: "OPS", target: "3850", possiblePoints: 40 },
+  { theme: "Qualitativo", target: "100", possiblePoints: 100 },
+  { theme: "Extras" },
+  { theme: "MDO", target: "11.29", possiblePoints: 100 },
+  { theme: "Delivery R Time", target: "5", possiblePoints: 45 },
+  { theme: "R2P Dia", target: "230", possiblePoints: 100 },
+  { theme: "OCM Rest", target: "75", possiblePoints: 0 },
+];
+
 type InventoryCategory = "food" | "paper" | "ops";
 type InventoryStatus = "Todos" | "Ativo" | "Inativo";
 type ProductSortKey = "code" | "description" | "status" | "source" | "openingStock" | "deliveries" | "posUsage" | "expectedStock" | "closingStock" | "deviation" | "deviationEur" | "currentYield";
@@ -985,7 +1014,7 @@ export default function Home() {
             </section>
           )}
 
-          {(view === "resumo" || view === "objetivos") && (
+          {view === "resumo" && (
             <section className="objectives-section">
               <div className="section-title"><div><span className="eyebrow">Julho 2026</span><h2>Objetivos mensais</h2></div>{view === "resumo" && <button className="text-button compact" onClick={() => setView("objetivos")}>Ver detalhe →</button>}</div>
               <div className="objective-grid">
@@ -998,6 +1027,24 @@ export default function Home() {
                   </article>
                 ))}
               </div>
+            </section>
+          )}
+
+          {view === "objetivos" && (
+            <section className="restaurant-objectives" aria-labelledby="restaurant-objectives-title">
+              <div className="restaurant-objectives-heading">
+                <div><span className="eyebrow">Restaurante Imperial</span><h2 id="restaurant-objectives-title">Objetivos</h2><p>Metas, resultados e pontuação do plano de objetivos.</p></div>
+                <div className="objectives-total"><span>Pontos possíveis</span><strong>{imperialObjectives.reduce((sum, item) => sum + (item.possiblePoints ?? 0), 0)}</strong></div>
+              </div>
+              <div className="objectives-table-scroll">
+                <div className="objectives-data-table" role="table" aria-label="Objetivos do restaurante Imperial">
+                  <div className="objective-data-row objective-data-header" role="row"><span>Restaurante</span><span>Tema objetivo</span><span>Objetivo</span><span>Resultado</span><span>Classificação</span><span>Pontos possíveis</span><span>Pontos atingidos</span><span>% objetivos atingidos</span></div>
+                  {imperialObjectives.map((item) => <div className="objective-data-row" role="row" key={item.theme}>
+                    <strong>Imperial</strong><strong>{item.theme}</strong><span>{item.target ?? "—"}</span><span>{item.result ?? "—"}</span><span className={item.classification ? "objective-classification" : ""}>{item.classification ?? "—"}</span><span>{item.possiblePoints ?? "—"}</span><span>{item.achievedPoints ?? "—"}</span><span className="objective-attainment">{item.achievedPercent !== undefined ? <><b>{item.achievedPercent}%</b><i><em style={{ width: `${item.achievedPercent}%` }} /></i></> : "—"}</span>
+                  </div>)}
+                </div>
+              </div>
+              <p className="inventory-note">Informação refletida a partir do quadro de objetivos partilhado para o restaurante Imperial.</p>
             </section>
           )}
 
