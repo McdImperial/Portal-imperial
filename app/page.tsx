@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import inventoryProductsData from "./data/inventory-products.json";
 import r2pDataJson from "./data/r2p-data.json";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos" | "r2p";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos" | "r2p" | "telartes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao" | "segit";
 type TaskStatus = "Por fazer" | "Em curso" | "Bloqueado" | "Concluído";
 
@@ -102,6 +102,7 @@ const viewLabels: Record<View, string> = {
   areas: "Áreas de acompanhamento",
   custos: "Custo, Comida, Papel e OPS",
   r2p: "Tempos de serviço · R2P",
+  telartes: "Tel de Artes",
 };
 
 type InventoryCategory = "food" | "paper" | "ops";
@@ -419,6 +420,9 @@ export default function Home() {
                     <button className={view === "r2p" ? "department-subtab active" : "department-subtab"} onClick={() => setView("r2p")}>
                       ◷ <span>Tempos de serviço · R2P</span>
                     </button>
+                    <button className={view === "telartes" ? "department-subtab active" : "department-subtab"} onClick={() => setView("telartes")}>
+                      ◈ <span>Tel de Artes</span>
+                    </button>
                   </div>
                 )}
               </div>
@@ -709,6 +713,23 @@ export default function Home() {
                   {r2pDashboard.days.map((day) => <div className="shift-row" role="row" key={day.date}><span><strong>{new Date(`${day.date}T00:00:00`).toLocaleDateString("pt-PT", { day: "2-digit", month: "short" })}</strong><small>{day.weekday}</small></span>{day.shifts.map((shift) => <span className="shift-manager" key={shift.name}><strong>{shift.manager || "—"}</strong><small className={shift.value && meetsR2PTarget(shift.value, r2pMonth) ? "on-target" : "off-target"}>{shift.value ? `${shift.value}s` : "—"}</small></span>)}<span>{day.sos ? `${day.sos}s` : "—"}</span><span>{day.national ? `${day.national}s` : "—"}</span></div>)}
                 </div>
                 <p className="inventory-note">Fonte: “Tempos de Serviço por Hora e GT - Imperial”. Dados publicados em 2 de agosto de 2026; esta página é uma fotografia dos dados e não uma ligação em tempo real. O objetivo de julho e agosto é manter o R2P abaixo de 230s; nos restantes meses mantém-se a referência de 180s.</p>
+              </div>
+            </section>
+          )}
+
+          {view === "telartes" && department === "cliente" && (
+            <section className="tel-artes-section" aria-labelledby="tel-artes-title">
+              <div className="tel-artes-heading">
+                <div>
+                  <span className="eyebrow">Serviço Cliente</span>
+                  <h2 id="tel-artes-title">Tel de Artes</h2>
+                  <p>Espaço dedicado ao acompanhamento de Tel de Artes.</p>
+                </div>
+                <span className="tel-artes-status"><i /> Separador criado</span>
+              </div>
+              <div className="tel-artes-empty">
+                <span className="tel-artes-icon">◈</span>
+                <div><strong>Área pronta para receber informação</strong><p>Aqui poderá centralizar os registos, indicadores e tarefas associados a Tel de Artes.</p></div>
               </div>
             </section>
           )}
