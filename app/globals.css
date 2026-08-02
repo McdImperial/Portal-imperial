@@ -610,7 +610,7 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .nav-count { position: absolute; margin: -24px 0 0 27px; }
   .sidebar-departments { order: 1; margin: 0 0 5px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,.1); }
   .sidebar-section-title { display: none; }
-  .department-list { grid-template-columns: repeat(6, 1fr); gap: 3px; }
+  .department-list { grid-template-columns: repeat(5, 1fr); gap: 3px; }
   .department-entry { display: block; }
   .department-tab { min-height: 34px; justify-content: center; padding: 4px; }
   .department-name, .department-active-dot { display: none; }

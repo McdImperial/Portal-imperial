@@ -52,7 +52,6 @@ const initialTasks: Task[] = [
 ];
 
 const departments: { id: Department; label: string; short: string }[] = [
-  { id: "global", label: "Visão global", short: "VG" },
   { id: "qualidade", label: "Qualidade & Produtos", short: "QP" },
   { id: "pessoas", label: "Pessoas", short: "PE" },
   { id: "cliente", label: "Serviço Cliente", short: "SC" },
