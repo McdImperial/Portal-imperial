@@ -100,7 +100,7 @@ const viewLabels: Record<View, string> = {
   resumo: "Visão geral",
   tarefas: "Todas as tarefas",
   objetivos: "Objetivos mensais",
-  areas: "Áreas de acompanhamento",
+  areas: "Áreas de limpeza",
   custos: "Custo, Comida, Papel e OPS",
   r2p: "Tempos de serviço · R2P",
   tellarches: "Tell The Arches",
@@ -428,6 +428,12 @@ export default function Home() {
                     <button className={view === "tarefas" ? "department-subtab active" : "department-subtab"} onClick={() => setView("tarefas")}>
                       ✓ <span>Tarefas</span>
                     </button>
+                    <button className={view === "objetivos" ? "department-subtab active" : "department-subtab"} onClick={() => setView("objetivos")}>
+                      ◎ <span>Objetivos mensais</span>
+                    </button>
+                    <button className={view === "areas" ? "department-subtab active" : "department-subtab"} onClick={() => setView("areas")}>
+                      ⌂ <span>Áreas de limpeza</span>
+                    </button>
                     {item.id === "qualidade" && <button className={view === "custos" ? "department-subtab active" : "department-subtab"} onClick={() => setView("custos")}>
                       ◫ <span>Custo, Comida, Papel &amp; OPS</span>
                     </button>}
@@ -462,7 +468,7 @@ export default function Home() {
         <header className="topbar">
           <div>
             <p className="date-line">Sexta-feira · 31 de julho · {departmentLabel}</p>
-            <h1>{department === "qualidade" && view === "areas" ? "Áreas Limpeza" : viewLabels[view]}</h1>
+            <h1>{viewLabels[view]}</h1>
           </div>
           <div className="top-actions">
             <button className="icon-button" aria-label="Notificações"><span className="notification-dot" />♢</button>
@@ -798,7 +804,7 @@ export default function Home() {
 
           {(view === "resumo" || view === "areas") && (
             <section className="panel zones-panel">
-              <div className="panel-heading"><div><span className="eyebrow">Estado atual · {departmentLabel}</span><h2>{department === "qualidade" ? "Áreas Limpeza" : "Áreas de acompanhamento"}</h2></div><span className="live-indicator"><i /> Atualizado agora</span></div>
+              <div className="panel-heading"><div><span className="eyebrow">Estado atual · {departmentLabel}</span><h2>Áreas de limpeza</h2></div><span className="live-indicator"><i /> Atualizado agora</span></div>
               <div className="zones-grid">
                 {activeProfile.zones.map((zone) => (
                   <article className="zone-card" key={zone.name}>
