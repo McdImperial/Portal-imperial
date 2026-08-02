@@ -505,6 +505,16 @@ export default function Home() {
     setNotice(changes.status === "ativo" ? "Acesso aprovado." : "Nível de acesso atualizado.");
   }
 
+  async function deleteManagedUser(user: ManagedUser) {
+    if (currentUser?.role !== "admin" || user.id === currentUser.id) return;
+    if (!window.confirm(`Eliminar definitivamente o utilizador ${user.login}?`)) return;
+    const response = await fetch("/api/auth/users/", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: user.id }) });
+    const data = await response.json() as { deleted?: boolean; error?: string };
+    if (!response.ok || !data.deleted) { setNotice(data.error || "Não foi possível eliminar o utilizador."); return; }
+    setManagedUsers((users) => users.filter((item) => item.id !== user.id));
+    setNotice("Utilizador eliminado definitivamente.");
+  }
+
   const roleLabel = (role: AppRole) => role === "admin" ? "Administrador" : role === "editor" ? "Editor" : "Consulta";
   const canEdit = currentUser?.role === "admin" || currentUser?.role === "editor";
 
@@ -961,7 +971,7 @@ export default function Home() {
                     <span>{new Date(user.createdAt).toLocaleDateString("pt-PT")}</span>
                     <span className={`user-status ${user.status}`}>{user.status === "ativo" ? "Ativo" : "Recusado"}</span>
                     <select value={user.role} disabled={user.id === currentUser.id} onChange={(event) => updateManagedUser(user.id, { role: event.target.value as AppRole })} aria-label={`Nível de acesso de ${user.login}`}><option value="admin">Administrador</option><option value="editor">Editor</option><option value="consulta">Consulta</option></select>
-                    <div className="user-actions">{user.status === "rejeitado" ? <button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>Reativar</button> : user.id !== currentUser.id ? <button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Desativar</button> : <span>Conta principal</span>}</div>
+                    <div className="user-actions">{user.status === "rejeitado" ? <button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>Reativar</button> : user.id !== currentUser.id ? <button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Desativar</button> : <span>Conta principal</span>}<button className="delete-user" disabled={user.id === currentUser.id} onClick={() => deleteManagedUser(user)} title={user.id === currentUser.id ? "A conta em utilização não pode ser eliminada" : `Eliminar ${user.login}`}>Eliminar</button></div>
                   </div>)}
                 </div>
                 <p className="inventory-note">Os novos utilizadores criam o próprio email e password através do botão “Novo utilizador”. O portal só fica disponível depois da validação do administrador.</p>

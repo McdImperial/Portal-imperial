@@ -1,6 +1,6 @@
 import { asc, eq } from "drizzle-orm";
 import { getDb } from "../../../../db";
-import { users } from "../../../../db/schema";
+import { sessions, users } from "../../../../db/schema";
 import { AppRole, requireUser } from "../_lib";
 
 const safeFields = { id: users.id, login: users.login, role: users.role, status: users.status, createdAt: users.createdAt, approvedAt: users.approvedAt };
@@ -25,4 +25,18 @@ export async function PATCH(request: Request) {
   }
   const [updated] = await getDb().update(users).set(updates).where(eq(users.id, body.id)).returning(safeFields);
   return Response.json({ user: updated });
+}
+
+export async function DELETE(request: Request) {
+  const auth = await requireUser(request, ["admin"]);
+  if (auth.error) return auth.error;
+  const body = (await request.json()) as { id?: number };
+  if (!body.id) return Response.json({ error: "Utilizador obrigatório." }, { status: 400 });
+  if (body.id === auth.user.id) return Response.json({ error: "Não pode eliminar a conta que está a utilizar." }, { status: 400 });
+  const db = getDb();
+  const [target] = await db.select({ id: users.id }).from(users).where(eq(users.id, body.id)).limit(1);
+  if (!target) return Response.json({ error: "Utilizador não encontrado." }, { status: 404 });
+  await db.delete(sessions).where(eq(sessions.userId, body.id));
+  await db.delete(users).where(eq(users.id, body.id));
+  return Response.json({ deleted: true, id: body.id });
 }
