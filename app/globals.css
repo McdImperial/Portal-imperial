@@ -144,6 +144,29 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .inventory-product-header button:hover { color: #286b53; background: #e8f1ec; }
 .inventory-product-header button i { color: #9ba5a1; font-size: 9px; font-style: normal; }
 .inventory-note { margin: 0; padding: 11px 18px; border-top: 1px solid var(--line); color: var(--muted); background: #fafcfb; font-size: 9px; line-height: 1.45; }
+.r2p-section { padding: 26px; display: grid; gap: 22px; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: 0 3px 12px rgba(22,54,44,.035); }
+.r2p-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; }
+.r2p-heading h2 { margin-top: 6px; font-family: Georgia, serif; font-size: 25px; font-weight: 500; }
+.r2p-ready { padding: 7px 10px; display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; color: #34735b; background: #e8f4ee; font-size: 9px; font-weight: 800; }
+.r2p-ready i { width: 6px; height: 6px; border-radius: 50%; background: #54a67e; }
+.r2p-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.r2p-metric { min-height: 126px; padding: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid #e1e9e5; border-radius: 14px; background: #f8faf9; }
+.r2p-metric.featured { border-color: #cfe6db; background: #e7f3ed; }
+.r2p-symbol { width: 43px; height: 43px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 12px; color: #286b53; background: white; font-size: 18px; font-weight: 800; }
+.r2p-metric strong { display: block; margin-top: 6px; font-family: Georgia, serif; font-size: 26px; font-weight: 500; }
+.r2p-metric small { color: var(--muted); font-size: 9px; }
+.r2p-table-card { overflow: hidden; border: 1px solid var(--line); border-radius: 13px; }
+.r2p-table-heading { padding: 17px 18px 14px; display: flex; align-items: end; justify-content: space-between; gap: 16px; background: #fafcfb; }
+.r2p-table-heading h3 { margin: 5px 0 0; font-size: 15px; }
+.r2p-table-heading > span { padding: 5px 8px; border-radius: 7px; color: #39765f; background: #e8f4ee; font-size: 9px; font-weight: 900; }
+.r2p-table { overflow-x: auto; }
+.r2p-row { min-width: 720px; min-height: 38px; display: grid; grid-template-columns: 1.2fr 1fr repeat(4, .8fr); align-items: center; border-top: 1px solid var(--line); }
+.r2p-row > span { padding: 0 15px; color: #78847f; font-size: 9px; font-weight: 800; }
+.r2p-table-header { background: #f3f6f4; }
+.r2p-empty { min-height: 220px; padding: 36px; display: grid; place-items: center; align-content: center; gap: 8px; border-top: 1px solid var(--line); color: #6f7f79; text-align: center; }
+.r2p-empty > span { width: 45px; height: 45px; display: grid; place-items: center; border-radius: 13px; color: #39765f; background: #e7f3ed; font-size: 20px; }
+.r2p-empty strong { color: #2d4039; font-size: 13px; }
+.r2p-empty p { margin: 0; max-width: 390px; font-size: 10px; line-height: 1.5; }
 .metric-card, .panel, .objective-card { background: var(--paper); border: 1px solid var(--line); box-shadow: 0 3px 12px rgba(22,54,44,.035); }
 .metric-card { min-height: 130px; border-radius: 15px; padding: 22px; display: flex; align-items: center; gap: 16px; }
 .metric-card.feature { background: #e6f2eb; border-color: #d5e9df; justify-content: space-between; }
@@ -333,6 +356,7 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .quality-shortcuts { grid-template-columns: 1fr; }
   .shortcut-actions { grid-template-columns: repeat(3, minmax(160px, 1fr)); }
   .cost-grid { grid-template-columns: 1fr; }
+  .r2p-metrics { grid-template-columns: repeat(2, 1fr); }
   .objective-grid { grid-template-columns: 1fr; }
 }
 
@@ -363,6 +387,10 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .quality-shortcuts { padding: 17px; gap: 16px; }
   .shortcut-actions { grid-template-columns: 1fr; }
   .cost-section { padding: 18px; }
+  .r2p-section { padding: 18px; }
+  .r2p-heading { align-items: flex-start; flex-direction: column; gap: 9px; }
+  .r2p-metrics { grid-template-columns: 1fr; }
+  .r2p-metric { min-height: 104px; }
   .cost-heading { align-items: flex-start; flex-direction: column; gap: 8px; }
   .drive-link { width: 100%; text-align: center; }
   .inventory-detail-heading { align-items: flex-start; flex-direction: column; gap: 6px; }

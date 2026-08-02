@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import inventoryProductsData from "./data/inventory-products.json";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos" | "r2p";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao" | "segit";
 type TaskStatus = "Por fazer" | "Em curso" | "Bloqueado" | "Concluído";
 
@@ -100,6 +100,7 @@ const viewLabels: Record<View, string> = {
   objetivos: "Objetivos mensais",
   areas: "Áreas de acompanhamento",
   custos: "Custo, Comida, Papel e OPS",
+  r2p: "Tempos de serviço · R2P",
 };
 
 type InventoryCategory = "food" | "paper" | "ops";
@@ -320,6 +321,13 @@ export default function Home() {
                   <div className="department-subtabs" aria-label="Subsecções de Qualidade e Produtos">
                     <button className={view === "custos" ? "department-subtab active" : "department-subtab"} onClick={() => setView("custos")}>
                       ◫ <span>Custo, Comida, Papel &amp; OPS</span>
+                    </button>
+                  </div>
+                )}
+                {item.id === "cliente" && department === "cliente" && (
+                  <div className="department-subtabs" aria-label="Subsecções de Serviço Cliente">
+                    <button className={view === "r2p" ? "department-subtab active" : "department-subtab"} onClick={() => setView("r2p")}>
+                      ◷ <span>Tempos de serviço · R2P</span>
                     </button>
                   </div>
                 )}
@@ -547,6 +555,28 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="inventory-note">Fonte: relatórios “Desvio de inventário” do restaurante Imperial. Selecione Comida, Papel ou OPS nos cartões acima; OPS agrega Produtos de Limpeza e Material de Escritório. Todos os produtos ativos e inativos estão incluídos.</p>
+              </div>
+            </section>
+          )}
+
+          {view === "r2p" && department === "cliente" && (
+            <section className="r2p-section" aria-labelledby="r2p-title">
+              <div className="r2p-heading">
+                <div><span className="eyebrow">Serviço Cliente</span><h2 id="r2p-title">Tempos de serviço · R2P</h2></div>
+                <span className="r2p-ready"><i /> Estrutura preparada</span>
+              </div>
+              <div className="r2p-metrics" aria-label="Indicadores R2P">
+                <article className="r2p-metric featured"><span className="r2p-symbol">◷</span><div><span className="eyebrow">R2P médio</span><strong>—</strong><small>A aguardar dados</small></div></article>
+                <article className="r2p-metric"><span className="r2p-symbol">#</span><div><span className="eyebrow">Pedidos</span><strong>—</strong><small>Total do período</small></div></article>
+                <article className="r2p-metric"><span className="r2p-symbol">✓</span><div><span className="eyebrow">Dentro da meta</span><strong>—</strong><small>Cumprimento do objetivo</small></div></article>
+                <article className="r2p-metric"><span className="r2p-symbol">↗</span><div><span className="eyebrow">Pico de serviço</span><strong>—</strong><small>Faixa horária crítica</small></div></article>
+              </div>
+              <div className="r2p-table-card">
+                <div className="r2p-table-heading"><div><span className="eyebrow">Acompanhamento</span><h3>Registo de tempos de serviço</h3></div><span>R2P</span></div>
+                <div className="r2p-table" role="table" aria-label="Registo de tempos de serviço R2P">
+                  <div className="r2p-row r2p-table-header" role="row"><span>Período</span><span>Canal</span><span>Pedidos</span><span>R2P médio</span><span>Meta</span><span>Estado</span></div>
+                  <div className="r2p-empty"><span>◷</span><strong>Pronto para receber dados R2P</strong><p>Os tempos de serviço aparecerão aqui assim que a fonte de dados for associada.</p></div>
+                </div>
               </div>
             </section>
           )}
