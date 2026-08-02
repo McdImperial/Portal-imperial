@@ -597,6 +597,12 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .objective-topic-head small, .objective-topic-values small, .objective-topic-points small, .objective-topic-progress small { color: #87938e; text-transform: uppercase; letter-spacing: .5px; font-size: 7px; font-weight: 800; }
 .objective-topic-head h3 { margin: 0; overflow: hidden; color: var(--ink); text-overflow: ellipsis; font-size: 12px; white-space: nowrap; }
 .objective-topic-symbol { width: 30px; height: 30px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 9px; color: #9f731e; background: #fbf0d9; font-weight: 900; }
+.objective-topic-image { width: 44px; height: 44px; flex: 0 0 auto; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.75); border-radius: 12px; font-size: 22px; box-shadow: inset 0 1px 0 rgba(255,255,255,.65); }
+.objective-topic-image.visual-blue { background: #e4f1f7; }
+.objective-topic-image.visual-mint { background: #e3f2eb; }
+.objective-topic-image.visual-coral { background: #fbe7df; }
+.objective-topic-image.visual-purple { background: #eee8f7; }
+.objective-topic-image.visual-gold { background: #fbf0d9; }
 .objective-topic-card.result-superado .objective-topic-symbol, .objective-topic-card.result-atingido .objective-topic-symbol { color: #267554; background: #e3f2eb; }
 .objective-topic-card.result-nao-atingido .objective-topic-symbol { color: #a44141; background: #f9e7e7; }
 .objective-topic-card.result-por-atualizar .objective-topic-symbol { color: #8b9893; background: #edf1ef; }
