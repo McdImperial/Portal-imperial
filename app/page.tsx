@@ -425,6 +425,21 @@ export default function Home() {
       naoAtingidos: { count: naoAtingidos, percent: percent(naoAtingidos) },
     };
   }, [selectedObjectives, selectedObjectiveSnapshot]);
+  const objectiveAnalysis = useMemo(() => {
+    const positive = selectedObjectives.filter((item) => ["Superado", "Atingido"].includes(getObjectiveResult(item)));
+    const near = selectedObjectives.filter((item) => getObjectiveResult(item) === "Próximo");
+    const unmet = selectedObjectives.filter((item) => getObjectiveResult(item) === "Não Atingido");
+    const onTrackPercent = objectiveStats.total ? Math.round((positive.length / objectiveStats.total) * 100) : 0;
+    const status = objectiveStats.monthlyPercent >= 85 ? { label: "Desempenho forte", tone: "strong" } : objectiveStats.monthlyPercent >= 65 ? { label: "Em evolução", tone: "progress" } : { label: "Requer atenção", tone: "attention" };
+    return {
+      ...status,
+      onTrackPercent,
+      remainingPoints: Math.max(0, objectiveStats.possiblePoints - objectiveStats.achievedPoints),
+      positiveNames: positive.sort((a, b) => (b.achievedPercent ?? 0) - (a.achievedPercent ?? 0)).map((item) => item.theme),
+      nearNames: near.sort((a, b) => (b.possiblePoints ?? 0) - (a.possiblePoints ?? 0)).map((item) => item.theme),
+      priorityNames: unmet.sort((a, b) => (b.possiblePoints ?? 0) - (a.possiblePoints ?? 0)).map((item) => item.theme),
+    };
+  }, [selectedObjectives, objectiveStats]);
 
   const visibleTasks = useMemo(() => {
     if (filter === "pendentes") return scopedTasks.filter((task) => !task.done);
@@ -1154,6 +1169,14 @@ export default function Home() {
                 <article className="objective-kpi objective-kpi-proximo"><span>↗</span><div><small>Próximos</small><div className="objective-kpi-value"><strong>{objectiveStats.proximos.count}</strong><b>{objectiveStats.proximos.percent}%</b></div><p>do total de objetivos</p></div></article>
                 <article className="objective-kpi objective-kpi-nao"><span>!</span><div><small>Não atingidos</small><div className="objective-kpi-value"><strong>{objectiveStats.naoAtingidos.count}</strong><b>{objectiveStats.naoAtingidos.percent}%</b></div><p>do total de objetivos</p></div></article>
               </div>
+              <section className={`objective-analysis analysis-${objectiveAnalysis.tone}`} aria-labelledby="objective-analysis-title">
+                <div className="objective-analysis-heading"><div><span className="analysis-icon">✦</span><div><span className="eyebrow">Análise do mês</span><h3 id="objective-analysis-title">Leitura dos resultados</h3></div></div><span className="analysis-status">{selectedObjectives.length ? objectiveAnalysis.label : "Sem dados"}</span></div>
+                {selectedObjectives.length ? <div className="objective-analysis-grid">
+                  <article className="analysis-summary"><small>Síntese</small><strong>{objectiveStats.monthlyPercent}% da pontuação</strong><p>Foram alcançados {objectiveStats.achievedPoints} de {objectiveStats.possiblePoints} pontos. {objectiveAnalysis.onTrackPercent}% dos objetivos estão atingidos ou superados.</p><div className="analysis-progress"><i><b style={{ width: `${Math.min(100, objectiveStats.monthlyPercent)}%` }} /></i><span>{objectiveAnalysis.remainingPoints} pontos por conquistar</span></div></article>
+                  <article className="analysis-positive"><small>Destaques positivos</small><strong>{objectiveStats.superados.count + objectiveStats.atingidos.count} objetivos no verde ou azul</strong><div className="analysis-chips">{objectiveAnalysis.positiveNames.length ? objectiveAnalysis.positiveNames.map((name) => <span key={name}>{name}</span>) : <em>Ainda sem objetivos atingidos ou superados.</em>}</div></article>
+                  <article className="analysis-focus"><small>Prioridades de melhoria</small><strong>{objectiveStats.naoAtingidos.count} não atingidos · {objectiveStats.proximos.count} próximos</strong>{objectiveAnalysis.priorityNames.length ? <p><b>Intervenção:</b> {objectiveAnalysis.priorityNames.join(", ")}.</p> : <p><b>Intervenção:</b> sem objetivos críticos.</p>}{objectiveAnalysis.nearNames.length ? <p><b>A consolidar:</b> {objectiveAnalysis.nearNames.join(", ")}.</p> : null}</article>
+                </div> : <div className="objective-analysis-empty"><span>◷</span><p>A análise ficará disponível assim que existirem resultados para {selectedObjectiveMonth.label}.</p></div>}
+              </section>
               <div className="objective-topic-grid" aria-label="Objetivos agrupados por tema">
                 {!selectedObjectives.length && <div className="objective-empty"><span>◷</span><div><strong>Sem objetivos importados</strong><p>Ainda não existem dados para {selectedObjectiveMonth.label}. Selecione outro mês.</p></div></div>}
                 {objectivePointGroups.map((group) => <section className="objective-score-row" key={group.points ?? "sem-pontos"}>
