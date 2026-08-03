@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import inventoryProductsData from "./data/inventory-products.json";
 import objectivesDataJson from "./data/objectives-data.json";
 import r2pDataJson from "./data/r2p-data.json";
@@ -298,6 +298,7 @@ function RankingPodium({ ranking }: { ranking: ManagerRanking[] }) {
 }
 
 export default function Home() {
+  const objectivesExportRef = useRef<HTMLElement>(null);
   const [view, setView] = useState<View>("resumo");
   const [department, setDepartment] = useState<Department>("global");
   const [tasks, setTasks] = useState(initialTasks);
@@ -500,60 +501,27 @@ export default function Home() {
   }
 
   async function exportObjectives() {
-    if (!selectedObjectives.length) return;
+    if (!selectedObjectives.length || !objectivesExportRef.current) return;
     try {
       const { jsPDF } = await import("jspdf");
       const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
       const pageWidth = doc.internal.pageSize.getWidth();
-      const margin = 12;
-      doc.setFillColor(36, 87, 63);
-      doc.rect(0, 0, pageWidth, 27, "F");
-      doc.setTextColor(255, 255, 255);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(18);
-      doc.text("McDonald's Imperial — Objetivos mensais", margin, 12);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.text(selectedObjectiveMonth.label, margin, 20);
-
-      doc.setTextColor(27, 43, 36);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(12);
-      doc.text(`Resultado mensal: ${objectiveStats.monthlyPercent}%`, margin, 37);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      doc.text(`${objectiveStats.achievedPoints} de ${objectiveStats.possiblePoints} pontos`, margin, 43);
-      doc.text(`Superados ${objectiveStats.superados.count} (${objectiveStats.superados.percent}%)  ·  Atingidos ${objectiveStats.atingidos.count} (${objectiveStats.atingidos.percent}%)  ·  Próximos ${objectiveStats.proximos.count} (${objectiveStats.proximos.percent}%)  ·  Não atingidos ${objectiveStats.naoAtingidos.count} (${objectiveStats.naoAtingidos.percent}%)`, margin, 49);
-
-      const headers = ["Tema objetivo", "Objetivo", "Resultado", "Classificação", "Pontos possíveis", "Pontos atingidos", "% atingido"];
-      const widths = [54, 31, 31, 43, 38, 38, 22];
-      const startY = 57;
-      const rowHeight = 8;
-      let x = margin;
-      doc.setFillColor(36, 87, 63);
-      doc.rect(margin, startY, widths.reduce((sum, width) => sum + width, 0), rowHeight, "F");
-      doc.setTextColor(255, 255, 255);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(7.5);
-      headers.forEach((header, index) => { doc.text(header, x + 2, startY + 5.2); x += widths[index]; });
-
-      selectedObjectives.forEach((item, rowIndex) => {
-        const y = startY + rowHeight + rowIndex * rowHeight;
-        if (rowIndex % 2 === 0) { doc.setFillColor(247, 249, 248); doc.rect(margin, y, widths.reduce((sum, width) => sum + width, 0), rowHeight, "F"); }
-        doc.setDrawColor(222, 229, 225);
-        doc.line(margin, y + rowHeight, pageWidth - margin - 3, y + rowHeight);
-        doc.setTextColor(31, 45, 39);
-        doc.setFont("helvetica", rowIndex === 0 ? "bold" : "normal");
-        doc.setFontSize(8);
-        const values = [item.theme, item.target ?? "—", item.result ?? "—", getObjectiveResult(item), String(item.possiblePoints ?? "—"), String(item.achievedPoints ?? "—"), `${item.achievedPercent ?? 0}%`];
-        x = margin;
-        values.forEach((value, index) => { doc.text(value, x + 2, y + 5.2, { maxWidth: widths[index] - 4 }); x += widths[index]; });
+      const margin = 7;
+      const exportArea = objectivesExportRef.current;
+      await document.fonts.ready;
+      await doc.html(exportArea, {
+        x: margin,
+        y: margin,
+        width: pageWidth - margin * 2,
+        windowWidth: exportArea.scrollWidth,
+        autoPaging: "text",
+        html2canvas: {
+          backgroundColor: "#f8faf9",
+          scale: 1,
+          useCORS: true,
+          ignoreElements: (element) => element.hasAttribute("data-pdf-exclude"),
+        },
       });
-
-      doc.setTextColor(108, 123, 116);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(7);
-      doc.text("Fonte: folha BD Mês — Seguimento Objetivos IMP - 26", margin, 190);
       doc.save(`objetivos-${objectiveMonth}.pdf`);
       setNotice(`PDF de ${selectedObjectiveMonth.label} exportado.`);
       window.setTimeout(() => setNotice(""), 2400);
@@ -1169,10 +1137,10 @@ export default function Home() {
           )}
 
           {view === "objetivos" && (
-            <section className="restaurant-objectives" aria-labelledby="restaurant-objectives-title">
+            <section ref={objectivesExportRef} className="restaurant-objectives" aria-labelledby="restaurant-objectives-title">
               <div className="restaurant-objectives-heading">
                 <div><span className="eyebrow">{selectedObjectiveMonth.label}</span><h2 id="restaurant-objectives-title">Objetivos mensais</h2><p>Leitura rápida das metas, resultados e pontuação.</p></div>
-                <div className="objective-toolbar">
+                <div className="objective-toolbar" data-pdf-exclude>
                   <label><span>Mês</span><select value={objectiveMonth} onChange={(event) => setObjectiveMonth(event.target.value)} aria-label="Filtrar objetivos por mês">{objectiveMonthOptions.map((month) => <option value={month.value} key={month.value}>{month.label}</option>)}</select></label>
                   <button type="button" className="objective-export" onClick={exportObjectives} disabled={!selectedObjectives.length}><span>⇩</span> Exportar PDF</button>
                 </div>
