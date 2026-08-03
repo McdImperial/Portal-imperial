@@ -618,6 +618,11 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .objective-topic-card.result-por-atualizar { border-top-color: #cbd5d1; }
 .objective-topic-head { min-height: 38px; display: flex; align-items: center; gap: 9px; }
 .objective-topic-head > div { min-width: 0; display: grid; gap: 3px; }
+.objective-topic-corner { margin-left: auto; align-self: flex-start; justify-items: end; gap: 7px !important; }
+.objective-department-corner { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid #dce6e1; border-radius: 12px; background: #f5f8f6; font-size: 21px; box-shadow: 0 2px 8px rgba(22,54,44,.06); }
+.objective-department-corner.department-people { border-color: #d9d7e9; background: #f3f0f8; }
+.objective-department-corner.department-service { border-color: #cfe2ea; background: #edf6fa; }
+.objective-department-corner.department-maintenance { border-color: #eadbc1; background: #fbf4e8; }
 .objective-topic-head small, .objective-topic-values small, .objective-topic-points small, .objective-topic-progress small { color: #87938e; text-transform: uppercase; letter-spacing: .5px; font-size: 7px; font-weight: 800; }
 .objective-topic-head h3 { margin: 0; overflow: hidden; color: var(--ink); text-overflow: ellipsis; font-size: 14px; font-weight: 800; line-height: 1.2; white-space: nowrap; }
 .objective-department { min-height: 42px; padding: 7px 9px; display: flex; align-items: center; gap: 8px; border: 1px solid #dce6e1; border-radius: 10px; background: #f5f8f6; }
