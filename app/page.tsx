@@ -7,7 +7,7 @@ import r2pDataJson from "./data/r2p-data.json";
 import tellTheArchesDataJson from "./data/tell-the-arches.json";
 
 type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos" | "r2p" | "tellarches" | "configuracoes";
-type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao" | "segit";
+type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type TaskStatus = "Por fazer" | "Em curso" | "Bloqueado" | "Concluído";
 type AppRole = "admin" | "editor" | "consulta";
 type AppUser = { id: number; name: string; login: string; role: AppRole; status: string };
@@ -48,16 +48,15 @@ const initialTasks: Task[] = [
   { id: 19, title: "Rever satisfação semanal", area: "Experiência", due: "Amanhã", assignee: "ML", priority: "Média", done: false, department: "cliente" },
   { id: 20, title: "Intervenção na câmara frigorífica", area: "Equipamentos", due: "Hoje, 16:00", assignee: "AR", priority: "Alta", done: false, department: "manutencao" },
   { id: 21, title: "Atualizar plano preventivo", area: "Prevenção", due: "Concluída ontem", assignee: "CM", priority: "Média", done: true, department: "manutencao" },
-  { id: 22, title: "Rever acessos de novos colaboradores", area: "IT", due: "Hoje, 15:00", assignee: "TS", priority: "Alta", done: false, department: "segit" },
-  { id: 23, title: "Teste mensal de emergência", area: "Segurança", due: "Concluída às 10:20", assignee: "JS", priority: "Média", done: true, department: "segit" },
+  { id: 22, title: "Rever acessos de novos colaboradores", area: "IT", due: "Hoje, 15:00", assignee: "TS", priority: "Alta", done: false, department: "manutencao" },
+  { id: 23, title: "Teste mensal de emergência", area: "Segurança", due: "Concluída às 10:20", assignee: "JS", priority: "Média", done: true, department: "manutencao" },
 ];
 
 const departments: { id: Department; label: string; short: string }[] = [
   { id: "qualidade", label: "Qualidade & Produtos", short: "QP" },
   { id: "pessoas", label: "Pessoas", short: "PE" },
   { id: "cliente", label: "Serviço Cliente", short: "SC" },
-  { id: "manutencao", label: "Manutenção", short: "MA" },
-  { id: "segit", label: "Seg. & IT", short: "SI" },
+  { id: "manutencao", label: "Manutenção Seg. & IT", short: "MSI" },
 ];
 
 const statusOptions: TaskStatus[] = ["Por fazer", "Em curso", "Bloqueado", "Concluído"];
@@ -80,7 +79,7 @@ function userInitials(name: string, email: string) {
 const departmentProfiles = {
   global: {
     objectives: [{ label: "Execução transversal", value: 76, target: "Meta: 90%", tone: "mint" }, { label: "Objetivos no verde", value: 84, target: "Meta: 90%", tone: "blue" }, { label: "Planos sem desvios", value: 71, target: "Meta: 85%", tone: "amber" }],
-    zones: [{ name: "Qualidade & Produtos", status: "Atenção", detail: "15 tarefas por concluir", percent: 71, tone: "attention" }, { name: "Pessoas", status: "Em dia", detail: "Objetivos atualizados", percent: 92, tone: "good" }, { name: "Serviço Cliente", status: "Atenção", detail: "2 pedidos críticos", percent: 68, tone: "attention" }, { name: "Manutenção · Seg. & IT", status: "Em curso", detail: "2 ações planeadas", percent: 78, tone: "progress" }],
+    zones: [{ name: "Qualidade & Produtos", status: "Atenção", detail: "15 tarefas por concluir", percent: 71, tone: "attention" }, { name: "Pessoas", status: "Em dia", detail: "Objetivos atualizados", percent: 92, tone: "good" }, { name: "Serviço Cliente", status: "Atenção", detail: "2 pedidos críticos", percent: 68, tone: "attention" }, { name: "Manutenção Seg. & IT", status: "Em curso", detail: "2 ações planeadas", percent: 78, tone: "progress" }],
   },
   qualidade: {
     objectives: [{ label: "Food", value: 0, display: "—", target: "Meta de julho por definir", tone: "mint" }, { label: "Paper", value: 0, display: "—", target: "Meta de julho por definir", tone: "blue" }, { label: "OPS", value: 0, display: "3 850", target: "Meta registada para julho", tone: "amber" }, { label: "Perdas", value: 0, display: "0,45", target: "Meta registada para julho", tone: "amber" }],
@@ -95,12 +94,8 @@ const departmentProfiles = {
     zones: [{ name: "Pedidos e reclamações", status: "Atenção", detail: "2 casos críticos", percent: 68, tone: "attention" }, { name: "Experiência do cliente", status: "Em curso", detail: "Revisão semanal amanhã", percent: 82, tone: "progress" }, { name: "Comunicação", status: "Em dia", detail: "Modelos atualizados", percent: 100, tone: "good" }, { name: "Indicadores de serviço", status: "Em dia", detail: "Dados atualizados hoje", percent: 94, tone: "good" }],
   },
   manutencao: {
-    objectives: [{ label: "Preventivas realizadas", value: 79, target: "Meta: 95%", tone: "mint" }, { label: "Disponibilidade técnica", value: 96, target: "Meta: 97%", tone: "blue" }, { label: "Avarias resolvidas no prazo", value: 72, target: "Meta: 85%", tone: "amber" }],
-    zones: [{ name: "Equipamentos críticos", status: "Atenção", detail: "1 intervenção aberta", percent: 62, tone: "attention" }, { name: "Manutenção preventiva", status: "Em curso", detail: "Plano a 79%", percent: 79, tone: "progress" }, { name: "Instalações", status: "Em dia", detail: "Ronda concluída", percent: 100, tone: "good" }, { name: "Fornecedores", status: "Em dia", detail: "Sem ações vencidas", percent: 93, tone: "good" }],
-  },
-  segit: {
-    objectives: [{ label: "Incidentes resolvidos", value: 88, target: "Meta: 95%", tone: "mint" }, { label: "Sistemas disponíveis", value: 99, target: "Meta: 99,5%", tone: "blue" }, { label: "Ações de segurança", value: 76, target: "Meta: 90%", tone: "amber" }],
-    zones: [{ name: "Segurança no trabalho", status: "Em dia", detail: "Teste concluído hoje", percent: 96, tone: "good" }, { name: "Acessos & Identidades", status: "Atenção", detail: "3 acessos por rever", percent: 65, tone: "attention" }, { name: "Infraestrutura IT", status: "Em dia", detail: "Sistemas estáveis", percent: 99, tone: "good" }, { name: "Continuidade", status: "Em curso", detail: "Plano em revisão", percent: 81, tone: "progress" }],
+    objectives: [{ label: "Preventivas realizadas", value: 79, target: "Meta: 95%", tone: "mint" }, { label: "Sistemas disponíveis", value: 99, target: "Meta: 99,5%", tone: "blue" }, { label: "Ações de segurança", value: 76, target: "Meta: 90%", tone: "amber" }],
+    zones: [{ name: "Equipamentos críticos", status: "Atenção", detail: "1 intervenção aberta", percent: 62, tone: "attention" }, { name: "Manutenção preventiva", status: "Em curso", detail: "Plano a 79%", percent: 79, tone: "progress" }, { name: "Segurança no trabalho", status: "Em dia", detail: "Teste concluído hoje", percent: 96, tone: "good" }, { name: "Acessos & Identidades", status: "Atenção", detail: "3 acessos por rever", percent: 65, tone: "attention" }, { name: "Infraestrutura IT", status: "Em dia", detail: "Sistemas estáveis", percent: 99, tone: "good" }, { name: "Instalações", status: "Em dia", detail: "Ronda concluída", percent: 100, tone: "good" }],
   },
 } satisfies Record<Department, { objectives: { label: string; value: number; display?: string; target: string; tone: string }[]; zones: { name: string; status: string; detail: string; percent: number; tone: string }[] }>;
 
@@ -158,10 +153,10 @@ const objectiveDepartments: Record<string, { name: string; icon: string; tone: s
   "R2P Dia": { name: "Serviço Cliente", icon: "🎧", tone: "service" },
   "OCM Rest": { name: "Serviço Cliente", icon: "🎧", tone: "service" },
   AOLs: { name: "Serviço Cliente", icon: "🎧", tone: "service" },
-  "Delivery R Time": { name: "Manutenção · Seg. & IT", icon: "🛠️", tone: "maintenance" },
-  "Delivery Exatidão": { name: "Manutenção · Seg. & IT", icon: "🛠️", tone: "maintenance" },
-  "Delivery C SAT": { name: "Manutenção · Seg. & IT", icon: "🛠️", tone: "maintenance" },
-  "Delivery T Time": { name: "Manutenção · Seg. & IT", icon: "🛠️", tone: "maintenance" },
+  "Delivery R Time": { name: "Manutenção Seg. & IT", icon: "🛠️", tone: "maintenance" },
+  "Delivery Exatidão": { name: "Manutenção Seg. & IT", icon: "🛠️", tone: "maintenance" },
+  "Delivery C SAT": { name: "Manutenção Seg. & IT", icon: "🛠️", tone: "maintenance" },
+  "Delivery T Time": { name: "Manutenção Seg. & IT", icon: "🛠️", tone: "maintenance" },
 };
 
 function getObjectiveResult(item: RestaurantObjective): ObjectiveResult {
@@ -362,7 +357,8 @@ export default function Home() {
         if (!response.ok) throw new Error("load failed");
         const data = await response.json() as { tasks: Task[] };
         if (data.tasks.length) {
-          if (active) setTasks(data.tasks);
+          const normalizedTasks = data.tasks.map((task) => ({ ...task, department: (task.department as string) === "segit" ? "manutencao" : task.department } as Task));
+          if (active) setTasks(normalizedTasks);
         } else {
           const seedResponse = await fetch("/api/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tasks: initialTasks }) });
           const seeded = await seedResponse.json() as { tasks: Task[] };
