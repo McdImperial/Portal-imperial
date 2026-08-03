@@ -588,8 +588,8 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .objective-kpi-atingido .objective-kpi-value b { color: #2b6c89; }
 .objective-kpi-proximo { background: #fff0d9; border-color: #efd8ad; }
 .objective-kpi-proximo .objective-kpi-value b { color: #a66d14; }
-.objective-kpi-nao { background: #f9e5e5; border-color: #ebcaca; }
-.objective-kpi-nao .objective-kpi-value b { color: #a44141; }
+.objective-kpi-nao { background: #fff0d9; border-color: #efd8ad; }
+.objective-kpi-nao .objective-kpi-value b { color: #a66d14; }
 .objective-kpi-green { background: #e6f3ed; border-color: #cfe6dc; }
 .objective-kpi-gold { background: #fbf0d9; border-color: #eeddbb; }
 .objective-kpi-blue { background: #e5f1f6; border-color: #cfe2ea; }
@@ -607,9 +607,8 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .objective-score-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap: 10px; }
 .objective-topic-card { min-height: 202px; padding: 13px; display: flex; flex-direction: column; gap: 11px; border: 1px solid #dfe6e2; border-top: 4px solid #d5a23d; border-radius: 12px; background: white; box-shadow: 0 3px 10px rgba(22,54,44,.04); }
 .objective-topic-card.result-superado { border-top-color: #287654; }
-.objective-topic-card.result-atingido { border-top-color: #4b9b5b; }
-.objective-topic-card.result-proximo { border-top-color: #d5a23d; }
-.objective-topic-card.result-nao-atingido { border-top-color: #c75959; }
+.objective-topic-card.result-atingido { border-top-color: #3f86a6; }
+.objective-topic-card.result-proximo, .objective-topic-card.result-nao-atingido { border-top-color: #d58b24; }
 .objective-topic-card.result-por-atualizar { border-top-color: #cbd5d1; }
 .objective-topic-head { min-height: 38px; display: flex; align-items: center; gap: 9px; }
 .objective-topic-head > div { min-width: 0; display: grid; gap: 3px; }
@@ -622,12 +621,14 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .objective-topic-image.visual-coral { background: #fbe7df; }
 .objective-topic-image.visual-purple { background: #eee8f7; }
 .objective-topic-image.visual-gold { background: #fbf0d9; }
-.objective-topic-card.result-superado .objective-topic-symbol, .objective-topic-card.result-atingido .objective-topic-symbol { color: #267554; background: #e3f2eb; }
-.objective-topic-card.result-nao-atingido .objective-topic-symbol { color: #a44141; background: #f9e7e7; }
+.objective-topic-card.result-superado .objective-topic-symbol { color: #267554; background: #e3f2eb; }
+.objective-topic-card.result-atingido .objective-topic-symbol { color: #2b6c89; background: #e4f1f7; }
+.objective-topic-card.result-nao-atingido .objective-topic-symbol { color: #a66d14; background: #fff0d9; }
 .objective-topic-card.result-por-atualizar .objective-topic-symbol { color: #8b9893; background: #edf1ef; }
 .objective-classification-badge { margin-left: auto; padding: 5px 8px; border-radius: 999px; color: #bf6a0d; background: #fff0d9; font-size: 8px; font-weight: 800; }
-.objective-classification-badge.result-superado, .objective-classification-badge.result-atingido { color: #267554; background: #e3f2eb; }
-.objective-classification-badge.result-nao-atingido { color: #a44141; background: #f9e7e7; }
+.objective-classification-badge.result-superado { color: #267554; background: #e3f2eb; }
+.objective-classification-badge.result-atingido { color: #2b6c89; background: #e4f1f7; }
+.objective-classification-badge.result-nao-atingido { color: #a66d14; background: #fff0d9; }
 .objective-classification-badge.result-por-atualizar { color: #7c8984; background: #edf1ef; }
 .objective-topic-values { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .objective-topic-values > div { padding: 9px 10px; display: grid; gap: 3px; border-radius: 9px; background: #f4f7f5; }
@@ -638,11 +639,14 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .objective-topic-progress { margin-top: auto; display: grid; gap: 8px; }
 .objective-topic-progress > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .objective-topic-progress strong { color: #7f8c87; font-size: 9px; }
-.objective-topic-card.result-superado .objective-topic-progress strong, .objective-topic-card.result-atingido .objective-topic-progress strong { color: #287654; }
-.objective-topic-card.result-proximo .objective-topic-progress strong { color: #a66d14; }
-.objective-topic-card.result-nao-atingido .objective-topic-progress strong { color: #a44141; }
+.objective-topic-card.result-superado .objective-topic-progress strong { color: #287654; }
+.objective-topic-card.result-atingido .objective-topic-progress strong { color: #2b6c89; }
+.objective-topic-card.result-proximo .objective-topic-progress strong, .objective-topic-card.result-nao-atingido .objective-topic-progress strong { color: #a66d14; }
 .objective-topic-progress > i { height: 8px; overflow: hidden; border-radius: 999px; background: #e7ece9; }
 .objective-topic-progress em { display: block; height: 100%; border-radius: inherit; background: #3b9249; }
+.objective-topic-card.result-atingido .objective-topic-progress em { background: #3f86a6; }
+.objective-topic-card.result-proximo .objective-topic-progress em, .objective-topic-card.result-nao-atingido .objective-topic-progress em { background: #d58b24; }
+.objective-topic-card.result-por-atualizar .objective-topic-progress em { background: #aebbb5; }
 .objectives-total { min-width: 120px; padding: 12px 15px; display: grid; gap: 4px; border-radius: 11px; color: #285746; background: #e7f3ed; text-align: right; }
 .objectives-total span { text-transform: uppercase; letter-spacing: .7px; font-size: 7px; font-weight: 800; }
 .objectives-total strong { font-family: Georgia, "Times New Roman", serif; font-size: 22px; }
