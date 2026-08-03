@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const healthRecords = sqliteTable("health_records", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -12,5 +12,9 @@ export const healthRecords = sqliteTable("health_records", {
   title: text("title"),
   notes: text("notes"),
   duration: integer("duration"),
+  sourceKey: text("source_key"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-}, (table) => [index("idx_health_records_profile_date").on(table.profile, table.recordedAt)]);
+}, (table) => [
+  index("idx_health_records_profile_date").on(table.profile, table.recordedAt),
+  uniqueIndex("idx_health_records_source_key").on(table.sourceKey),
+]);

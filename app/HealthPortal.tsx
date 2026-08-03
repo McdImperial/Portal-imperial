@@ -80,6 +80,7 @@ export default function HealthPortal() {
   const bp = lastOf(personRecords, "blood_pressure");
   const activities = personRecords.filter((r) => r.kind === "activity");
   const activityMinutes = activities.reduce((sum, item) => sum + (item.duration ?? 0), 0);
+  const activityDistance = activities.reduce((sum, item) => sum + (item.value1 ?? 0), 0);
   const steps = activities.reduce((sum, item) => sum + (item.value2 ?? 0), 0);
   const medical = personRecords.filter((r) => r.kind === "medical");
 
@@ -115,7 +116,6 @@ export default function HealthPortal() {
     window.setTimeout(() => setSaved(false), 2800);
   }
 
-  const currentProfile = profiles.find((item) => item.name === profile)!;
   const chartWeights = personRecords.filter((r) => r.kind === "weight").slice(0, 8).reverse();
 
   return (
@@ -144,7 +144,7 @@ export default function HealthPortal() {
             <p>Acompanhe o seu bem-estar, com tudo no mesmo lugar.</p>
           </div>
           <div className="header-actions">
-            <button className="date-chip">Últimos 30 dias <span>⌄</span></button>
+            <button className="date-chip">Todo o histórico <span>⌄</span></button>
             <button className="primary" onClick={() => setModal("weight")}><span>＋</span> Novo registo</button>
           </div>
         </header>
@@ -153,8 +153,8 @@ export default function HealthPortal() {
           <section className="metrics-grid" aria-label="Resumo de saúde">
             <MetricCard tone="sage" label="Peso atual" value={weight ? `${weight.value1} kg` : "—"} detail={previousWeight && weight ? `${(Number(weight.value1) - Number(previousWeight.value1)).toFixed(1)} kg desde ${displayDate(previousWeight.recordedAt)}` : "Adicione uma medição"} icon="↘" />
             <MetricCard tone="rose" label="Tensão arterial" value={bp ? `${bp.value1} / ${bp.value2}` : "—"} detail={bp ? `Última medição · ${displayDate(bp.recordedAt)}` : "Adicione uma medição"} icon="♡" unit="mmHg" />
-            <MetricCard tone="sky" label="Atividade" value={`${activityMinutes} min`} detail={`${activities.length} sessões registadas`} icon="⌁" />
-            <MetricCard tone="gold" label="Passos" value={new Intl.NumberFormat("pt-PT").format(steps)} detail="No período selecionado" icon="↑" />
+            <MetricCard tone="sky" label="Atividade" value={activityMinutes ? `${activityMinutes} min` : `${activityDistance.toFixed(1)} km`} detail={`${activities.length} dias ou sessões registados`} icon="⌁" />
+            <MetricCard tone="gold" label="Passos" value={new Intl.NumberFormat("pt-PT").format(steps)} detail="No histórico importado" icon="↑" />
           </section>
 
           <section className="content-grid">
@@ -169,7 +169,7 @@ export default function HealthPortal() {
                   <div className="bp-row" key={item.id}><span className={`status-dot ${index === 0 ? "good" : ""}`} /><div><strong>{item.value1} / {item.value2}</strong><small>mmHg</small></div><span>{displayDate(item.recordedAt)}</span></div>
                 ))}
               </div>
-              <div className="soft-message">As medições recentes parecem consistentes. Continue a registar sempre nas mesmas condições.</div>
+              <div className="soft-message">Resumo descritivo dos registos. A interpretação clínica deve ser feita por um profissional de saúde.</div>
             </article>
           </section>
 
@@ -217,8 +217,10 @@ function WeightChart({ records }: { records: HealthRecord[] }) {
 
 function RecordRow({ item }: { item: HealthRecord }) {
   const labels: Record<RecordKind, { icon: string; name: string }> = { weight: { icon: "⚖", name: "Peso" }, blood_pressure: { icon: "♡", name: "Tensão arterial" }, activity: { icon: "⌁", name: item.title || "Atividade" }, medical: { icon: "+", name: item.title || "Registo de saúde" } };
-  const detail = item.kind === "weight" ? `${item.value1} kg` : item.kind === "blood_pressure" ? `${item.value1} / ${item.value2} mmHg` : item.kind === "activity" ? `${item.duration} min · ${item.value1} km` : item.notes;
-  return <div className="record-row"><span className={`record-icon ${item.kind}`}>{labels[item.kind].icon}</span><div><strong>{labels[item.kind].name}</strong><small>{detail}</small></div><time>{displayDate(item.recordedAt)}</time></div>;
+  const driveUrl = item.notes?.match(/https:\/\/drive\.google\.com\/\S+/)?.[0] ?? null;
+  const note = driveUrl ? item.notes?.replace(driveUrl, "").trim() : item.notes;
+  const detail = item.kind === "weight" ? `${item.value1} kg` : item.kind === "blood_pressure" ? `${item.value1} / ${item.value2} mmHg` : item.kind === "activity" ? (item.duration ? `${item.duration} min · ${item.value1 ?? 0} km` : `${item.value1 ?? 0} km · ${new Intl.NumberFormat("pt-PT").format(item.value2 ?? 0)} passos`) : note;
+  return <div className="record-row"><span className={`record-icon ${item.kind}`}>{labels[item.kind].icon}</span><div><strong>{labels[item.kind].name}</strong><small>{detail}{driveUrl && <>{detail ? " · " : ""}<a href={driveUrl} target="_blank" rel="noreferrer">Abrir no Drive</a></>}</small></div><time>{displayDate(item.recordedAt)}</time></div>;
 }
 
 function RecordsView({ records, onAdd }: { records: HealthRecord[]; onAdd: () => void }) {
@@ -229,7 +231,8 @@ function RecordsView({ records, onAdd }: { records: HealthRecord[]; onAdd: () =>
 
 function ActivityView({ records, onAdd }: { records: HealthRecord[]; onAdd: () => void }) {
   const totalDistance = records.reduce((s, r) => s + (r.value1 ?? 0), 0);
-  return <section className="page-panel"><div className="section-title"><div><p className="eyebrow">Movimento</p><h2>Atividade física</h2><p>Acompanhe sessões, duração, distância e passos.</p></div><button className="primary" onClick={onAdd}>＋ Nova atividade</button></div><div className="activity-summary"><MetricCard tone="sky" label="Tempo total" value={`${records.reduce((s,r)=>s+(r.duration??0),0)} min`} detail={`${records.length} sessões`} icon="⌁"/><MetricCard tone="sage" label="Distância" value={`${totalDistance.toFixed(1)} km`} detail="No período selecionado" icon="↗"/><MetricCard tone="gold" label="Passos" value={new Intl.NumberFormat("pt-PT").format(records.reduce((s,r)=>s+(r.value2??0),0))} detail="Total registado" icon="↑"/></div><div className="records-table">{records.map((item) => <RecordRow key={item.id} item={item} />)}</div></section>;
+  const totalMinutes = records.reduce((s,r)=>s+(r.duration??0),0);
+  return <section className="page-panel"><div className="section-title"><div><p className="eyebrow">Movimento</p><h2>Atividade física</h2><p>Acompanhe dias ativos, distância, passos e sessões adicionadas.</p></div><button className="primary" onClick={onAdd}>＋ Nova atividade</button></div><div className="activity-summary"><MetricCard tone="sky" label={totalMinutes ? "Tempo total" : "Dias registados"} value={totalMinutes ? `${totalMinutes} min` : `${records.length}`} detail={totalMinutes ? `${records.length} sessões` : "Com dados de atividade"} icon="⌁"/><MetricCard tone="sage" label="Distância" value={`${totalDistance.toFixed(1)} km`} detail="No histórico importado" icon="↗"/><MetricCard tone="gold" label="Passos" value={new Intl.NumberFormat("pt-PT").format(records.reduce((s,r)=>s+(r.value2??0),0))} detail="Total registado" icon="↑"/></div><div className="records-table">{records.map((item) => <RecordRow key={item.id} item={item} />)}</div></section>;
 }
 
 function TrendsView({ records, chartWeights }: { records: HealthRecord[]; chartWeights: HealthRecord[] }) {
