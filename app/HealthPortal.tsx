@@ -60,7 +60,7 @@ export default function HealthPortal() {
       const response = await fetch("/api/records", { cache: "no-store" });
       if (response.ok) {
         const data = (await response.json()) as { records: HealthRecord[] };
-        if (data.records.length) setRecords(data.records);
+        setRecords(data.records);
       }
     } catch {
       // The in-product preview uses realistic examples until cloud storage is available.
