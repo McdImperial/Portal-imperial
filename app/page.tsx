@@ -1176,7 +1176,7 @@ export default function Home() {
                 {objectivePointGroups.map((group) => <section className="objective-score-row" key={group.points ?? "sem-pontos"}>
                   <div className="objective-score-heading"><span>{group.points === undefined ? "Sem pontuação definida" : `${group.points} pontos possíveis`}</span><small>{group.objectives.length} {group.objectives.length === 1 ? "objetivo" : "objetivos"}</small></div>
                   <div className="objective-score-cards">{group.objectives.map((item) => { const result = getObjectiveResult(item); const visual = objectiveVisuals[item.theme] ?? { icon: "◎", label: item.theme, tone: "mint" }; return <article className={`objective-topic-card result-${statusClass(result)}`} key={item.theme}>
-                  <div className="objective-topic-head"><span className={`objective-topic-image visual-${visual.tone}`} role="img" aria-label={visual.label}>{visual.icon}</span><div><small>Tema objetivo</small><h3>{item.theme}</h3></div><span className={`objective-classification-badge result-${statusClass(result)}`}>{result}</span></div>
+                  <div className="objective-topic-head"><span className={`objective-topic-image visual-${visual.tone}`} role="img" aria-label={visual.label}>{visual.icon}</span><div><h3>{item.theme}</h3></div><span className={`objective-classification-badge result-${statusClass(result)}`}>{result}</span></div>
                   <div className="objective-topic-values">
                     <div><small>Objetivo</small><strong>{item.target ?? "—"}</strong></div>
                     <div><small>Resultado</small><strong>{item.result ?? "—"}</strong></div>
