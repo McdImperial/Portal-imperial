@@ -7,6 +7,7 @@ const areasByDepartment = {
   qualidade: ["Positiva / Negativa", "Stock secos", "Aquário", "Balneários Funcionários", "Sala de pausa", "Sala de HM", "Balneários de Gerentes"],
   cliente: ["Sala piso 0", "Sala piso -1", "WC Clientes", "Cantinho RPs", "Corredor interno P -1"],
   pessoas: ["Sala piso 0", "Sala piso -1", "WC Clientes", "Cantinho RPs", "Corredor interno P -1"],
+  manutencao: ["Cozinha", "Copa", "Sala de peças", "Sala de lixo", "Zona Técnica", "Esplanada"],
 } as const;
 type InterventionDepartment = keyof typeof areasByDepartment;
 const kinds = ["Limpeza", "Manutenção"] as const;

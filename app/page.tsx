@@ -15,7 +15,7 @@ type AppUser = { id: number; name: string; login: string; role: AppRole; departm
 type ManagedUser = AppUser & { createdAt: string; approvedAt: string | null };
 type CleaningIntervention = {
   id: number;
-  department: "qualidade" | "cliente" | "pessoas";
+  department: "qualidade" | "cliente" | "pessoas" | "manutencao";
   area: string;
   kind: "Limpeza" | "Manutenção";
   scheduledDate: string;
@@ -78,7 +78,8 @@ const departments: { id: Department; label: string; short: string }[] = [
 const qualityCleaningAreas = ["Positiva / Negativa", "Stock secos", "Aquário", "Balneários Funcionários", "Sala de pausa", "Sala de HM", "Balneários de Gerentes"] as const;
 const serviceCleaningAreas = ["Sala piso 0", "Sala piso -1", "WC Clientes", "Cantinho RPs", "Corredor interno P -1"] as const;
 const peopleCleaningAreas = ["Sala piso 0", "Sala piso -1", "WC Clientes", "Cantinho RPs", "Corredor interno P -1"] as const;
-const cleaningAreasByDepartment = { qualidade: qualityCleaningAreas, cliente: serviceCleaningAreas, pessoas: peopleCleaningAreas } as const;
+const maintenanceCleaningAreas = ["Cozinha", "Copa", "Sala de peças", "Sala de lixo", "Zona Técnica", "Esplanada"] as const;
+const cleaningAreasByDepartment = { qualidade: qualityCleaningAreas, cliente: serviceCleaningAreas, pessoas: peopleCleaningAreas, manutencao: maintenanceCleaningAreas } as const;
 const emptyInterventionDraft = (area: string): InterventionDraft => ({ area, kind: "Limpeza", scheduledDate: "", estimatedHours: "2", resources: "" });
 
 const statusOptions: TaskStatus[] = ["Por fazer", "Em curso", "Bloqueado", "Concluído"];
@@ -402,7 +403,7 @@ export default function Home() {
   }, [currentUser]);
 
   useEffect(() => {
-    const interventionDepartment = department === "qualidade" || department === "cliente" || department === "pessoas" ? department : null;
+    const interventionDepartment = department === "qualidade" || department === "cliente" || department === "pessoas" || department === "manutencao" ? department : null;
     if (!currentUser || view !== "areas" || !interventionDepartment) return;
     let active = true;
     setCleaningInterventions([]);
@@ -434,7 +435,7 @@ export default function Home() {
   const completion = scopedTasks.length ? Math.round((completed / scopedTasks.length) * 100) : 0;
   const activeProfile = departmentProfiles[department];
   const departmentLabel = departments.find((item) => item.id === department)?.label ?? "Visão global";
-  const interventionDepartment = department === "qualidade" || department === "cliente" || department === "pessoas" ? department : null;
+  const interventionDepartment = department === "qualidade" || department === "cliente" || department === "pessoas" || department === "manutencao" ? department : null;
   const selectedCleaningAreas: readonly string[] = interventionDepartment ? cleaningAreasByDepartment[interventionDepartment] : [];
   const canManageCleaning = Boolean(interventionDepartment && (currentUser?.role === "admin" || currentUser?.role === "editor" && currentUser.department === interventionDepartment));
   const openInterventions = cleaningInterventions.filter((item) => item.status !== "Encerrada").length;
@@ -1277,7 +1278,7 @@ export default function Home() {
             </section>
           )}
 
-          {(view === "resumo" || view === "areas" && department !== "qualidade" && department !== "cliente" && department !== "pessoas") && (
+          {view === "resumo" && (
             <section className="panel zones-panel">
               <div className="panel-heading"><div><span className="eyebrow">Estado atual · {departmentLabel}</span><h2>Áreas de limpeza</h2></div><span className="live-indicator"><i /> Atualizado agora</span></div>
               <div className="zones-grid">
