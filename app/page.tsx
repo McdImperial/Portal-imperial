@@ -6,8 +6,9 @@ import objectivesDataJson from "./data/objectives-data.json";
 import r2pDataJson from "./data/r2p-data.json";
 import tellTheArchesDataJson from "./data/tell-the-arches.json";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos" | "r2p" | "tellarches" | "configuracoes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "custos" | "r2p" | "tellarches" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
+type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
 type TaskStatus = "Por fazer" | "Em curso" | "Bloqueado" | "Concluído";
 type AppRole = "admin" | "editor" | "consulta";
@@ -29,6 +30,9 @@ type CleaningIntervention = {
   updatedAt: string;
 };
 type InterventionDraft = { area: string; kind: "Limpeza" | "Manutenção"; scheduledDate: string; estimatedHours: string; resources: string };
+type AreaRating = "" | "Bom" | "Aceitável" | "Necessita Melhorar" | "Não aceitável";
+type AreaEvaluation = { id: number; month: string; department: EvaluationDepartment; area: string; cleaningRating: AreaRating; maintenanceRating: AreaRating; evaluatedByName: string; evaluatedAt: string };
+type AreaEvaluationDraft = Record<string, { cleaningRating: AreaRating; maintenanceRating: AreaRating }>;
 
 type Task = {
   id: number;
@@ -81,6 +85,8 @@ const peopleCleaningAreas = ["Sala piso 0", "Sala piso -1", "WC Clientes", "Cant
 const maintenanceCleaningAreas = ["Cozinha", "Copa", "Sala de peças", "Sala de lixo", "Zona Técnica", "Esplanada"] as const;
 const cleaningAreasByDepartment = { qualidade: qualityCleaningAreas, cliente: serviceCleaningAreas, pessoas: peopleCleaningAreas, manutencao: maintenanceCleaningAreas } as const;
 const emptyInterventionDraft = (area: string): InterventionDraft => ({ area, kind: "Limpeza", scheduledDate: "", estimatedHours: "2", resources: "" });
+const areaRatings: AreaRating[] = ["", "Bom", "Aceitável", "Necessita Melhorar", "Não aceitável"];
+const evaluationKey = (department: EvaluationDepartment, area: string) => `${department}::${area}`;
 
 const statusOptions: TaskStatus[] = ["Por fazer", "Em curso", "Bloqueado", "Concluído"];
 const ownerOptions = [
@@ -127,6 +133,7 @@ const viewLabels: Record<View, string> = {
   tarefas: "Todas as tarefas",
   objetivos: "Objetivos mensais",
   areas: "Áreas de limpeza",
+  areasglobais: "Áreas",
   custos: "Custo, Comida, Papel e OPS",
   r2p: "Tempos de serviço · R2P",
   tellarches: "Tell The Arches",
@@ -360,6 +367,10 @@ export default function Home() {
   const [showInterventionForm, setShowInterventionForm] = useState(false);
   const [interventionDraft, setInterventionDraft] = useState<InterventionDraft>(() => emptyInterventionDraft(qualityCleaningAreas[0]));
   const [interventionBusy, setInterventionBusy] = useState(false);
+  const [evaluationMonth, setEvaluationMonth] = useState("2026-08");
+  const [areaEvaluationDraft, setAreaEvaluationDraft] = useState<AreaEvaluationDraft>({});
+  const [evaluationBusy, setEvaluationBusy] = useState(false);
+  const [evaluationUpdatedAt, setEvaluationUpdatedAt] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -429,6 +440,20 @@ export default function Home() {
     fetch("/api/auth/users/").then((response) => response.ok ? response.json() : Promise.reject()).then((data: { users: ManagedUser[] }) => setManagedUsers(data.users)).catch(() => setNotice("Não foi possível carregar os utilizadores."));
   }, [view, currentUser]);
 
+  useEffect(() => {
+    if (!currentUser || view !== "areasglobais") return;
+    let active = true;
+    const blank = Object.fromEntries((Object.entries(cleaningAreasByDepartment) as [EvaluationDepartment, readonly string[]][]).flatMap(([departmentId, areas]) => areas.map((area) => [evaluationKey(departmentId, area), { cleaningRating: "" as AreaRating, maintenanceRating: "" as AreaRating }])));
+    fetch(`/api/area-evaluations/?month=${evaluationMonth}`).then((response) => response.ok ? response.json() : Promise.reject()).then((data: { evaluations: AreaEvaluation[] }) => {
+      if (!active) return;
+      const next = { ...blank };
+      data.evaluations.forEach((evaluation) => { next[evaluationKey(evaluation.department, evaluation.area)] = { cleaningRating: evaluation.cleaningRating, maintenanceRating: evaluation.maintenanceRating }; });
+      setAreaEvaluationDraft(next);
+      setEvaluationUpdatedAt(data.evaluations.map((item) => item.evaluatedAt).sort().at(-1) ?? null);
+    }).catch(() => setNotice("Não foi possível carregar as avaliações mensais."));
+    return () => { active = false; };
+  }, [currentUser, view, evaluationMonth]);
+
   const scopedTasks = tasks.filter((task) => department === "global" || task.department === department);
   const pending = scopedTasks.filter((task) => !task.done).length;
   const completed = scopedTasks.length - pending;
@@ -440,6 +465,17 @@ export default function Home() {
   const canManageCleaning = Boolean(interventionDepartment && (currentUser?.role === "admin" || currentUser?.role === "editor" && currentUser.department === interventionDepartment));
   const openInterventions = cleaningInterventions.filter((item) => item.status !== "Encerrada").length;
   const closedInterventions = cleaningInterventions.filter((item) => item.status === "Encerrada").length;
+  const areaRatingStats = useMemo(() => {
+    const values = Object.values(areaEvaluationDraft).flatMap((item) => [item.cleaningRating, item.maintenanceRating]).filter((rating): rating is Exclude<AreaRating, ""> => Boolean(rating));
+    return {
+      rated: values.length,
+      total: (Object.values(cleaningAreasByDepartment) as readonly (readonly string[])[]).reduce((sum, areas) => sum + areas.length * 2, 0),
+      bom: values.filter((rating) => rating === "Bom").length,
+      aceitavel: values.filter((rating) => rating === "Aceitável").length,
+      melhorar: values.filter((rating) => rating === "Necessita Melhorar").length,
+      naoAceitavel: values.filter((rating) => rating === "Não aceitável").length,
+    };
+  }, [areaEvaluationDraft]);
   const selectedObjectiveMonth = objectiveMonthOptions.find((item) => item.value === objectiveMonth) ?? objectiveMonthOptions[6];
   const selectedObjectiveSnapshot = objectivesByMonth[objectiveMonth];
   const selectedObjectives = selectedObjectiveSnapshot?.objectives ?? [];
@@ -745,6 +781,26 @@ export default function Home() {
     setNotice(closed ? "Intervenção encerrada." : "Intervenção reaberta.");
   }
 
+  async function saveAreaEvaluations() {
+    if (currentUser?.role !== "admin" || evaluationBusy) return;
+    setEvaluationBusy(true);
+    const evaluations = (Object.entries(cleaningAreasByDepartment) as [EvaluationDepartment, readonly string[]][]).flatMap(([departmentId, areas]) => areas.map((area) => {
+      const ratings = areaEvaluationDraft[evaluationKey(departmentId, area)] ?? { cleaningRating: "", maintenanceRating: "" };
+      return { department: departmentId, area, ...ratings };
+    }));
+    try {
+      const response = await fetch("/api/area-evaluations/", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ month: evaluationMonth, evaluations }) });
+      const data = await response.json() as { evaluations?: AreaEvaluation[]; evaluatedAt?: string; error?: string };
+      if (!response.ok || !data.evaluations) throw new Error(data.error || "Não foi possível guardar a avaliação.");
+      setEvaluationUpdatedAt(data.evaluatedAt ?? new Date().toISOString());
+      setNotice("Avaliação mensal guardada.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Não foi possível guardar a avaliação.");
+    } finally {
+      setEvaluationBusy(false);
+    }
+  }
+
   const roleLabel = (role: AppRole) => role === "admin" ? "Administrador" : role === "editor" ? "Editor" : "Consulta";
   const canEdit = currentUser?.role === "admin" || currentUser?.role === "editor";
 
@@ -752,7 +808,7 @@ export default function Home() {
     { id: "resumo", label: "Resumo", glyph: "▦" },
     { id: "tarefas", label: "Tarefas", glyph: "✓" },
     { id: "objetivos", label: "Objetivos", glyph: "◎" },
-    { id: "areas", label: "Áreas", glyph: "⌂" },
+    { id: "areasglobais", label: "Áreas", glyph: "⌂" },
     ...(currentUser?.role === "admin" ? [{ id: "configuracoes" as View, label: "Configurações", glyph: "⚙" }] : []),
   ];
 
@@ -785,7 +841,7 @@ export default function Home() {
         </div>
         <nav className="nav-list">
           {navItems.map((item) => (
-            <button key={item.id} className={view === item.id ? "nav-item active" : "nav-item"} onClick={() => setView(item.id)}>
+            <button key={item.id} className={view === item.id ? "nav-item active" : "nav-item"} onClick={() => { setView(item.id); if (item.id === "areasglobais") setDepartment("global"); }}>
               <span className="nav-glyph">{item.glyph}</span>{item.label}
               {item.id === "tarefas" && <span className="nav-count">{pending}</span>}
             </button>
@@ -1275,6 +1331,52 @@ export default function Home() {
                 </section>)}
               </div>
               <p className="inventory-note">Fonte: folha “BD Mês” do ficheiro de seguimento de objetivos. Os campos sem resultado permanecem assinalados como “Por atualizar”. <a href={objectivesSourceUrl} target="_blank" rel="noreferrer">Abrir ficheiro fonte ↗</a></p>
+            </section>
+          )}
+
+          {view === "areasglobais" && (
+            <section className="area-evaluation-section" aria-labelledby="area-evaluation-title">
+              <div className="area-evaluation-heading">
+                <div><span className="eyebrow">Compilação de todos os departamentos</span><h2 id="area-evaluation-title">Avaliação mensal das áreas</h2><p>Acompanhamento separado do estado de limpeza e manutenção de cada área.</p></div>
+                <div className="area-evaluation-actions">
+                  <label><span>Mês</span><select value={evaluationMonth} onChange={(event) => setEvaluationMonth(event.target.value)}>{objectiveMonthOptions.map((month) => <option value={month.value} key={month.value}>{month.label}</option>)}</select></label>
+                  {currentUser.role === "admin" ? <button onClick={saveAreaEvaluations} disabled={evaluationBusy}>{evaluationBusy ? "A guardar…" : "Guardar avaliação mensal"}</button> : <span className="read-only-badge">Avaliação reservada ao administrador</span>}
+                </div>
+              </div>
+
+              <div className="area-evaluation-summary">
+                <article><small>Avaliações preenchidas</small><strong>{areaRatingStats.rated}<span>/{areaRatingStats.total}</span></strong></article>
+                <article className="rating-bom"><small>Bom</small><strong>{areaRatingStats.bom}</strong></article>
+                <article className="rating-aceitavel"><small>Aceitável</small><strong>{areaRatingStats.aceitavel}</strong></article>
+                <article className="rating-melhorar"><small>Necessita melhorar</small><strong>{areaRatingStats.melhorar}</strong></article>
+                <article className="rating-nao"><small>Não aceitável</small><strong>{areaRatingStats.naoAceitavel}</strong></article>
+              </div>
+
+              <div className="area-rating-legend" aria-label="Legenda das classificações">
+                <span className="bom"><i /> Bom</span><span className="aceitavel"><i /> Aceitável</span><span className="necessita-melhorar"><i /> Necessita Melhorar</span><span className="nao-aceitavel"><i /> Não aceitável</span>
+              </div>
+
+              <div className="department-evaluations">
+                {(Object.entries(cleaningAreasByDepartment) as [EvaluationDepartment, readonly string[]][]).map(([departmentId, areas]) => {
+                  const profile = departments.find((item) => item.id === departmentId)!;
+                  return <section className="department-evaluation-card" key={departmentId}>
+                    <div className="department-evaluation-title"><span className="department-initials">{profile.short}</span><div><h3>{profile.label}</h3><small>{areas.length} {areas.length === 1 ? "área acompanhada" : "áreas acompanhadas"}</small></div></div>
+                    <div className="area-evaluation-table">
+                      <div className="area-evaluation-row header"><span>Área</span><span>Estado de limpeza</span><span>Estado de manutenção</span></div>
+                      {areas.map((area) => {
+                        const key = evaluationKey(departmentId, area);
+                        const ratings = areaEvaluationDraft[key] ?? { cleaningRating: "" as AreaRating, maintenanceRating: "" as AreaRating };
+                        return <div className="area-evaluation-row" key={area}>
+                          <strong>{area}</strong>
+                          {currentUser.role === "admin" ? <select className={`rating-select ${statusClass(ratings.cleaningRating || "Por avaliar")}`} value={ratings.cleaningRating} onChange={(event) => setAreaEvaluationDraft((current) => ({ ...current, [key]: { ...ratings, cleaningRating: event.target.value as AreaRating } }))}>{areaRatings.map((rating) => <option value={rating} key={rating || "empty"}>{rating || "Por avaliar"}</option>)}</select> : <span className={`rating-display ${statusClass(ratings.cleaningRating || "Por avaliar")}`}>{ratings.cleaningRating || "Por avaliar"}</span>}
+                          {currentUser.role === "admin" ? <select className={`rating-select ${statusClass(ratings.maintenanceRating || "Por avaliar")}`} value={ratings.maintenanceRating} onChange={(event) => setAreaEvaluationDraft((current) => ({ ...current, [key]: { ...ratings, maintenanceRating: event.target.value as AreaRating } }))}>{areaRatings.map((rating) => <option value={rating} key={rating || "empty"}>{rating || "Por avaliar"}</option>)}</select> : <span className={`rating-display ${statusClass(ratings.maintenanceRating || "Por avaliar")}`}>{ratings.maintenanceRating || "Por avaliar"}</span>}
+                        </div>;
+                      })}
+                    </div>
+                  </section>;
+                })}
+              </div>
+              <p className="area-evaluation-footnote">{evaluationUpdatedAt ? `Última atualização: ${new Date(evaluationUpdatedAt).toLocaleString("pt-PT", { dateStyle: "medium", timeStyle: "short" })}.` : "Ainda não existe uma avaliação guardada para este mês."} Apenas o administrador pode alterar estas classificações.</p>
             </section>
           )}
 

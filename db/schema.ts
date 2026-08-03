@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const tasks = sqliteTable("tasks", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -61,4 +61,18 @@ export const cleaningInterventions = sqliteTable("cleaning_interventions", {
 }, (table) => [
   index("idx_cleaning_interventions_scheduled_date").on(table.scheduledDate),
   index("idx_cleaning_interventions_department_date").on(table.department, table.scheduledDate),
+]);
+
+export const areaEvaluations = sqliteTable("area_evaluations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  month: text("month").notNull(),
+  department: text("department").notNull(),
+  area: text("area").notNull(),
+  cleaningRating: text("cleaning_rating").notNull().default(""),
+  maintenanceRating: text("maintenance_rating").notNull().default(""),
+  evaluatedBy: integer("evaluated_by").notNull(),
+  evaluatedByName: text("evaluated_by_name").notNull(),
+  evaluatedAt: text("evaluated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  uniqueIndex("uidx_area_evaluations_month_department_area").on(table.month, table.department, table.area),
 ]);
