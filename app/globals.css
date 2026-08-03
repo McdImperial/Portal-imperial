@@ -518,8 +518,8 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .rating-select { width: 100%; min-height: 34px; padding: 0 9px; border: 1px solid #d9e1dd; border-radius: 8px; font-size: 8px; font-weight: 800; outline: 0; }
 .rating-select:focus { box-shadow: 0 0 0 3px rgba(65,125,101,.12); }
 .rating-display { justify-self: start; padding: 6px 9px; border-radius: 999px; font-size: 8px; font-weight: 850; }
-.rating-buttons { min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
-.rating-choice { min-height: 29px; padding: 4px 6px; border: 1px solid transparent; border-radius: 7px; opacity: .48; font-size: 7px; font-weight: 850; line-height: 1.15; cursor: pointer; transition: opacity .15s ease, transform .15s ease, box-shadow .15s ease; }
+.rating-buttons { min-width: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; }
+.rating-choice { min-height: 26px; padding: 3px 4px; border: 1px solid transparent; border-radius: 6px; opacity: .48; font-size: 6px; font-weight: 850; line-height: 1; white-space: nowrap; cursor: pointer; transition: opacity .15s ease, transform .15s ease, box-shadow .15s ease; }
 .rating-choice:hover { opacity: .78; transform: translateY(-1px); }
 .rating-choice.selected { opacity: 1; box-shadow: 0 0 0 2px white, 0 0 0 4px currentColor; }
 .rating-choice.bom { border-color: #b9dcc8; color: #267554; background: #e1f1e8; }
