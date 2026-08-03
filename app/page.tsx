@@ -504,17 +504,19 @@ export default function Home() {
     if (!selectedObjectives.length || !objectivesExportRef.current) return;
     try {
       const { jsPDF } = await import("jspdf");
-      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const margin = 7;
       const exportArea = objectivesExportRef.current;
+      const pageWidth = 297;
+      const margin = 7;
+      const contentHeight = (exportArea.scrollHeight / exportArea.scrollWidth) * (pageWidth - margin * 2);
+      const pageHeight = Math.max(210, contentHeight + margin * 2 + 16);
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [pageWidth, pageHeight], compress: true });
       await document.fonts.ready;
       await doc.html(exportArea, {
         x: margin,
         y: margin,
         width: pageWidth - margin * 2,
         windowWidth: exportArea.scrollWidth,
-        autoPaging: "text",
+        autoPaging: false,
         html2canvas: {
           backgroundColor: "#f8faf9",
           scale: 1,
@@ -522,6 +524,7 @@ export default function Home() {
           ignoreElements: (element) => element.hasAttribute("data-pdf-exclude"),
         },
       });
+      while (doc.getNumberOfPages() > 1) doc.deletePage(2);
       doc.save(`objetivos-${objectiveMonth}.pdf`);
       setNotice(`PDF de ${selectedObjectiveMonth.label} exportado.`);
       window.setTimeout(() => setNotice(""), 2400);
