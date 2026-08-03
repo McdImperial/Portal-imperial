@@ -71,7 +71,7 @@ export async function getCurrentUser(request: Request) {
   }
   const [user] = await db.select().from(users).where(eq(users.id, session.userId)).limit(1);
   if (!user || user.status !== "ativo") return null;
-  return { id: user.id, name: user.name, login: user.login, role: user.role as AppRole, status: user.status };
+  return { id: user.id, name: user.name, login: user.login, role: user.role as AppRole, department: user.department, status: user.status };
 }
 
 export async function requireUser(request: Request, roles?: AppRole[]) {

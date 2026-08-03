@@ -31,6 +31,7 @@ export const users = sqliteTable("users", {
   login: text("login").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   role: text("role").notNull().default("consulta"),
+  department: text("department").notNull().default(""),
   status: text("status").notNull().default("pendente"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   approvedAt: text("approved_at"),

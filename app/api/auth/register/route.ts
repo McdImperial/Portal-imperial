@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     const [created] = await db.select().from(users).where(eq(users.login, login)).limit(1);
     if (!created) return Response.json({ error: "A conta não ficou guardada. Tente novamente." }, { status: 500 });
     const session = await createSession(created.id);
-    return Response.json({ user: { id: created.id, name: created.name, login: created.login, role: created.role, status: created.status }, firstAdmin: true }, { status: 201, headers: { "Set-Cookie": sessionCookie(session.token) } });
+    return Response.json({ user: { id: created.id, name: created.name, login: created.login, role: created.role, department: created.department, status: created.status }, firstAdmin: true }, { status: 201, headers: { "Set-Cookie": sessionCookie(session.token) } });
   } catch (error) {
     console.error("Falha ao criar utilizador", error);
     const message = error instanceof Error && /unique/i.test(error.message) ? "Este login já está registado." : "Não foi possível criar o utilizador.";

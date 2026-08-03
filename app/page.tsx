@@ -8,9 +8,10 @@ import tellTheArchesDataJson from "./data/tell-the-arches.json";
 
 type View = "resumo" | "tarefas" | "objetivos" | "areas" | "custos" | "r2p" | "tellarches" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
+type UserDepartment = Exclude<Department, "global"> | "";
 type TaskStatus = "Por fazer" | "Em curso" | "Bloqueado" | "Concluído";
 type AppRole = "admin" | "editor" | "consulta";
-type AppUser = { id: number; name: string; login: string; role: AppRole; status: string };
+type AppUser = { id: number; name: string; login: string; role: AppRole; department: UserDepartment; status: string };
 type ManagedUser = AppUser & { createdAt: string; approvedAt: string | null };
 
 type Task = {
@@ -652,12 +653,12 @@ export default function Home() {
     setAuthMode("login");
   }
 
-  async function updateManagedUser(id: number, changes: { role?: AppRole; status?: "ativo" | "pendente" | "rejeitado" }) {
+  async function updateManagedUser(id: number, changes: { role?: AppRole; department?: UserDepartment; status?: "ativo" | "pendente" | "rejeitado" }) {
     const response = await fetch("/api/auth/users/", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, ...changes }) });
     const data = await response.json() as { user?: ManagedUser; error?: string };
     if (!response.ok || !data.user) { setNotice(data.error || "Não foi possível atualizar o utilizador."); return; }
     setManagedUsers((users) => users.map((user) => user.id === id ? data.user! : user));
-    setNotice(changes.status === "ativo" ? "Acesso aprovado." : "Nível de acesso atualizado.");
+    setNotice(changes.status === "ativo" ? "Acesso aprovado." : changes.department !== undefined ? "Departamento atualizado." : "Nível de acesso atualizado.");
   }
 
   async function deleteManagedUser(user: ManagedUser) {
@@ -1097,10 +1098,11 @@ export default function Home() {
               <div className="settings-card users-settings-card requests-card">
                 <div className="settings-card-title"><div><span className="eyebrow">Aprovação do administrador</span><h3>Pedidos de acesso</h3></div><span className={managedUsers.some((user) => user.status === "pendente") ? "pending-count has-pending" : "pending-count"}>{managedUsers.filter((user) => user.status === "pendente").length} pendentes</span></div>
                 <div className="users-table" role="table" aria-label="Pedidos de acesso pendentes">
-                  <div className="user-row request-row user-header" role="row"><span>Utilizador</span><span>Data do pedido</span><span>Nível a atribuir</span><span>Validação</span></div>
+                  <div className="user-row request-row user-header" role="row"><span>Utilizador</span><span>Data do pedido</span><span>Departamento</span><span>Nível a atribuir</span><span>Validação</span></div>
                   {managedUsers.filter((user) => user.status === "pendente").map((user) => <div className="user-row request-row" role="row" key={user.id}>
                     <div className="user-identity"><span className="avatar small">{userInitials(user.name, user.login)}</span><span className="user-identity-copy"><strong>{user.name || "Sem nome"}</strong><small>{user.login}</small></span></div>
                     <span>{new Date(user.createdAt).toLocaleDateString("pt-PT")}</span>
+                    <select value={user.department} onChange={(event) => updateManagedUser(user.id, { department: event.target.value as UserDepartment })} aria-label={`Departamento de ${user.login}`}><option value="">Por atribuir</option>{departments.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select>
                     <select value={user.role} onChange={(event) => updateManagedUser(user.id, { role: event.target.value as AppRole })} aria-label={`Nível de acesso a atribuir a ${user.login}`}><option value="admin">Administrador</option><option value="editor">Editor</option><option value="consulta">Consulta</option></select>
                     <div className="user-actions"><button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>✓ Aprovar</button><button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Recusar</button></div>
                   </div>)}
@@ -1111,10 +1113,11 @@ export default function Home() {
                 <div className="settings-card-title"><div><span className="eyebrow">Controlo de acessos</span><h3>Lista de utilizadores</h3></div><span>{managedUsers.filter((user) => user.status !== "pendente").length} utilizadores</span></div>
                 <div className="access-levels"><span><b>Administrador</b> gestão total</span><span><b>Editor</b> cria e altera tarefas</span><span><b>Consulta</b> apenas visualização</span></div>
                 <div className="users-table" role="table" aria-label="Lista de utilizadores validados">
-                  <div className="user-row user-header" role="row"><span>Utilizador</span><span>Registo</span><span>Estado</span><span>Nível de acesso</span><span>Ação</span></div>
+                  <div className="user-row user-header" role="row"><span>Utilizador</span><span>Registo</span><span>Departamento</span><span>Estado</span><span>Nível de acesso</span><span>Ação</span></div>
                   {managedUsers.filter((user) => user.status !== "pendente").map((user) => <div className="user-row" role="row" key={user.id}>
                     <div className="user-identity"><span className="avatar small">{userInitials(user.name, user.login)}</span><span className="user-identity-copy"><strong>{user.name || "Sem nome"}</strong><small>{user.login}</small></span>{user.id === currentUser.id && <small>Você</small>}</div>
                     <span>{new Date(user.createdAt).toLocaleDateString("pt-PT")}</span>
+                    <select value={user.department} onChange={(event) => updateManagedUser(user.id, { department: event.target.value as UserDepartment })} aria-label={`Departamento de ${user.login}`}><option value="">Por atribuir</option>{departments.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select>
                     <span className={`user-status ${user.status}`}>{user.status === "ativo" ? "Ativo" : "Recusado"}</span>
                     <select value={user.role} disabled={user.id === currentUser.id} onChange={(event) => updateManagedUser(user.id, { role: event.target.value as AppRole })} aria-label={`Nível de acesso de ${user.login}`}><option value="admin">Administrador</option><option value="editor">Editor</option><option value="consulta">Consulta</option></select>
                     <div className="user-actions">{user.status === "rejeitado" ? <button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>Reativar</button> : user.id !== currentUser.id ? <button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Desativar</button> : <span>Conta principal</span>}<button className="delete-user" disabled={user.id === currentUser.id} onClick={() => deleteManagedUser(user)} title={user.id === currentUser.id ? "A conta em utilização não pode ser eliminada" : `Eliminar ${user.login}`}>Eliminar</button></div>
