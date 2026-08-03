@@ -147,6 +147,23 @@ const objectiveVisuals: Record<string, { icon: string; label: string; tone: stri
   "OCM Rest": { icon: "🏆", label: "Resultado OCM", tone: "purple" },
 };
 
+const objectiveDepartments: Record<string, { name: string; icon: string; tone: string }> = {
+  Food: { name: "Qualidade & Produtos", icon: "🧪", tone: "quality" },
+  Paper: { name: "Qualidade & Produtos", icon: "🧪", tone: "quality" },
+  OPS: { name: "Qualidade & Produtos", icon: "🧪", tone: "quality" },
+  Perdas: { name: "Qualidade & Produtos", icon: "🧪", tone: "quality" },
+  MDO: { name: "Pessoas", icon: "👥", tone: "people" },
+  Turnover: { name: "Pessoas", icon: "👥", tone: "people" },
+  Staffing: { name: "Pessoas", icon: "👥", tone: "people" },
+  "R2P Dia": { name: "Serviço Cliente", icon: "🎧", tone: "service" },
+  "OCM Rest": { name: "Serviço Cliente", icon: "🎧", tone: "service" },
+  AOLs: { name: "Serviço Cliente", icon: "🎧", tone: "service" },
+  "Delivery R Time": { name: "Manutenção · Seg. & IT", icon: "🛠️", tone: "maintenance" },
+  "Delivery Exatidão": { name: "Manutenção · Seg. & IT", icon: "🛠️", tone: "maintenance" },
+  "Delivery C SAT": { name: "Manutenção · Seg. & IT", icon: "🛠️", tone: "maintenance" },
+  "Delivery T Time": { name: "Manutenção · Seg. & IT", icon: "🛠️", tone: "maintenance" },
+};
+
 function getObjectiveResult(item: RestaurantObjective): ObjectiveResult {
   if (item.classification === "Superado" || item.classification === "Atingido" || item.classification === "Próximo" || item.classification === "Não Atingido") return item.classification;
   if (item.achievedPercent === undefined) return "Por atualizar";
@@ -1175,8 +1192,9 @@ export default function Home() {
                 {!selectedObjectives.length && <div className="objective-empty"><span>◷</span><div><strong>Sem objetivos importados</strong><p>Ainda não existem dados para {selectedObjectiveMonth.label}. Selecione outro mês.</p></div></div>}
                 {objectivePointGroups.map((group) => <section className="objective-score-row" key={group.points ?? "sem-pontos"}>
                   <div className="objective-score-heading"><span>{group.points === undefined ? "Sem pontuação definida" : `${group.points} pontos possíveis`}</span><small>{group.objectives.length} {group.objectives.length === 1 ? "objetivo" : "objetivos"}</small></div>
-                  <div className="objective-score-cards">{group.objectives.map((item) => { const result = getObjectiveResult(item); const visual = objectiveVisuals[item.theme] ?? { icon: "◎", label: item.theme, tone: "mint" }; return <article className={`objective-topic-card result-${statusClass(result)}`} key={item.theme}>
+                  <div className="objective-score-cards">{group.objectives.map((item) => { const result = getObjectiveResult(item); const visual = objectiveVisuals[item.theme] ?? { icon: "◎", label: item.theme, tone: "mint" }; const owner = objectiveDepartments[item.theme]; return <article className={`objective-topic-card result-${statusClass(result)}`} key={item.theme}>
                   <div className="objective-topic-head"><span className={`objective-topic-image visual-${visual.tone}`} role="img" aria-label={visual.label}>{visual.icon}</span><div><h3>{item.theme}</h3></div><span className={`objective-classification-badge result-${statusClass(result)}`}>{result}</span></div>
+                  {owner && <div className={`objective-department department-${owner.tone}`}><span role="img" aria-label={owner.name}>{owner.icon}</span><div><small>Departamento responsável</small><strong>{owner.name}</strong></div></div>}
                   <div className="objective-topic-values">
                     <div><small>Objetivo</small><strong>{item.target ?? "—"}</strong></div>
                     <div><small>Resultado</small><strong>{item.result ?? "—"}</strong></div>
