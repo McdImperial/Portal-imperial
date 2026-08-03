@@ -485,7 +485,7 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .area-evaluation-summary article { min-height: 76px; padding: 14px; display: grid; align-content: center; gap: 6px; border: 1px solid #dfe6e2; border-radius: 11px; background: #f7f9f8; }
 .area-evaluation-summary small { color: #74827d; text-transform: uppercase; letter-spacing: .45px; font-size: 7px; font-weight: 850; }
 .area-evaluation-summary strong { color: #263d35; font-family: Georgia, serif; font-size: 23px; font-weight: 500; }
-.area-evaluation-summary strong span { color: #8b9893; font-size: 12px; }
+.area-evaluation-summary strong span { margin-left: 6px; color: #8b9893; font-size: 12px; }
 .area-evaluation-summary .rating-bom { border-color: #c7e2d3; background: #e5f3eb; }
 .area-evaluation-summary .rating-bom small, .area-evaluation-summary .rating-bom strong { color: #267554; }
 .area-evaluation-summary .rating-aceitavel { border-color: #c7dfea; background: #e4f1f7; }
@@ -505,6 +505,7 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .department-rating-results .rating-display { justify-self: stretch; overflow: hidden; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
 .area-rating-legend { padding: 12px 24px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: #fafcfb; }
 .area-rating-legend span { display: flex; align-items: center; gap: 6px; color: #687771; font-size: 8px; font-weight: 800; }
+.area-rating-legend b { padding: 3px 6px; border-radius: 999px; color: #52645d; background: #edf2ef; font-size: 7px; white-space: nowrap; }
 .area-rating-legend i { width: 9px; height: 9px; border-radius: 50%; background: #aeb9b4; }
 .area-rating-legend .bom i { background: #3c9568; }
 .area-rating-legend .aceitavel i { background: #3f86a6; }

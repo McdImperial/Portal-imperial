@@ -6,7 +6,7 @@ import { requireUser } from "../auth/_lib";
 const areasByDepartment = {
   qualidade: ["Positiva / Negativa", "Stock secos", "Aquário", "Balneários Funcionários", "Sala de pausa", "Sala de HM", "Balneários de Gerentes"],
   pessoas: ["Sala piso 0", "Sala piso -1", "WC Clientes", "Cantinho RPs", "Corredor interno P -1"],
-  cliente: ["Sala piso 0", "Sala piso -1", "WC Clientes", "Cantinho RPs", "Corredor interno P -1"],
+  cliente: ["Balcão", "Bebidas", "Corredor interno P 0", "Escadas piso 0", "Corredor Escritório", "Escadas Escritório"],
   manutencao: ["Cozinha", "Copa", "Sala de peças", "Sala de lixo", "Zona Técnica", "Esplanada"],
 } as const;
 const ratings = ["", "Bom", "Aceitável", "Necessita Melhorar", "Não aceitável"] as const;

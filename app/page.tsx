@@ -88,15 +88,20 @@ const emptyInterventionDraft = (area: string): InterventionDraft => ({ area, kin
 const areaRatings: AreaRating[] = ["", "Bom", "Aceitável", "Necessita Melhorar", "Não aceitável"];
 const areaRatingIcons: Record<AreaRating, string> = { "": "⚪", "Bom": "🟢", "Aceitável": "🔵", "Necessita Melhorar": "🟠", "Não aceitável": "🔴" };
 const evaluationKey = (department: EvaluationDepartment, area: string) => `${department}::${area}`;
-const areaRatingScores: Record<Exclude<AreaRating, "">, number> = { "Bom": 4, "Aceitável": 3, "Necessita Melhorar": 2, "Não aceitável": 1 };
+const areaRatingScores: Record<Exclude<AreaRating, "">, number> = { "Bom": 100, "Aceitável": 75, "Necessita Melhorar": 50, "Não aceitável": 0 };
+
+function areaRatingPercentage(ratings: AreaRating[]): number | null {
+  const completed = ratings.filter((rating): rating is Exclude<AreaRating, ""> => Boolean(rating));
+  if (!completed.length) return null;
+  return Math.round(completed.reduce((sum, rating) => sum + areaRatingScores[rating], 0) / completed.length);
+}
 
 function globalAreaRating(ratings: AreaRating[]): AreaRating {
-  const completed = ratings.filter((rating): rating is Exclude<AreaRating, ""> => Boolean(rating));
-  if (!completed.length) return "";
-  const average = completed.reduce((sum, rating) => sum + areaRatingScores[rating], 0) / completed.length;
-  if (average >= 3.5) return "Bom";
-  if (average >= 2.5) return "Aceitável";
-  if (average >= 1.5) return "Necessita Melhorar";
+  const percentage = areaRatingPercentage(ratings);
+  if (percentage === null) return "";
+  if (percentage >= 90) return "Bom";
+  if (percentage >= 75) return "Aceitável";
+  if (percentage >= 50) return "Necessita Melhorar";
   return "Não aceitável";
 }
 
@@ -480,22 +485,34 @@ export default function Home() {
   const openInterventions = cleaningInterventions.filter((item) => item.status !== "Encerrada").length;
   const closedInterventions = cleaningInterventions.filter((item) => item.status === "Encerrada").length;
   const areaRatingStats = useMemo(() => {
-    const values = Object.values(areaEvaluationDraft).flatMap((item) => [item.cleaningRating, item.maintenanceRating]).filter((rating): rating is Exclude<AreaRating, ""> => Boolean(rating));
+    const currentEvaluations = (Object.entries(cleaningAreasByDepartment) as [EvaluationDepartment, readonly string[]][]).flatMap(([departmentId, areas]) => areas.map((area) => areaEvaluationDraft[evaluationKey(departmentId, area)] ?? { cleaningRating: "" as AreaRating, maintenanceRating: "" as AreaRating }));
+    const values = currentEvaluations.flatMap((item) => [item.cleaningRating, item.maintenanceRating]).filter((rating): rating is Exclude<AreaRating, ""> => Boolean(rating));
+    const total = (Object.values(cleaningAreasByDepartment) as readonly (readonly string[])[]).reduce((sum, areas) => sum + areas.length * 2, 0);
+    const bom = values.filter((rating) => rating === "Bom").length;
+    const aceitavel = values.filter((rating) => rating === "Aceitável").length;
+    const melhorar = values.filter((rating) => rating === "Necessita Melhorar").length;
+    const naoAceitavel = values.filter((rating) => rating === "Não aceitável").length;
+    const share = (count: number) => values.length ? Math.round(count / values.length * 100) : 0;
     return {
       rated: values.length,
-      total: (Object.values(cleaningAreasByDepartment) as readonly (readonly string[])[]).reduce((sum, areas) => sum + areas.length * 2, 0),
-      bom: values.filter((rating) => rating === "Bom").length,
-      aceitavel: values.filter((rating) => rating === "Aceitável").length,
-      melhorar: values.filter((rating) => rating === "Necessita Melhorar").length,
-      naoAceitavel: values.filter((rating) => rating === "Não aceitável").length,
+      total,
+      completionPercent: total ? Math.round(values.length / total * 100) : 0,
+      bom, bomPercent: share(bom),
+      aceitavel, aceitavelPercent: share(aceitavel),
+      melhorar, melhorarPercent: share(melhorar),
+      naoAceitavel, naoAceitavelPercent: share(naoAceitavel),
     };
   }, [areaEvaluationDraft]);
   const departmentEvaluationSummaries = useMemo(() => (Object.entries(cleaningAreasByDepartment) as [EvaluationDepartment, readonly string[]][]).map(([departmentId, areas]) => {
     const evaluations = areas.map((area) => areaEvaluationDraft[evaluationKey(departmentId, area)] ?? { cleaningRating: "" as AreaRating, maintenanceRating: "" as AreaRating });
+    const cleaningRatings = evaluations.map((item) => item.cleaningRating);
+    const maintenanceRatings = evaluations.map((item) => item.maintenanceRating);
     return {
       departmentId,
-      cleaningRating: globalAreaRating(evaluations.map((item) => item.cleaningRating)),
-      maintenanceRating: globalAreaRating(evaluations.map((item) => item.maintenanceRating)),
+      cleaningRating: globalAreaRating(cleaningRatings),
+      cleaningPercent: areaRatingPercentage(cleaningRatings),
+      maintenanceRating: globalAreaRating(maintenanceRatings),
+      maintenancePercent: areaRatingPercentage(maintenanceRatings),
     };
   }), [areaEvaluationDraft]);
   const selectedObjectiveMonth = objectiveMonthOptions.find((item) => item.value === objectiveMonth) ?? objectiveMonthOptions[6];
@@ -1367,11 +1384,11 @@ export default function Home() {
               </div>
 
               <div className="area-evaluation-summary">
-                <article><small>Avaliações preenchidas</small><strong>{areaRatingStats.rated}<span>/{areaRatingStats.total}</span></strong></article>
-                <article className="rating-bom"><small>Bom</small><strong>{areaRatingStats.bom}</strong></article>
-                <article className="rating-aceitavel"><small>Aceitável</small><strong>{areaRatingStats.aceitavel}</strong></article>
-                <article className="rating-melhorar"><small>Necessita melhorar</small><strong>{areaRatingStats.melhorar}</strong></article>
-                <article className="rating-nao"><small>Não aceitável</small><strong>{areaRatingStats.naoAceitavel}</strong></article>
+                <article><small>Avaliações preenchidas</small><strong>{areaRatingStats.rated}<span>/{areaRatingStats.total} · {areaRatingStats.completionPercent}%</span></strong></article>
+                <article className="rating-bom"><small>Bom</small><strong>{areaRatingStats.bom}<span>{areaRatingStats.bomPercent}%</span></strong></article>
+                <article className="rating-aceitavel"><small>Aceitável</small><strong>{areaRatingStats.aceitavel}<span>{areaRatingStats.aceitavelPercent}%</span></strong></article>
+                <article className="rating-melhorar"><small>Necessita melhorar</small><strong>{areaRatingStats.melhorar}<span>{areaRatingStats.melhorarPercent}%</span></strong></article>
+                <article className="rating-nao"><small>Não aceitável</small><strong>{areaRatingStats.naoAceitavel}<span>{areaRatingStats.naoAceitavelPercent}%</span></strong></article>
               </div>
 
               <div className="department-rating-cards" aria-label="Avaliação global por departamento">
@@ -1380,15 +1397,15 @@ export default function Home() {
                   return <article className="department-rating-card" key={summary.departmentId}>
                     <div className="department-rating-card-title"><span className={`department-initials department-icon department-${profile.id}`} role="img" aria-label={profile.label}>{profile.icon}</span><strong>{profile.label}</strong></div>
                     <div className="department-rating-results">
-                      <div><small>Limpeza</small><span className={`rating-display ${statusClass(summary.cleaningRating || "Por avaliar")}`}>{summary.cleaningRating || "Por avaliar"}</span></div>
-                      <div><small>Manutenção</small><span className={`rating-display ${statusClass(summary.maintenanceRating || "Por avaliar")}`}>{summary.maintenanceRating || "Por avaliar"}</span></div>
+                      <div><small>Limpeza</small><span className={`rating-display ${statusClass(summary.cleaningRating || "Por avaliar")}`}>{summary.cleaningPercent === null ? "—" : `${summary.cleaningPercent}%`} · {summary.cleaningRating || "Por avaliar"}</span></div>
+                      <div><small>Manutenção</small><span className={`rating-display ${statusClass(summary.maintenanceRating || "Por avaliar")}`}>{summary.maintenancePercent === null ? "—" : `${summary.maintenancePercent}%`} · {summary.maintenanceRating || "Por avaliar"}</span></div>
                     </div>
                   </article>;
                 })}
               </div>
 
               <div className="area-rating-legend" aria-label="Legenda das classificações">
-                <span className="bom"><i /> Bom</span><span className="aceitavel"><i /> Aceitável</span><span className="necessita-melhorar"><i /> Necessita Melhorar</span><span className="nao-aceitavel"><i /> Não aceitável</span>
+                <span className="bom"><i /> Bom <b>90%–100%</b></span><span className="aceitavel"><i /> Aceitável <b>75%–90%</b></span><span className="necessita-melhorar"><i /> Necessita Melhorar <b>50%–75%</b></span><span className="nao-aceitavel"><i /> Não aceitável <b>0%–50%</b></span>
               </div>
 
               <div className="department-evaluations">
