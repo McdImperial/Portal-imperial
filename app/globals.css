@@ -502,7 +502,13 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .department-rating-results { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
 .department-rating-results > div { min-width: 0; display: grid; align-content: start; gap: 6px; }
 .department-rating-results small { color: #7a8983; text-transform: uppercase; letter-spacing: .4px; font-size: 6.5px; font-weight: 850; }
-.department-rating-results .rating-display { justify-self: stretch; overflow: hidden; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.department-rating-value { min-height: 34px; display: flex; align-items: center; gap: 9px; }
+.department-rating-value strong { color: #263d35; font-family: Georgia, serif; font-size: 22px; font-weight: 500; line-height: 1; }
+.department-rating-dot { width: 14px; height: 14px; flex: 0 0 auto; border-radius: 50%; background: #aeb9b4; box-shadow: 0 0 0 4px rgba(174,185,180,.13); }
+.department-rating-dot.bom { background: #3c9568; box-shadow: 0 0 0 4px rgba(60,149,104,.13); }
+.department-rating-dot.aceitavel { background: #3f86a6; box-shadow: 0 0 0 4px rgba(63,134,166,.13); }
+.department-rating-dot.necessita-melhorar { background: #d58b24; box-shadow: 0 0 0 4px rgba(213,139,36,.13); }
+.department-rating-dot.nao-aceitavel { background: #c4404c; box-shadow: 0 0 0 4px rgba(196,64,76,.13); }
 .area-rating-legend { padding: 12px 24px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: #fafcfb; }
 .area-rating-legend span { display: flex; align-items: center; gap: 6px; color: #687771; font-size: 8px; font-weight: 800; }
 .area-rating-legend b { padding: 3px 6px; border-radius: 999px; color: #52645d; background: #edf2ef; font-size: 7px; white-space: nowrap; }

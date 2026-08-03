@@ -1397,8 +1397,8 @@ export default function Home() {
                   return <article className="department-rating-card" key={summary.departmentId}>
                     <div className="department-rating-card-title"><span className={`department-initials department-icon department-${profile.id}`} role="img" aria-label={profile.label}>{profile.icon}</span><strong>{profile.label}</strong></div>
                     <div className="department-rating-results">
-                      <div><small>Limpeza</small><span className={`rating-display ${statusClass(summary.cleaningRating || "Por avaliar")}`}>{summary.cleaningPercent === null ? "—" : `${summary.cleaningPercent}%`} · {summary.cleaningRating || "Por avaliar"}</span></div>
-                      <div><small>Manutenção</small><span className={`rating-display ${statusClass(summary.maintenanceRating || "Por avaliar")}`}>{summary.maintenancePercent === null ? "—" : `${summary.maintenancePercent}%`} · {summary.maintenanceRating || "Por avaliar"}</span></div>
+                      <div><small>Limpeza</small><span className="department-rating-value" aria-label={`Limpeza: ${summary.cleaningPercent === null ? "por avaliar" : `${summary.cleaningPercent}%, ${summary.cleaningRating}`}`}><i className={`department-rating-dot ${statusClass(summary.cleaningRating || "Por avaliar")}`} /><strong>{summary.cleaningPercent === null ? "—" : `${summary.cleaningPercent}%`}</strong></span></div>
+                      <div><small>Manutenção</small><span className="department-rating-value" aria-label={`Manutenção: ${summary.maintenancePercent === null ? "por avaliar" : `${summary.maintenancePercent}%, ${summary.maintenanceRating}`}`}><i className={`department-rating-dot ${statusClass(summary.maintenanceRating || "Por avaliar")}`} /><strong>{summary.maintenancePercent === null ? "—" : `${summary.maintenancePercent}%`}</strong></span></div>
                     </div>
                   </article>;
                 })}
