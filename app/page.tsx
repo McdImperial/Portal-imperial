@@ -73,11 +73,11 @@ const initialTasks: Task[] = [
   { id: 23, title: "Teste mensal de emergência", area: "Segurança", due: "Concluída às 10:20", assignee: "JS", priority: "Média", done: true, department: "manutencao" },
 ];
 
-const departments: { id: Department; label: string; short: string }[] = [
-  { id: "qualidade", label: "Qualidade & Produtos", short: "QP" },
-  { id: "pessoas", label: "Pessoas", short: "PE" },
-  { id: "cliente", label: "Serviço Cliente", short: "SC" },
-  { id: "manutencao", label: "Manutenção Seg. & IT", short: "MSI" },
+const departments: { id: Department; label: string; short: string; icon: string }[] = [
+  { id: "qualidade", label: "Qualidade & Produtos", short: "QP", icon: "🧪" },
+  { id: "pessoas", label: "Pessoas", short: "PE", icon: "👥" },
+  { id: "cliente", label: "Serviço Cliente", short: "SC", icon: "🎧" },
+  { id: "manutencao", label: "Manutenção Seg. & IT", short: "MSI", icon: "🛠️" },
 ];
 const qualityCleaningAreas = ["Positiva / Negativa", "Stock secos", "Aquário", "Balneários Funcionários", "Sala de pausa", "Sala de HM", "Balneários de Gerentes"] as const;
 const serviceCleaningAreas = ["Sala piso 0", "Sala piso -1", "WC Clientes", "Cantinho RPs", "Corredor interno P -1"] as const;
@@ -471,7 +471,8 @@ export default function Home() {
   const completed = scopedTasks.length - pending;
   const completion = scopedTasks.length ? Math.round((completed / scopedTasks.length) * 100) : 0;
   const activeProfile = departmentProfiles[department];
-  const departmentLabel = departments.find((item) => item.id === department)?.label ?? "Visão global";
+  const activeDepartment = departments.find((item) => item.id === department);
+  const departmentLabel = activeDepartment?.label ?? "Visão global";
   const interventionDepartment = department === "qualidade" || department === "cliente" || department === "pessoas" || department === "manutencao" ? department : null;
   const selectedCleaningAreas: readonly string[] = interventionDepartment ? cleaningAreasByDepartment[interventionDepartment] : [];
   const canManageCleaning = Boolean(interventionDepartment && (currentUser?.role === "admin" || currentUser?.role === "editor" && currentUser.department === interventionDepartment));
@@ -878,7 +879,7 @@ export default function Home() {
                   aria-pressed={department === item.id}
                   title={item.label}
                 >
-                  <span className="department-initials">{item.short}</span>
+                  <span className={`department-initials department-icon department-${item.id}`} role="img" aria-label={item.label}>{item.icon}</span>
                   <span className="department-name">{item.label}</span>
                   {department === item.id && <span className="department-active-dot" />}
                 </button>
@@ -920,7 +921,7 @@ export default function Home() {
       <section className="workspace">
         <header className="topbar">
           <div>
-            <p className="date-line">Sexta-feira · 31 de julho · {departmentLabel}</p>
+            <p className="date-line">Sexta-feira · 31 de julho · {activeDepartment && <span className={`department-context-icon department-${activeDepartment.id}`} role="img" aria-label={activeDepartment.label}>{activeDepartment.icon}</span>}{departmentLabel}</p>
             <h1>{viewLabels[view]}</h1>
           </div>
         </header>
@@ -1252,7 +1253,7 @@ export default function Home() {
                   {managedUsers.filter((user) => user.status === "pendente").map((user) => <div className="user-row request-row" role="row" key={user.id}>
                     <div className="user-identity"><span className="avatar small">{userInitials(user.name, user.login)}</span><span className="user-identity-copy"><strong>{user.name || "Sem nome"}</strong><small>{user.login}</small></span></div>
                     <span>{new Date(user.createdAt).toLocaleDateString("pt-PT")}</span>
-                    <select value={user.department} onChange={(event) => updateManagedUser(user.id, { department: event.target.value as UserDepartment })} aria-label={`Departamento de ${user.login}`}><option value="">Por atribuir</option>{departments.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select>
+                    <select value={user.department} onChange={(event) => updateManagedUser(user.id, { department: event.target.value as UserDepartment })} aria-label={`Departamento de ${user.login}`}><option value="">Por atribuir</option>{departments.map((item) => <option value={item.id} key={item.id}>{item.icon} {item.label}</option>)}</select>
                     <select value={user.role} onChange={(event) => updateManagedUser(user.id, { role: event.target.value as AppRole })} aria-label={`Nível de acesso a atribuir a ${user.login}`}><option value="admin">Administrador</option><option value="editor">Editor</option><option value="consulta">Consulta</option></select>
                     <div className="user-actions"><button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>✓ Aprovar</button><button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Recusar</button></div>
                   </div>)}
@@ -1267,7 +1268,7 @@ export default function Home() {
                   {managedUsers.filter((user) => user.status !== "pendente").map((user) => <div className="user-row" role="row" key={user.id}>
                     <div className="user-identity"><span className="avatar small">{userInitials(user.name, user.login)}</span><span className="user-identity-copy"><strong>{user.name || "Sem nome"}</strong><small>{user.login}</small></span>{user.id === currentUser.id && <small>Você</small>}</div>
                     <span>{new Date(user.createdAt).toLocaleDateString("pt-PT")}</span>
-                    <select value={user.department} onChange={(event) => updateManagedUser(user.id, { department: event.target.value as UserDepartment })} aria-label={`Departamento de ${user.login}`}><option value="">Por atribuir</option>{departments.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select>
+                    <select value={user.department} onChange={(event) => updateManagedUser(user.id, { department: event.target.value as UserDepartment })} aria-label={`Departamento de ${user.login}`}><option value="">Por atribuir</option>{departments.map((item) => <option value={item.id} key={item.id}>{item.icon} {item.label}</option>)}</select>
                     <span className={`user-status ${user.status}`}>{user.status === "ativo" ? "Ativo" : "Recusado"}</span>
                     <select value={user.role} disabled={user.id === currentUser.id} onChange={(event) => updateManagedUser(user.id, { role: event.target.value as AppRole })} aria-label={`Nível de acesso de ${user.login}`}><option value="admin">Administrador</option><option value="editor">Editor</option><option value="consulta">Consulta</option></select>
                     <div className="user-actions">{user.status === "rejeitado" ? <button className="approve-user" onClick={() => updateManagedUser(user.id, { status: "ativo" })}>Reativar</button> : user.id !== currentUser.id ? <button className="reject-user" onClick={() => updateManagedUser(user.id, { status: "rejeitado" })}>Desativar</button> : <span>Conta principal</span>}<button className="delete-user" disabled={user.id === currentUser.id} onClick={() => deleteManagedUser(user)} title={user.id === currentUser.id ? "A conta em utilização não pode ser eliminada" : `Eliminar ${user.login}`}>Eliminar</button></div>
@@ -1376,7 +1377,7 @@ export default function Home() {
                 {departmentEvaluationSummaries.map((summary) => {
                   const profile = departments.find((item) => item.id === summary.departmentId)!;
                   return <article className="department-rating-card" key={summary.departmentId}>
-                    <div className="department-rating-card-title"><span className="department-initials">{profile.short}</span><strong>{profile.label}</strong></div>
+                    <div className="department-rating-card-title"><span className={`department-initials department-icon department-${profile.id}`} role="img" aria-label={profile.label}>{profile.icon}</span><strong>{profile.label}</strong></div>
                     <div className="department-rating-results">
                       <div><small>Limpeza</small><span className={`rating-display ${statusClass(summary.cleaningRating || "Por avaliar")}`}>{summary.cleaningRating || "Por avaliar"}</span></div>
                       <div><small>Manutenção</small><span className={`rating-display ${statusClass(summary.maintenanceRating || "Por avaliar")}`}>{summary.maintenanceRating || "Por avaliar"}</span></div>
@@ -1394,7 +1395,7 @@ export default function Home() {
                   const profile = departments.find((item) => item.id === departmentId)!;
                   const collapsed = Boolean(collapsedEvaluationDepartments[departmentId]);
                   return <section className="department-evaluation-card" key={departmentId}>
-                    <div className="department-evaluation-title"><span className="department-initials">{profile.short}</span><div><h3>{profile.label}</h3><small>{areas.length} {areas.length === 1 ? "área acompanhada" : "áreas acompanhadas"}</small></div><button className="department-evaluation-toggle" type="button" aria-expanded={!collapsed} onClick={() => setCollapsedEvaluationDepartments((current) => ({ ...current, [departmentId]: !collapsed }))}>{collapsed ? "Mostrar áreas ↓" : "Ocultar áreas ↑"}</button></div>
+                    <div className="department-evaluation-title"><span className={`department-initials department-icon department-${profile.id}`} role="img" aria-label={profile.label}>{profile.icon}</span><div><h3>{profile.label}</h3><small>{areas.length} {areas.length === 1 ? "área acompanhada" : "áreas acompanhadas"}</small></div><button className="department-evaluation-toggle" type="button" aria-expanded={!collapsed} onClick={() => setCollapsedEvaluationDepartments((current) => ({ ...current, [departmentId]: !collapsed }))}>{collapsed ? "Mostrar áreas ↓" : "Ocultar áreas ↑"}</button></div>
                     {!collapsed && <div className="area-evaluation-table">
                       <div className="area-evaluation-row header"><span>Área</span><span>Estado de limpeza</span><span>Estado de manutenção</span></div>
                       {areas.map((area) => {
@@ -1416,7 +1417,7 @@ export default function Home() {
 
           {view === "resumo" && (
             <section className="panel zones-panel">
-              <div className="panel-heading"><div><span className="eyebrow">Estado atual · {departmentLabel}</span><h2>Áreas de limpeza</h2></div><span className="live-indicator"><i /> Atualizado agora</span></div>
+              <div className="panel-heading"><div><span className="eyebrow department-eyebrow">{activeDepartment && <i className={`department-context-icon department-${activeDepartment.id}`} role="img" aria-label={activeDepartment.label}>{activeDepartment.icon}</i>}Estado atual · {departmentLabel}</span><h2>Áreas de limpeza</h2></div><span className="live-indicator"><i /> Atualizado agora</span></div>
               <div className="zones-grid">
                 {activeProfile.zones.map((zone) => (
                   <article className="zone-card" key={zone.name}>
@@ -1433,7 +1434,7 @@ export default function Home() {
           {view === "areas" && interventionDepartment && (
             <section className="panel cleaning-planner" aria-labelledby="cleaning-planner-title">
               <div className="panel-heading cleaning-planner-heading">
-                <div><span className="eyebrow">{departmentLabel}</span><h2 id="cleaning-planner-title">Áreas de limpeza e intervenções</h2><p>Planeamento de ações de limpeza e manutenção nas áreas acompanhadas.</p></div>
+                <div><span className="eyebrow department-eyebrow">{activeDepartment && <i className={`department-context-icon department-${activeDepartment.id}`} role="img" aria-label={activeDepartment.label}>{activeDepartment.icon}</i>}{departmentLabel}</span><h2 id="cleaning-planner-title">Áreas de limpeza e intervenções</h2><p>Planeamento de ações de limpeza e manutenção nas áreas acompanhadas.</p></div>
                 {canManageCleaning ? <button className="schedule-intervention-button" onClick={() => { if (!showInterventionForm) setInterventionDraft(emptyInterventionDraft(selectedCleaningAreas[0])); setShowInterventionForm((visible) => !visible); }}>{showInterventionForm ? "Fechar formulário" : "+ Agendar intervenção"}</button> : <span className="read-only-badge">Apenas consulta</span>}
               </div>
 

@@ -38,6 +38,14 @@ button:focus-visible { outline: 3px solid rgba(76, 145, 119, .32); outline-offse
 .department-tab.selected { color: white; background: rgba(255,255,255,.11); }
 .department-initials { width: 25px; height: 25px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 7px; color: #bdd1c9; background: rgba(255,255,255,.08); font-size: 8px; font-weight: 800; letter-spacing: .3px; }
 .department-tab.selected .department-initials { color: var(--forest); background: #f1bf75; }
+.department-icon { font-size: 13px; line-height: 1; }
+.department-tab .department-icon.department-qualidade, .department-icon.department-qualidade, .department-context-icon.department-qualidade { color: #8a5a0c; background: #fff0d9; }
+.department-tab .department-icon.department-pessoas, .department-icon.department-pessoas, .department-context-icon.department-pessoas { color: #76508f; background: #eee7f5; }
+.department-tab .department-icon.department-cliente, .department-icon.department-cliente, .department-context-icon.department-cliente { color: #276f8e; background: #e2f1f7; }
+.department-tab .department-icon.department-manutencao, .department-icon.department-manutencao, .department-context-icon.department-manutencao { color: #2b7457; background: #e3f2ea; }
+.department-context-icon { width: 21px; height: 21px; margin: 0 5px 0 2px; display: inline-grid; place-items: center; border-radius: 6px; font-size: 12px; line-height: 1; vertical-align: middle; font-style: normal; }
+.department-eyebrow { display: flex; align-items: center; gap: 4px; }
+.department-eyebrow .department-context-icon { margin: 0 3px 0 0; }
 .department-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; font-weight: 650; }
 .department-active-dot { width: 5px; height: 5px; margin-left: auto; border-radius: 50%; background: #75c6a6; box-shadow: 0 0 0 3px rgba(117,198,166,.12); }
 .department-subtabs { display: grid; gap: 2px; margin: 0 4px 4px 20px; padding: 2px 0 2px 12px; border-left: 1px solid rgba(241,191,117,.42); }
