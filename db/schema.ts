@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const tasks = sqliteTable("tasks", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -43,3 +43,20 @@ export const sessions = sqliteTable("sessions", {
   expiresAt: text("expires_at").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const cleaningInterventions = sqliteTable("cleaning_interventions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  area: text("area").notNull(),
+  kind: text("kind").notNull().default("Limpeza"),
+  scheduledDate: text("scheduled_date").notNull(),
+  estimatedHours: real("estimated_hours").notNull(),
+  resources: text("resources").notNull().default(""),
+  status: text("status").notNull().default("Agendada"),
+  createdBy: integer("created_by").notNull(),
+  createdByName: text("created_by_name").notNull(),
+  closedAt: text("closed_at"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_cleaning_interventions_scheduled_date").on(table.scheduledDate),
+]);

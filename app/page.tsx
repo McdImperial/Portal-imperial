@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import inventoryProductsData from "./data/inventory-products.json";
 import objectivesDataJson from "./data/objectives-data.json";
 import r2pDataJson from "./data/r2p-data.json";
@@ -13,6 +13,21 @@ type TaskStatus = "Por fazer" | "Em curso" | "Bloqueado" | "Concluído";
 type AppRole = "admin" | "editor" | "consulta";
 type AppUser = { id: number; name: string; login: string; role: AppRole; department: UserDepartment; status: string };
 type ManagedUser = AppUser & { createdAt: string; approvedAt: string | null };
+type CleaningIntervention = {
+  id: number;
+  area: string;
+  kind: "Limpeza" | "Manutenção";
+  scheduledDate: string;
+  estimatedHours: number;
+  resources: string;
+  status: "Agendada" | "Encerrada";
+  createdBy: number;
+  createdByName: string;
+  closedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+type InterventionDraft = { area: string; kind: "Limpeza" | "Manutenção"; scheduledDate: string; estimatedHours: string; resources: string };
 
 type Task = {
   id: number;
@@ -59,6 +74,8 @@ const departments: { id: Department; label: string; short: string }[] = [
   { id: "cliente", label: "Serviço Cliente", short: "SC" },
   { id: "manutencao", label: "Manutenção Seg. & IT", short: "MSI" },
 ];
+const qualityCleaningAreas = ["Positiva / Negativa", "Stock secos", "Aquário", "Balneários Funcionários", "Sala de pausa", "Sala de HM", "Balneários de Gerentes"] as const;
+const emptyInterventionDraft: InterventionDraft = { area: qualityCleaningAreas[0], kind: "Limpeza", scheduledDate: "", estimatedHours: "2", resources: "" };
 
 const statusOptions: TaskStatus[] = ["Por fazer", "Em curso", "Bloqueado", "Concluído"];
 const ownerOptions = [
@@ -334,6 +351,10 @@ export default function Home() {
   const [authMessage, setAuthMessage] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
   const [managedUsers, setManagedUsers] = useState<ManagedUser[]>([]);
+  const [cleaningInterventions, setCleaningInterventions] = useState<CleaningIntervention[]>([]);
+  const [showInterventionForm, setShowInterventionForm] = useState(false);
+  const [interventionDraft, setInterventionDraft] = useState<InterventionDraft>(emptyInterventionDraft);
+  const [interventionBusy, setInterventionBusy] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -379,6 +400,15 @@ export default function Home() {
   useEffect(() => {
     if (!currentUser) return;
     let active = true;
+    fetch("/api/cleaning-interventions/").then((response) => response.ok ? response.json() : Promise.reject()).then((data: { interventions: CleaningIntervention[] }) => {
+      if (active) setCleaningInterventions(data.interventions);
+    }).catch(() => setNotice("Não foi possível carregar o planeamento das intervenções."));
+    return () => { active = false; };
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    let active = true;
     fetch("/api/settings/folders").then((response) => response.ok ? response.json() : Promise.reject()).then((data: { folders: SharedFolder[] }) => {
       if (active && data.folders.length) setSharedFolders(data.folders);
     }).catch(() => undefined);
@@ -396,6 +426,9 @@ export default function Home() {
   const completion = scopedTasks.length ? Math.round((completed / scopedTasks.length) * 100) : 0;
   const activeProfile = departmentProfiles[department];
   const departmentLabel = departments.find((item) => item.id === department)?.label ?? "Visão global";
+  const canManageCleaning = currentUser?.role === "admin" || currentUser?.role === "editor" && currentUser.department === "qualidade";
+  const openInterventions = cleaningInterventions.filter((item) => item.status !== "Encerrada").length;
+  const closedInterventions = cleaningInterventions.filter((item) => item.status === "Encerrada").length;
   const selectedObjectiveMonth = objectiveMonthOptions.find((item) => item.value === objectiveMonth) ?? objectiveMonthOptions[6];
   const selectedObjectiveSnapshot = objectivesByMonth[objectiveMonth];
   const selectedObjectives = selectedObjectiveSnapshot?.objectives ?? [];
@@ -669,6 +702,35 @@ export default function Home() {
     if (!response.ok || !data.deleted) { setNotice(data.error || "Não foi possível eliminar o utilizador."); return; }
     setManagedUsers((users) => users.filter((item) => item.id !== user.id));
     setNotice("Utilizador eliminado definitivamente.");
+  }
+
+  async function scheduleIntervention(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!canManageCleaning || interventionBusy) return;
+    setInterventionBusy(true);
+    try {
+      const response = await fetch("/api/cleaning-interventions/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...interventionDraft, estimatedHours: Number(interventionDraft.estimatedHours) }) });
+      const data = await response.json() as { intervention?: CleaningIntervention; error?: string };
+      if (!response.ok || !data.intervention) throw new Error(data.error || "Não foi possível agendar a intervenção.");
+      setCleaningInterventions((current) => [...current, data.intervention!].sort((a, b) => a.scheduledDate.localeCompare(b.scheduledDate) || a.id - b.id));
+      setInterventionDraft(emptyInterventionDraft);
+      setShowInterventionForm(false);
+      setNotice("Intervenção agendada.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Não foi possível agendar a intervenção.");
+    } finally {
+      setInterventionBusy(false);
+    }
+  }
+
+  async function setInterventionClosed(intervention: CleaningIntervention, closed: boolean) {
+    if (!canManageCleaning) return;
+    const status = closed ? "Encerrada" : "Agendada";
+    const response = await fetch("/api/cleaning-interventions/", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: intervention.id, status }) });
+    const data = await response.json() as { intervention?: CleaningIntervention; error?: string };
+    if (!response.ok || !data.intervention) { setNotice(data.error || "Não foi possível atualizar a intervenção."); return; }
+    setCleaningInterventions((current) => current.map((item) => item.id === intervention.id ? data.intervention! : item));
+    setNotice(closed ? "Intervenção encerrada." : "Intervenção reaberta.");
   }
 
   const roleLabel = (role: AppRole) => role === "admin" ? "Administrador" : role === "editor" ? "Editor" : "Consulta";
@@ -1204,7 +1266,7 @@ export default function Home() {
             </section>
           )}
 
-          {(view === "resumo" || view === "areas") && (
+          {(view === "resumo" || view === "areas" && department !== "qualidade") && (
             <section className="panel zones-panel">
               <div className="panel-heading"><div><span className="eyebrow">Estado atual · {departmentLabel}</span><h2>Áreas de limpeza</h2></div><span className="live-indicator"><i /> Atualizado agora</span></div>
               <div className="zones-grid">
@@ -1216,6 +1278,55 @@ export default function Home() {
                     <div className="zone-track"><span className={zone.tone} style={{ width: `${zone.percent}%` }} /></div>
                   </article>
                 ))}
+              </div>
+            </section>
+          )}
+
+          {view === "areas" && department === "qualidade" && (
+            <section className="panel cleaning-planner" aria-labelledby="cleaning-planner-title">
+              <div className="panel-heading cleaning-planner-heading">
+                <div><span className="eyebrow">Qualidade & Produtos</span><h2 id="cleaning-planner-title">Áreas de limpeza e intervenções</h2><p>Planeamento de ações de limpeza e manutenção nas áreas acompanhadas.</p></div>
+                {canManageCleaning ? <button className="schedule-intervention-button" onClick={() => setShowInterventionForm((visible) => !visible)}>{showInterventionForm ? "Fechar formulário" : "+ Agendar intervenção"}</button> : <span className="read-only-badge">Apenas consulta</span>}
+              </div>
+
+              <div className="cleaning-summary" aria-label="Resumo das intervenções">
+                <article><span>▦</span><div><small>Áreas acompanhadas</small><strong>{qualityCleaningAreas.length}</strong></div></article>
+                <article><span>◷</span><div><small>Intervenções abertas</small><strong>{openInterventions}</strong></div></article>
+                <article><span>✓</span><div><small>Intervenções encerradas</small><strong>{closedInterventions}</strong></div></article>
+              </div>
+
+              <div className="cleaning-areas-catalog" aria-label="Áreas de limpeza">
+                {qualityCleaningAreas.map((area) => {
+                  const areaInterventions = cleaningInterventions.filter((item) => item.area === area);
+                  const areaOpen = areaInterventions.filter((item) => item.status !== "Encerrada").length;
+                  return <article key={area} className={areaOpen ? "has-open" : ""}><span>{areaOpen ? "◷" : "✓"}</span><div><strong>{area}</strong><small>{areaOpen ? `${areaOpen} ${areaOpen === 1 ? "intervenção aberta" : "intervenções abertas"}` : areaInterventions.length ? "Sem intervenções abertas" : "Sem intervenções agendadas"}</small></div></article>;
+                })}
+              </div>
+
+              {showInterventionForm && canManageCleaning && <form className="intervention-form" onSubmit={scheduleIntervention}>
+                <div className="intervention-form-heading"><div><span className="eyebrow">Novo agendamento</span><h3>Detalhes da intervenção</h3></div><small>Todos os campos são obrigatórios</small></div>
+                <div className="intervention-form-grid">
+                  <label><span>Área</span><select value={interventionDraft.area} onChange={(event) => setInterventionDraft((draft) => ({ ...draft, area: event.target.value }))}>{qualityCleaningAreas.map((area) => <option value={area} key={area}>{area}</option>)}</select></label>
+                  <label><span>Tipo</span><select value={interventionDraft.kind} onChange={(event) => setInterventionDraft((draft) => ({ ...draft, kind: event.target.value as "Limpeza" | "Manutenção" }))}><option>Limpeza</option><option>Manutenção</option></select></label>
+                  <label><span>Dia da intervenção</span><input type="date" required value={interventionDraft.scheduledDate} onChange={(event) => setInterventionDraft((draft) => ({ ...draft, scheduledDate: event.target.value }))} /></label>
+                  <label><span>Horas estimadas</span><input type="number" min="0.5" max="999" step="0.5" required value={interventionDraft.estimatedHours} onChange={(event) => setInterventionDraft((draft) => ({ ...draft, estimatedHours: event.target.value }))} /></label>
+                  <label className="resources-field"><span>Recursos necessários</span><textarea required maxLength={500} rows={3} placeholder="Ex.: 2 colaboradores, escadote, detergente e equipamento de proteção" value={interventionDraft.resources} onChange={(event) => setInterventionDraft((draft) => ({ ...draft, resources: event.target.value }))} /></label>
+                </div>
+                <div className="intervention-form-actions"><button type="button" onClick={() => setShowInterventionForm(false)}>Cancelar</button><button className="save" type="submit" disabled={interventionBusy}>{interventionBusy ? "A guardar…" : "Guardar agendamento"}</button></div>
+              </form>}
+
+              <div className="interventions-section">
+                <div className="interventions-heading"><div><span className="eyebrow">Planeamento</span><h3>Intervenções agendadas</h3></div><span>{cleaningInterventions.length} {cleaningInterventions.length === 1 ? "registo" : "registos"}</span></div>
+                <div className="interventions-list">
+                  {cleaningInterventions.map((intervention) => <article className={intervention.status === "Encerrada" ? "intervention-card closed" : "intervention-card"} key={intervention.id}>
+                    <div className="intervention-main"><span className={intervention.kind === "Limpeza" ? "kind-badge cleaning" : "kind-badge maintenance"}>{intervention.kind === "Limpeza" ? "✦" : "⚙"} {intervention.kind}</span><strong>{intervention.area}</strong><small>Agendada por {intervention.createdByName}</small></div>
+                    <div className="intervention-detail"><small>Dia</small><strong>{new Date(`${intervention.scheduledDate}T12:00:00`).toLocaleDateString("pt-PT", { day: "2-digit", month: "short", year: "numeric" })}</strong></div>
+                    <div className="intervention-detail"><small>Estimativa</small><strong>{intervention.estimatedHours.toLocaleString("pt-PT")} h</strong></div>
+                    <div className="intervention-resources"><small>Recursos necessários</small><p>{intervention.resources}</p></div>
+                    <label className="intervention-close"><input type="checkbox" checked={intervention.status === "Encerrada"} disabled={!canManageCleaning} onChange={(event) => setInterventionClosed(intervention, event.target.checked)} /><span>{intervention.status === "Encerrada" ? "Encerrada" : "Marcar como encerrada"}</span></label>
+                  </article>)}
+                  {!cleaningInterventions.length && <div className="interventions-empty"><span>◷</span><div><strong>Sem intervenções agendadas</strong><small>Utilize “Agendar intervenção” para criar o primeiro registo.</small></div></div>}
+                </div>
               </div>
             </section>
           )}

@@ -399,6 +399,69 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .zone-track span.good { background: #62ad8d; }
 .zone-track span.progress { background: #75a8c0; }
 .zone-track span.attention { background: #e37c65; }
+.cleaning-planner { overflow: hidden; }
+.cleaning-planner-heading p { margin: 6px 0 0; color: var(--muted); font-size: 9px; }
+.schedule-intervention-button { min-height: 38px; padding: 0 14px; border: 0; border-radius: 9px; color: white; background: #215a46; cursor: pointer; font-size: 9px; font-weight: 850; box-shadow: 0 6px 14px rgba(33,90,70,.15); }
+.schedule-intervention-button:hover { background: #194936; }
+.read-only-badge { padding: 7px 10px; border-radius: 999px; color: #6a7973; background: #edf2ef; font-size: 8px; font-weight: 800; }
+.cleaning-summary { padding: 0 20px 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.cleaning-summary article { min-height: 72px; padding: 13px; display: flex; align-items: center; gap: 11px; border: 1px solid #dde6e1; border-radius: 11px; background: #f8faf9; }
+.cleaning-summary article > span { width: 34px; height: 34px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 9px; color: #2f7058; background: #e4f1eb; font-size: 15px; }
+.cleaning-summary article:nth-child(2) > span { color: #a66d14; background: #fff0d9; }
+.cleaning-summary article:nth-child(3) > span { color: #2b6c89; background: #e4f1f7; }
+.cleaning-summary article div { display: grid; gap: 4px; }
+.cleaning-summary small { color: #7d8985; text-transform: uppercase; letter-spacing: .45px; font-size: 7px; font-weight: 800; }
+.cleaning-summary strong { color: #203a31; font-family: Georgia, serif; font-size: 21px; font-weight: 500; }
+.cleaning-areas-catalog { padding: 16px 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; border-top: 1px solid var(--line); background: #fafcfb; }
+.cleaning-areas-catalog article { min-height: 66px; padding: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid #dfe7e3; border-radius: 10px; background: white; }
+.cleaning-areas-catalog article > span { width: 30px; height: 30px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 8px; color: #277553; background: #e2f1e9; font-weight: 900; }
+.cleaning-areas-catalog article.has-open { border-color: #ead3a8; background: #fffdf8; }
+.cleaning-areas-catalog article.has-open > span { color: #a66d14; background: #fff0d9; }
+.cleaning-areas-catalog article div { min-width: 0; display: grid; gap: 4px; }
+.cleaning-areas-catalog strong { font-size: 10px; }
+.cleaning-areas-catalog small { color: var(--muted); font-size: 8px; }
+.intervention-form { margin: 18px 20px; overflow: hidden; border: 1px solid #cfe0d8; border-radius: 12px; background: #f7fbf9; box-shadow: 0 7px 18px rgba(27,70,55,.06); }
+.intervention-form-heading { padding: 14px 16px; display: flex; align-items: end; justify-content: space-between; gap: 12px; border-bottom: 1px solid #dce8e2; background: white; }
+.intervention-form-heading h3 { margin: 4px 0 0; font-size: 13px; }
+.intervention-form-heading > small { color: var(--muted); font-size: 8px; }
+.intervention-form-grid { padding: 15px 16px; display: grid; grid-template-columns: 1.3fr .8fr 1fr .7fr; gap: 12px; }
+.intervention-form-grid label { display: grid; align-content: start; gap: 6px; }
+.intervention-form-grid label > span { color: #63716c; font-size: 8px; font-weight: 800; }
+.intervention-form-grid input, .intervention-form-grid select, .intervention-form-grid textarea { width: 100%; border: 1px solid #d6e1dc; border-radius: 8px; color: #24352f; background: white; font: inherit; font-size: 9px; outline: 0; }
+.intervention-form-grid input, .intervention-form-grid select { min-height: 37px; padding: 0 9px; }
+.intervention-form-grid textarea { padding: 10px; resize: vertical; line-height: 1.45; }
+.intervention-form-grid input:focus, .intervention-form-grid select:focus, .intervention-form-grid textarea:focus { border-color: #57977e; box-shadow: 0 0 0 3px rgba(87,151,126,.12); }
+.intervention-form-grid .resources-field { grid-column: 1 / -1; }
+.intervention-form-actions { padding: 12px 16px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid #dce8e2; background: white; }
+.intervention-form-actions button { min-height: 35px; padding: 0 12px; border: 1px solid #d7e1dc; border-radius: 8px; color: #4e5e58; background: white; cursor: pointer; font-size: 8px; font-weight: 800; }
+.intervention-form-actions button.save { border-color: #215a46; color: white; background: #2f7058; }
+.intervention-form-actions button:disabled { cursor: wait; opacity: .6; }
+.interventions-section { border-top: 1px solid var(--line); }
+.interventions-heading { padding: 17px 20px 13px; display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+.interventions-heading h3 { margin: 4px 0 0; font-size: 14px; }
+.interventions-heading > span { color: var(--muted); font-size: 8px; }
+.interventions-list { display: grid; border-top: 1px solid var(--line); }
+.intervention-card { min-height: 84px; padding: 13px 20px; display: grid; grid-template-columns: 1.15fr .65fr .48fr 1.35fr .8fr; align-items: center; gap: 14px; border-bottom: 1px solid var(--line); background: white; }
+.intervention-card.closed { background: #f7faf8; opacity: .82; }
+.intervention-main { min-width: 0; display: grid; justify-items: start; gap: 5px; }
+.intervention-main > strong { overflow: hidden; max-width: 100%; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.intervention-main > small { color: var(--muted); font-size: 7.5px; }
+.kind-badge { padding: 4px 6px; border-radius: 999px; font-size: 7px; font-weight: 850; }
+.kind-badge.cleaning { color: #267554; background: #e1f1e8; }
+.kind-badge.maintenance { color: #936116; background: #fff0d9; }
+.intervention-detail, .intervention-resources { min-width: 0; display: grid; gap: 5px; }
+.intervention-detail small, .intervention-resources small { color: #84908c; text-transform: uppercase; letter-spacing: .4px; font-size: 6.5px; font-weight: 850; }
+.intervention-detail strong { color: #34473f; font-size: 9px; }
+.intervention-resources p { margin: 0; overflow: hidden; color: #586a63; font-size: 8px; line-height: 1.45; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.intervention-close { justify-self: end; display: flex; align-items: center; gap: 7px; color: #64746e; font-size: 8px; font-weight: 800; cursor: pointer; }
+.intervention-close input { width: 17px; height: 17px; accent-color: #2f7058; cursor: pointer; }
+.intervention-close input:disabled { cursor: default; }
+.intervention-card.closed .intervention-close { color: #267554; }
+.interventions-empty { min-height: 110px; padding: 20px; display: flex; align-items: center; justify-content: center; gap: 11px; color: #60716a; }
+.interventions-empty > span { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; color: #8b6a27; background: #fbf0d9; }
+.interventions-empty > div { display: grid; gap: 4px; }
+.interventions-empty strong { font-size: 10px; }
+.interventions-empty small { color: var(--muted); font-size: 8px; }
 
 .board-page { min-width: 0; min-height: 620px; background: #fff; border: 1px solid #e4e7ef; border-radius: 10px; box-shadow: 0 3px 12px rgba(22,54,44,.04); overflow: hidden; }
 .board-source-strip { min-height: 58px; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; border-bottom: 1px solid #dfe8e3; background: #f4faf7; }
@@ -754,6 +817,14 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .primary-button span { margin: 0; font-size: 18px; }
   .content { padding: 20px 16px 38px; }
   .summary-grid, .zones-grid { grid-template-columns: 1fr; }
+  .cleaning-summary, .cleaning-areas-catalog { grid-template-columns: 1fr; }
+  .cleaning-planner-heading, .intervention-form-heading, .interventions-heading { align-items: flex-start; flex-direction: column; }
+  .schedule-intervention-button { width: 100%; }
+  .intervention-form-grid { grid-template-columns: 1fr; }
+  .intervention-form-grid .resources-field { grid-column: auto; }
+  .intervention-card { padding: 15px 18px; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .intervention-main, .intervention-resources, .intervention-close { grid-column: 1 / -1; }
+  .intervention-close { justify-self: start; }
   .quality-shortcuts { padding: 17px; gap: 16px; }
   .shortcut-actions { grid-template-columns: 1fr; }
   .cost-section { padding: 18px; }
