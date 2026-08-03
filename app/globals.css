@@ -69,6 +69,7 @@ button:focus-visible { outline: 3px solid rgba(76, 145, 119, .32); outline-offse
 
 .workspace { min-width: 0; }
 .topbar { height: 108px; padding: 25px 42px 22px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.82); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.topbar.centered > div { width: 100%; text-align: center; }
 .date-line { margin: 0 0 6px; color: var(--muted); font-size: 12px; }
 h1, h2, p { margin-top: 0; }
 h1 { margin-bottom: 0; font-family: Georgia, "Times New Roman", serif; font-size: 27px; font-weight: 500; letter-spacing: -.5px; }

@@ -920,7 +920,7 @@ export default function Home() {
       </aside>
 
       <section className="workspace">
-        <header className="topbar">
+        <header className={view === "areasglobais" ? "topbar centered" : "topbar"}>
           <div>
             <p className="date-line">Sexta-feira · 31 de julho · {activeDepartment && <span className={`department-context-icon department-${activeDepartment.id}`} role="img" aria-label={activeDepartment.label}>{activeDepartment.icon}</span>}{departmentLabel}</p>
             <h1>{viewLabels[view]}</h1>
