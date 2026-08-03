@@ -80,7 +80,7 @@ const departments: { id: Department; label: string; short: string; icon: string 
   { id: "manutencao", label: "Manutenção Seg. & IT", short: "MSI", icon: "🛠️" },
 ];
 const qualityCleaningAreas = ["Positiva / Negativa", "Stock secos", "Aquário", "Balneários Funcionários", "Sala de pausa", "Sala de HM", "Balneários de Gerentes"] as const;
-const serviceCleaningAreas = ["Sala piso 0", "Sala piso -1", "WC Clientes", "Cantinho RPs", "Corredor interno P -1"] as const;
+const serviceCleaningAreas = ["Balcão", "Bebidas", "Corredor interno P 0", "Escadas piso 0", "Corredor Escritório", "Escadas Escritório"] as const;
 const peopleCleaningAreas = ["Sala piso 0", "Sala piso -1", "WC Clientes", "Cantinho RPs", "Corredor interno P -1"] as const;
 const maintenanceCleaningAreas = ["Cozinha", "Copa", "Sala de peças", "Sala de lixo", "Zona Técnica", "Esplanada"] as const;
 const cleaningAreasByDepartment = { qualidade: qualityCleaningAreas, cliente: serviceCleaningAreas, pessoas: peopleCleaningAreas, manutencao: maintenanceCleaningAreas } as const;
