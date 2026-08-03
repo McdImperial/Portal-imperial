@@ -503,33 +503,32 @@ export default function Home() {
   async function exportObjectives() {
     if (!selectedObjectives.length || !objectivesExportRef.current) return;
     try {
-      const { jsPDF } = await import("jspdf");
+      const html2canvas = (await import("html2canvas")).default;
       const exportArea = objectivesExportRef.current;
-      const pageWidth = 297;
-      const margin = 7;
-      const contentHeight = (exportArea.scrollHeight / exportArea.scrollWidth) * (pageWidth - margin * 2);
-      const pageHeight = Math.max(210, contentHeight + margin * 2 + 16);
-      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [pageWidth, pageHeight], compress: true });
       await document.fonts.ready;
-      await doc.html(exportArea, {
-        x: margin,
-        y: margin,
-        width: pageWidth - margin * 2,
+      const canvas = await html2canvas(exportArea, {
+        backgroundColor: "#f8faf9",
+        scale: 2,
+        useCORS: true,
+        logging: false,
         windowWidth: exportArea.scrollWidth,
-        autoPaging: false,
-        html2canvas: {
-          backgroundColor: "#f8faf9",
-          scale: 1,
-          useCORS: true,
-          ignoreElements: (element) => element.hasAttribute("data-pdf-exclude"),
-        },
+        windowHeight: exportArea.scrollHeight,
+        ignoreElements: (element) => element.hasAttribute("data-export-exclude"),
       });
-      while (doc.getNumberOfPages() > 1) doc.deletePage(2);
-      doc.save(`objetivos-${objectiveMonth}.pdf`);
-      setNotice(`PDF de ${selectedObjectiveMonth.label} exportado.`);
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("PNG indisponível");
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `objetivos-${objectiveMonth}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+      setNotice(`PNG de ${selectedObjectiveMonth.label} exportado.`);
       window.setTimeout(() => setNotice(""), 2400);
     } catch {
-      setNotice("Não foi possível gerar o PDF. Tente novamente.");
+      setNotice("Não foi possível gerar o PNG. Tente novamente.");
     }
   }
 
@@ -1143,9 +1142,9 @@ export default function Home() {
             <section ref={objectivesExportRef} className="restaurant-objectives" aria-labelledby="restaurant-objectives-title">
               <div className="restaurant-objectives-heading">
                 <div><span className="eyebrow">{selectedObjectiveMonth.label}</span><h2 id="restaurant-objectives-title">Objetivos mensais</h2><p>Leitura rápida das metas, resultados e pontuação.</p></div>
-                <div className="objective-toolbar" data-pdf-exclude>
+                <div className="objective-toolbar" data-export-exclude>
                   <label><span>Mês</span><select value={objectiveMonth} onChange={(event) => setObjectiveMonth(event.target.value)} aria-label="Filtrar objetivos por mês">{objectiveMonthOptions.map((month) => <option value={month.value} key={month.value}>{month.label}</option>)}</select></label>
-                  <button type="button" className="objective-export" onClick={exportObjectives} disabled={!selectedObjectives.length}><span>⇩</span> Exportar PDF</button>
+                  <button type="button" className="objective-export" onClick={exportObjectives} disabled={!selectedObjectives.length}><span>⇩</span> Exportar PNG</button>
                 </div>
               </div>
               <div className="objectives-kpi-grid" aria-label="Resumo dos objetivos">
