@@ -6,6 +6,7 @@ import { requireUser } from "../auth/_lib";
 const areasByDepartment = {
   qualidade: ["Positiva / Negativa", "Stock secos", "Aquário", "Balneários Funcionários", "Sala de pausa", "Sala de HM", "Balneários de Gerentes"],
   cliente: ["Sala piso 0", "Sala piso -1", "WC Clientes", "Cantinho RPs", "Corredor interno P -1"],
+  pessoas: ["Sala piso 0", "Sala piso -1", "WC Clientes", "Cantinho RPs", "Corredor interno P -1"],
 } as const;
 type InterventionDepartment = keyof typeof areasByDepartment;
 const kinds = ["Limpeza", "Manutenção"] as const;
