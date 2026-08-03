@@ -46,6 +46,7 @@ export const sessions = sqliteTable("sessions", {
 
 export const cleaningInterventions = sqliteTable("cleaning_interventions", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  department: text("department").notNull().default("qualidade"),
   area: text("area").notNull(),
   kind: text("kind").notNull().default("Limpeza"),
   scheduledDate: text("scheduled_date").notNull(),
@@ -59,4 +60,5 @@ export const cleaningInterventions = sqliteTable("cleaning_interventions", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [
   index("idx_cleaning_interventions_scheduled_date").on(table.scheduledDate),
+  index("idx_cleaning_interventions_department_date").on(table.department, table.scheduledDate),
 ]);

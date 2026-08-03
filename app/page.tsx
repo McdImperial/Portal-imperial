@@ -15,6 +15,7 @@ type AppUser = { id: number; name: string; login: string; role: AppRole; departm
 type ManagedUser = AppUser & { createdAt: string; approvedAt: string | null };
 type CleaningIntervention = {
   id: number;
+  department: "qualidade" | "cliente";
   area: string;
   kind: "Limpeza" | "Manutenção";
   scheduledDate: string;
@@ -75,7 +76,9 @@ const departments: { id: Department; label: string; short: string }[] = [
   { id: "manutencao", label: "Manutenção Seg. & IT", short: "MSI" },
 ];
 const qualityCleaningAreas = ["Positiva / Negativa", "Stock secos", "Aquário", "Balneários Funcionários", "Sala de pausa", "Sala de HM", "Balneários de Gerentes"] as const;
-const emptyInterventionDraft: InterventionDraft = { area: qualityCleaningAreas[0], kind: "Limpeza", scheduledDate: "", estimatedHours: "2", resources: "" };
+const serviceCleaningAreas = ["Sala piso 0", "Sala piso -1", "WC Clientes", "Cantinho RPs", "Corredor interno P -1"] as const;
+const cleaningAreasByDepartment = { qualidade: qualityCleaningAreas, cliente: serviceCleaningAreas } as const;
+const emptyInterventionDraft = (area: string): InterventionDraft => ({ area, kind: "Limpeza", scheduledDate: "", estimatedHours: "2", resources: "" });
 
 const statusOptions: TaskStatus[] = ["Por fazer", "Em curso", "Bloqueado", "Concluído"];
 const ownerOptions = [
@@ -353,7 +356,7 @@ export default function Home() {
   const [managedUsers, setManagedUsers] = useState<ManagedUser[]>([]);
   const [cleaningInterventions, setCleaningInterventions] = useState<CleaningIntervention[]>([]);
   const [showInterventionForm, setShowInterventionForm] = useState(false);
-  const [interventionDraft, setInterventionDraft] = useState<InterventionDraft>(emptyInterventionDraft);
+  const [interventionDraft, setInterventionDraft] = useState<InterventionDraft>(() => emptyInterventionDraft(qualityCleaningAreas[0]));
   const [interventionBusy, setInterventionBusy] = useState(false);
 
   useEffect(() => {
@@ -398,13 +401,17 @@ export default function Home() {
   }, [currentUser]);
 
   useEffect(() => {
-    if (!currentUser) return;
+    const interventionDepartment = department === "qualidade" || department === "cliente" ? department : null;
+    if (!currentUser || view !== "areas" || !interventionDepartment) return;
     let active = true;
-    fetch("/api/cleaning-interventions/").then((response) => response.ok ? response.json() : Promise.reject()).then((data: { interventions: CleaningIntervention[] }) => {
+    setCleaningInterventions([]);
+    setShowInterventionForm(false);
+    setInterventionDraft(emptyInterventionDraft(cleaningAreasByDepartment[interventionDepartment][0]));
+    fetch(`/api/cleaning-interventions/?department=${interventionDepartment}`).then((response) => response.ok ? response.json() : Promise.reject()).then((data: { interventions: CleaningIntervention[] }) => {
       if (active) setCleaningInterventions(data.interventions);
     }).catch(() => setNotice("Não foi possível carregar o planeamento das intervenções."));
     return () => { active = false; };
-  }, [currentUser]);
+  }, [currentUser, department, view]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -426,7 +433,9 @@ export default function Home() {
   const completion = scopedTasks.length ? Math.round((completed / scopedTasks.length) * 100) : 0;
   const activeProfile = departmentProfiles[department];
   const departmentLabel = departments.find((item) => item.id === department)?.label ?? "Visão global";
-  const canManageCleaning = currentUser?.role === "admin" || currentUser?.role === "editor" && currentUser.department === "qualidade";
+  const interventionDepartment = department === "qualidade" || department === "cliente" ? department : null;
+  const selectedCleaningAreas: readonly string[] = interventionDepartment ? cleaningAreasByDepartment[interventionDepartment] : [];
+  const canManageCleaning = Boolean(interventionDepartment && (currentUser?.role === "admin" || currentUser?.role === "editor" && currentUser.department === interventionDepartment));
   const openInterventions = cleaningInterventions.filter((item) => item.status !== "Encerrada").length;
   const closedInterventions = cleaningInterventions.filter((item) => item.status === "Encerrada").length;
   const selectedObjectiveMonth = objectiveMonthOptions.find((item) => item.value === objectiveMonth) ?? objectiveMonthOptions[6];
@@ -709,11 +718,12 @@ export default function Home() {
     if (!canManageCleaning || interventionBusy) return;
     setInterventionBusy(true);
     try {
-      const response = await fetch("/api/cleaning-interventions/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...interventionDraft, estimatedHours: Number(interventionDraft.estimatedHours) }) });
+      if (!interventionDepartment) throw new Error("Selecione um departamento válido.");
+      const response = await fetch("/api/cleaning-interventions/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...interventionDraft, department: interventionDepartment, estimatedHours: Number(interventionDraft.estimatedHours) }) });
       const data = await response.json() as { intervention?: CleaningIntervention; error?: string };
       if (!response.ok || !data.intervention) throw new Error(data.error || "Não foi possível agendar a intervenção.");
       setCleaningInterventions((current) => [...current, data.intervention!].sort((a, b) => a.scheduledDate.localeCompare(b.scheduledDate) || a.id - b.id));
-      setInterventionDraft(emptyInterventionDraft);
+      setInterventionDraft(emptyInterventionDraft(selectedCleaningAreas[0]));
       setShowInterventionForm(false);
       setNotice("Intervenção agendada.");
     } catch (error) {
@@ -1266,7 +1276,7 @@ export default function Home() {
             </section>
           )}
 
-          {(view === "resumo" || view === "areas" && department !== "qualidade") && (
+          {(view === "resumo" || view === "areas" && department !== "qualidade" && department !== "cliente") && (
             <section className="panel zones-panel">
               <div className="panel-heading"><div><span className="eyebrow">Estado atual · {departmentLabel}</span><h2>Áreas de limpeza</h2></div><span className="live-indicator"><i /> Atualizado agora</span></div>
               <div className="zones-grid">
@@ -1282,21 +1292,21 @@ export default function Home() {
             </section>
           )}
 
-          {view === "areas" && department === "qualidade" && (
+          {view === "areas" && interventionDepartment && (
             <section className="panel cleaning-planner" aria-labelledby="cleaning-planner-title">
               <div className="panel-heading cleaning-planner-heading">
-                <div><span className="eyebrow">Qualidade & Produtos</span><h2 id="cleaning-planner-title">Áreas de limpeza e intervenções</h2><p>Planeamento de ações de limpeza e manutenção nas áreas acompanhadas.</p></div>
-                {canManageCleaning ? <button className="schedule-intervention-button" onClick={() => setShowInterventionForm((visible) => !visible)}>{showInterventionForm ? "Fechar formulário" : "+ Agendar intervenção"}</button> : <span className="read-only-badge">Apenas consulta</span>}
+                <div><span className="eyebrow">{departmentLabel}</span><h2 id="cleaning-planner-title">Áreas de limpeza e intervenções</h2><p>Planeamento de ações de limpeza e manutenção nas áreas acompanhadas.</p></div>
+                {canManageCleaning ? <button className="schedule-intervention-button" onClick={() => { if (!showInterventionForm) setInterventionDraft(emptyInterventionDraft(selectedCleaningAreas[0])); setShowInterventionForm((visible) => !visible); }}>{showInterventionForm ? "Fechar formulário" : "+ Agendar intervenção"}</button> : <span className="read-only-badge">Apenas consulta</span>}
               </div>
 
               <div className="cleaning-summary" aria-label="Resumo das intervenções">
-                <article><span>▦</span><div><small>Áreas acompanhadas</small><strong>{qualityCleaningAreas.length}</strong></div></article>
+                <article><span>▦</span><div><small>Áreas acompanhadas</small><strong>{selectedCleaningAreas.length}</strong></div></article>
                 <article><span>◷</span><div><small>Intervenções abertas</small><strong>{openInterventions}</strong></div></article>
                 <article><span>✓</span><div><small>Intervenções encerradas</small><strong>{closedInterventions}</strong></div></article>
               </div>
 
               <div className="cleaning-areas-catalog" aria-label="Áreas de limpeza">
-                {qualityCleaningAreas.map((area) => {
+                {selectedCleaningAreas.map((area) => {
                   const areaInterventions = cleaningInterventions.filter((item) => item.area === area);
                   const areaOpen = areaInterventions.filter((item) => item.status !== "Encerrada").length;
                   return <article key={area} className={areaOpen ? "has-open" : ""}><span>{areaOpen ? "◷" : "✓"}</span><div><strong>{area}</strong><small>{areaOpen ? `${areaOpen} ${areaOpen === 1 ? "intervenção aberta" : "intervenções abertas"}` : areaInterventions.length ? "Sem intervenções abertas" : "Sem intervenções agendadas"}</small></div></article>;
@@ -1306,7 +1316,7 @@ export default function Home() {
               {showInterventionForm && canManageCleaning && <form className="intervention-form" onSubmit={scheduleIntervention}>
                 <div className="intervention-form-heading"><div><span className="eyebrow">Novo agendamento</span><h3>Detalhes da intervenção</h3></div><small>Todos os campos são obrigatórios</small></div>
                 <div className="intervention-form-grid">
-                  <label><span>Área</span><select value={interventionDraft.area} onChange={(event) => setInterventionDraft((draft) => ({ ...draft, area: event.target.value }))}>{qualityCleaningAreas.map((area) => <option value={area} key={area}>{area}</option>)}</select></label>
+                  <label><span>Área</span><select value={interventionDraft.area} onChange={(event) => setInterventionDraft((draft) => ({ ...draft, area: event.target.value }))}>{selectedCleaningAreas.map((area) => <option value={area} key={area}>{area}</option>)}</select></label>
                   <label><span>Tipo</span><select value={interventionDraft.kind} onChange={(event) => setInterventionDraft((draft) => ({ ...draft, kind: event.target.value as "Limpeza" | "Manutenção" }))}><option>Limpeza</option><option>Manutenção</option></select></label>
                   <label><span>Dia da intervenção</span><input type="date" required value={interventionDraft.scheduledDate} onChange={(event) => setInterventionDraft((draft) => ({ ...draft, scheduledDate: event.target.value }))} /></label>
                   <label><span>Horas estimadas</span><input type="number" min="0.5" max="999" step="0.5" required value={interventionDraft.estimatedHours} onChange={(event) => setInterventionDraft((draft) => ({ ...draft, estimatedHours: event.target.value }))} /></label>
