@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 type Profile = "Tiago Soutelo" | "Marlene Soutelo";
+type Area = "Financeiro" | "Saúde";
 type RecordKind = "weight" | "blood_pressure" | "activity" | "medical";
 type HealthRecord = {
   id: number;
@@ -48,6 +49,7 @@ function lastOf(items: HealthRecord[], kind: RecordKind) {
 }
 
 export default function HealthPortal() {
+  const [area, setArea] = useState<Area>("Saúde");
   const [profile, setProfile] = useState<Profile>("Tiago Soutelo");
   const [activeNav, setActiveNav] = useState<(typeof navItems)[number]>("Visão geral");
   const [records, setRecords] = useState<HealthRecord[]>(fallback);
@@ -121,22 +123,34 @@ export default function HealthPortal() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand"><span className="brand-mark">+</span><span>Vitae</span></div>
-        <p className="side-label">Perfis</p>
-        <div className="profile-list">
-          {profiles.map((item) => (
-            <button key={item.name} className={`profile-button ${profile === item.name ? "selected" : ""}`} onClick={() => setProfile(item.name)}>
-              <span className={`avatar ${item.tint}`}>{item.initials}</span><span>{item.name}</span>
-            </button>
-          ))}
+        <div className="brand"><span className="brand-mark">◇</span><span>Portal Soutelo</span></div>
+        <p className="side-label">Áreas</p>
+        <div className="area-list">
+          <button className={`area-button ${area === "Financeiro" ? "selected" : ""}`} onClick={() => setArea("Financeiro")}>
+            <span className="area-icon finance">€</span><span><strong>Financeiro</strong><small>Em preparação</small></span>
+          </button>
+          <button className={`area-button ${area === "Saúde" ? "selected" : ""}`} onClick={() => setArea("Saúde")}>
+            <span className="area-icon health">♡</span><span><strong>Saúde</strong><small>Registos e evolução</small></span>
+          </button>
         </div>
-        <nav aria-label="Navegação principal">
-          {navItems.map((item) => <button key={item} className={activeNav === item ? "active" : ""} onClick={() => setActiveNav(item)}><span className="nav-dot" />{item}</button>)}
-        </nav>
-        <div className="privacy-note"><span>Dados privados</span><small>Apenas as pessoas autorizadas podem aceder a este portal.</small></div>
+        {area === "Saúde" && <div className="health-navigation">
+          <p className="side-label profile-label">Perfis</p>
+          <div className="profile-list">
+            {profiles.map((item) => (
+              <button key={item.name} className={`profile-button ${profile === item.name ? "selected" : ""}`} onClick={() => setProfile(item.name)}>
+                <span className={`avatar ${item.tint}`}>{item.initials}</span><span>{item.name}</span>
+              </button>
+            ))}
+          </div>
+          <nav aria-label="Navegação da área de saúde">
+            {navItems.map((item) => <button key={item} className={activeNav === item ? "active" : ""} onClick={() => setActiveNav(item)}><span className="nav-dot" />{item}</button>)}
+          </nav>
+        </div>}
+        <div className="privacy-note"><span>Espaço privado</span><small>Apenas as pessoas autorizadas podem aceder a este portal.</small></div>
       </aside>
 
       <main>
+        {area === "Financeiro" ? <FinancialPlaceholder /> : <>
         <header className="topbar">
           <div>
             <p className="eyebrow">{activeNav}</p>
@@ -193,8 +207,9 @@ export default function HealthPortal() {
         {activeNav === "Registos" && <RecordsView records={personRecords} onAdd={() => setModal("medical")} />}
         {activeNav === "Atividade" && <ActivityView records={activities} onAdd={() => setModal("activity")} />}
         {activeNav === "Evolução" && <TrendsView records={personRecords} chartWeights={chartWeights} />}
+        </>}
 
-        <footer><span>Vitae · Portal familiar de saúde</span><span>Este portal ajuda a organizar registos e não substitui aconselhamento médico.</span></footer>
+        <footer><span>Portal Soutelo · Espaço familiar privado</span><span>{area === "Saúde" ? "Os registos organizam informação e não substituem aconselhamento médico." : "Área financeira reservada para desenvolvimento futuro."}</span></footer>
       </main>
 
       {loading && <div className="loading-pill">A atualizar os seus dados…</div>}
@@ -202,6 +217,19 @@ export default function HealthPortal() {
       {modal && <RecordModal kind={modal} profile={profile} onClose={() => setModal(null)} onSubmit={submitRecord} />}
     </div>
   );
+}
+
+function FinancialPlaceholder() {
+  return <section className="finance-page">
+    <header className="topbar finance-header"><div><p className="eyebrow">Financeiro</p><h1>Finanças da família</h1><p>Um espaço reservado para organizar a informação financeira mais à frente.</p></div><span className="coming-tag">Em preparação</span></header>
+    <div className="finance-empty">
+      <span className="finance-symbol">€</span>
+      <p className="eyebrow">Próxima área de trabalho</p>
+      <h2>A estrutura está pronta</h2>
+      <p>Quando avançarmos, esta área poderá receber os dados financeiros mantendo-os separados dos registos de saúde.</p>
+      <div className="future-sections"><span>Informação financeira</span><span>Análise e acompanhamento</span></div>
+    </div>
+  </section>;
 }
 
 function MetricCard({ tone, label, value, detail, icon, unit }: { tone: string; label: string; value: string; detail: string; icon: string; unit?: string }) {
