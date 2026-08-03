@@ -87,6 +87,17 @@ const cleaningAreasByDepartment = { qualidade: qualityCleaningAreas, cliente: se
 const emptyInterventionDraft = (area: string): InterventionDraft => ({ area, kind: "Limpeza", scheduledDate: "", estimatedHours: "2", resources: "" });
 const areaRatings: AreaRating[] = ["", "Bom", "Aceitável", "Necessita Melhorar", "Não aceitável"];
 const evaluationKey = (department: EvaluationDepartment, area: string) => `${department}::${area}`;
+const areaRatingScores: Record<Exclude<AreaRating, "">, number> = { "Bom": 4, "Aceitável": 3, "Necessita Melhorar": 2, "Não aceitável": 1 };
+
+function globalAreaRating(ratings: AreaRating[]): AreaRating {
+  const completed = ratings.filter((rating): rating is Exclude<AreaRating, ""> => Boolean(rating));
+  if (!completed.length) return "";
+  const average = completed.reduce((sum, rating) => sum + areaRatingScores[rating], 0) / completed.length;
+  if (average >= 3.5) return "Bom";
+  if (average >= 2.5) return "Aceitável";
+  if (average >= 1.5) return "Necessita Melhorar";
+  return "Não aceitável";
+}
 
 const statusOptions: TaskStatus[] = ["Por fazer", "Em curso", "Bloqueado", "Concluído"];
 const ownerOptions = [
@@ -371,6 +382,7 @@ export default function Home() {
   const [areaEvaluationDraft, setAreaEvaluationDraft] = useState<AreaEvaluationDraft>({});
   const [evaluationBusy, setEvaluationBusy] = useState(false);
   const [evaluationUpdatedAt, setEvaluationUpdatedAt] = useState<string | null>(null);
+  const [collapsedEvaluationDepartments, setCollapsedEvaluationDepartments] = useState<Partial<Record<EvaluationDepartment, boolean>>>({});
 
   useEffect(() => {
     let active = true;
@@ -476,6 +488,14 @@ export default function Home() {
       naoAceitavel: values.filter((rating) => rating === "Não aceitável").length,
     };
   }, [areaEvaluationDraft]);
+  const departmentEvaluationSummaries = useMemo(() => (Object.entries(cleaningAreasByDepartment) as [EvaluationDepartment, readonly string[]][]).map(([departmentId, areas]) => {
+    const evaluations = areas.map((area) => areaEvaluationDraft[evaluationKey(departmentId, area)] ?? { cleaningRating: "" as AreaRating, maintenanceRating: "" as AreaRating });
+    return {
+      departmentId,
+      cleaningRating: globalAreaRating(evaluations.map((item) => item.cleaningRating)),
+      maintenanceRating: globalAreaRating(evaluations.map((item) => item.maintenanceRating)),
+    };
+  }), [areaEvaluationDraft]);
   const selectedObjectiveMonth = objectiveMonthOptions.find((item) => item.value === objectiveMonth) ?? objectiveMonthOptions[6];
   const selectedObjectiveSnapshot = objectivesByMonth[objectiveMonth];
   const selectedObjectives = selectedObjectiveSnapshot?.objectives ?? [];
@@ -1352,6 +1372,19 @@ export default function Home() {
                 <article className="rating-nao"><small>Não aceitável</small><strong>{areaRatingStats.naoAceitavel}</strong></article>
               </div>
 
+              <div className="department-rating-cards" aria-label="Avaliação global por departamento">
+                {departmentEvaluationSummaries.map((summary) => {
+                  const profile = departments.find((item) => item.id === summary.departmentId)!;
+                  return <article className="department-rating-card" key={summary.departmentId}>
+                    <div className="department-rating-card-title"><span className="department-initials">{profile.short}</span><strong>{profile.label}</strong></div>
+                    <div className="department-rating-results">
+                      <div><small>Limpeza</small><span className={`rating-display ${statusClass(summary.cleaningRating || "Por avaliar")}`}>{summary.cleaningRating || "Por avaliar"}</span></div>
+                      <div><small>Manutenção</small><span className={`rating-display ${statusClass(summary.maintenanceRating || "Por avaliar")}`}>{summary.maintenanceRating || "Por avaliar"}</span></div>
+                    </div>
+                  </article>;
+                })}
+              </div>
+
               <div className="area-rating-legend" aria-label="Legenda das classificações">
                 <span className="bom"><i /> Bom</span><span className="aceitavel"><i /> Aceitável</span><span className="necessita-melhorar"><i /> Necessita Melhorar</span><span className="nao-aceitavel"><i /> Não aceitável</span>
               </div>
@@ -1359,20 +1392,21 @@ export default function Home() {
               <div className="department-evaluations">
                 {(Object.entries(cleaningAreasByDepartment) as [EvaluationDepartment, readonly string[]][]).map(([departmentId, areas]) => {
                   const profile = departments.find((item) => item.id === departmentId)!;
+                  const collapsed = Boolean(collapsedEvaluationDepartments[departmentId]);
                   return <section className="department-evaluation-card" key={departmentId}>
-                    <div className="department-evaluation-title"><span className="department-initials">{profile.short}</span><div><h3>{profile.label}</h3><small>{areas.length} {areas.length === 1 ? "área acompanhada" : "áreas acompanhadas"}</small></div></div>
-                    <div className="area-evaluation-table">
+                    <div className="department-evaluation-title"><span className="department-initials">{profile.short}</span><div><h3>{profile.label}</h3><small>{areas.length} {areas.length === 1 ? "área acompanhada" : "áreas acompanhadas"}</small></div><button className="department-evaluation-toggle" type="button" aria-expanded={!collapsed} onClick={() => setCollapsedEvaluationDepartments((current) => ({ ...current, [departmentId]: !collapsed }))}>{collapsed ? "Mostrar áreas ↓" : "Ocultar áreas ↑"}</button></div>
+                    {!collapsed && <div className="area-evaluation-table">
                       <div className="area-evaluation-row header"><span>Área</span><span>Estado de limpeza</span><span>Estado de manutenção</span></div>
                       {areas.map((area) => {
                         const key = evaluationKey(departmentId, area);
                         const ratings = areaEvaluationDraft[key] ?? { cleaningRating: "" as AreaRating, maintenanceRating: "" as AreaRating };
                         return <div className="area-evaluation-row" key={area}>
                           <strong>{area}</strong>
-                          {currentUser.role === "admin" ? <select className={`rating-select ${statusClass(ratings.cleaningRating || "Por avaliar")}`} value={ratings.cleaningRating} onChange={(event) => setAreaEvaluationDraft((current) => ({ ...current, [key]: { ...ratings, cleaningRating: event.target.value as AreaRating } }))}>{areaRatings.map((rating) => <option value={rating} key={rating || "empty"}>{rating || "Por avaliar"}</option>)}</select> : <span className={`rating-display ${statusClass(ratings.cleaningRating || "Por avaliar")}`}>{ratings.cleaningRating || "Por avaliar"}</span>}
-                          {currentUser.role === "admin" ? <select className={`rating-select ${statusClass(ratings.maintenanceRating || "Por avaliar")}`} value={ratings.maintenanceRating} onChange={(event) => setAreaEvaluationDraft((current) => ({ ...current, [key]: { ...ratings, maintenanceRating: event.target.value as AreaRating } }))}>{areaRatings.map((rating) => <option value={rating} key={rating || "empty"}>{rating || "Por avaliar"}</option>)}</select> : <span className={`rating-display ${statusClass(ratings.maintenanceRating || "Por avaliar")}`}>{ratings.maintenanceRating || "Por avaliar"}</span>}
+                          {currentUser.role === "admin" ? <div className="rating-buttons" role="group" aria-label={`Estado de limpeza de ${area}`}>{areaRatings.slice(1).map((rating) => <button type="button" key={rating} aria-pressed={ratings.cleaningRating === rating} className={`rating-choice ${statusClass(rating)} ${ratings.cleaningRating === rating ? "selected" : ""}`} onClick={() => setAreaEvaluationDraft((current) => ({ ...current, [key]: { ...ratings, cleaningRating: ratings.cleaningRating === rating ? "" : rating } }))}>{rating}</button>)}</div> : <span className={`rating-display ${statusClass(ratings.cleaningRating || "Por avaliar")}`}>{ratings.cleaningRating || "Por avaliar"}</span>}
+                          {currentUser.role === "admin" ? <div className="rating-buttons" role="group" aria-label={`Estado de manutenção de ${area}`}>{areaRatings.slice(1).map((rating) => <button type="button" key={rating} aria-pressed={ratings.maintenanceRating === rating} className={`rating-choice ${statusClass(rating)} ${ratings.maintenanceRating === rating ? "selected" : ""}`} onClick={() => setAreaEvaluationDraft((current) => ({ ...current, [key]: { ...ratings, maintenanceRating: ratings.maintenanceRating === rating ? "" : rating } }))}>{rating}</button>)}</div> : <span className={`rating-display ${statusClass(ratings.maintenanceRating || "Por avaliar")}`}>{ratings.maintenanceRating || "Por avaliar"}</span>}
                         </div>;
                       })}
-                    </div>
+                    </div>}
                   </section>;
                 })}
               </div>
