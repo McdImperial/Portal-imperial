@@ -43,6 +43,7 @@ type FinanceDocument = {
 };
 type ClinicalMetric = { label: string; current: number; previous: number; unit: string; };
 type ClinicalGroup = { title: string; metrics: ClinicalMetric[]; };
+type ClinicalComparisonSet = { currentDate: string; previousDate: string; groups: ClinicalGroup[] };
 
 const profiles: { name: Profile; initials: string; tint: string }[] = [
   { name: "Tiago Soutelo", initials: "TS", tint: "blue" },
@@ -73,7 +74,7 @@ const financeDocuments: FinanceDocument[] = [
   { category: "Eletricidade", provider: "EDP", detail: "Período de faturação: 4 abr a 3 mai", value: "89,18 €", date: "6 mai 2026", icon: "◈", tone: "orange", url: "https://drive.google.com/file/d/1d6fpF66En1F_Jpy7x3X66VbQ6rzdmqn6/view?usp=drivesdk" },
 ];
 
-const clinicalComparisons: Record<Profile, { currentDate: string; previousDate: string; groups: ClinicalGroup[] }> = {
+const latestClinicalComparisons: Record<Profile, ClinicalComparisonSet> = {
   "Tiago Soutelo": {
     currentDate: "2026-05-27", previousDate: "2025-12-17", groups: [
       { title: "Hemograma", metrics: [
@@ -94,6 +95,41 @@ const clinicalComparisons: Record<Profile, { currentDate: string; previousDate: 
         { label:"Creatinina",current:.79,previous:.76,unit:"mg/dL" },{ label:"TFGe",current:88,previous:92,unit:"mL/min/1,73m²" },{ label:"AST/GOT",current:23,previous:17,unit:"U/L" },{ label:"ALT/GPT",current:24,previous:24,unit:"U/L" },{ label:"Ferro",current:121,previous:208,unit:"µg/dL" },{ label:"Ferritina",current:87,previous:129,unit:"ng/mL" },{ label:"Colesterol total",current:120,previous:216,unit:"mg/dL" },{ label:"Colesterol LDL",current:64,previous:151,unit:"mg/dL" },
       ] },
     ],
+  },
+};
+
+const clinicalComparisons: Record<Profile, ClinicalComparisonSet[]> = {
+  "Tiago Soutelo": [
+    { currentDate: "2025-12-17", previousDate: "2025-04-16", groups: [
+      { title: "Hemograma", metrics: [
+        { label:"Eritrócitos",current:5.27,previous:5.51,unit:"x10¹²/L" }, { label:"Hemoglobina",current:15.2,previous:16,unit:"g/dL" }, { label:"Hematócrito",current:45.5,previous:47,unit:"%" }, { label:"VCM",current:86.3,previous:85.3,unit:"fL" }, { label:"Leucócitos",current:5.46,previous:4.17,unit:"x10⁹/L" }, { label:"Plaquetas",current:292,previous:281,unit:"x10⁹/L" },
+      ] },
+      { title: "Glicemia, função renal e lípidos", metrics: [
+        { label:"Glicose",current:100,previous:124,unit:"mg/dL" }, { label:"Creatinina",current:.83,previous:.89,unit:"mg/dL" }, { label:"TFGe",current:112,previous:103,unit:"mL/min/1,73m²" }, { label:"Ácido úrico",current:5.9,previous:6.2,unit:"mg/dL" }, { label:"Colesterol total",current:195,previous:180,unit:"mg/dL" }, { label:"Colesterol HDL",current:29,previous:25,unit:"mg/dL" }, { label:"Triglicerídeos",current:275,previous:480,unit:"mg/dL" },
+      ] },
+    ] },
+    latestClinicalComparisons["Tiago Soutelo"],
+  ],
+  "Marlene Soutelo": [
+    { currentDate: "2026-02-19", previousDate: "2021-07-16", groups: [
+      { title: "Hemograma", metrics: [
+        { label:"Eritrócitos",current:4.95,previous:4.53,unit:"x10¹²/L" }, { label:"Hemoglobina",current:15.9,previous:14.9,unit:"g/dL" }, { label:"Hematócrito",current:45.8,previous:42.4,unit:"%" }, { label:"VCM",current:92.5,previous:93.6,unit:"fL" }, { label:"Leucócitos",current:8.55,previous:8.51,unit:"x10⁹/L" }, { label:"Plaquetas",current:306,previous:234,unit:"x10⁹/L" },
+      ] },
+      { title: "Bioquímica", metrics: [
+        { label:"Glicose",current:100,previous:85,unit:"mg/dL" }, { label:"Creatinina",current:.76,previous:.80,unit:"mg/dL" }, { label:"AST/GOT",current:17,previous:15,unit:"U/L" }, { label:"ALT/GPT",current:24,previous:20,unit:"U/L" }, { label:"Ácido úrico",current:8.5,previous:5.8,unit:"mg/dL" }, { label:"Colesterol total",current:216,previous:188,unit:"mg/dL" }, { label:"Colesterol HDL",current:49,previous:50,unit:"mg/dL" }, { label:"Triglicerídeos",current:80,previous:78,unit:"mg/dL" },
+      ] },
+    ] },
+    latestClinicalComparisons["Marlene Soutelo"],
+  ],
+};
+
+type ReferenceRange = { label: string; min?: number; max?: number };
+const clinicalReferences: Record<Profile, Record<string, ReferenceRange>> = {
+  "Tiago Soutelo": {
+    "Eritrócitos": { label: "4,30 — 6,40", min: 4.3, max: 6.4 }, "Hemoglobina": { label: "13,0 — 16,5", min: 13, max: 16.5 }, "Hematócrito": { label: "39,8 — 52,0", min: 39.8, max: 52 }, "VCM": { label: "80 — 97", min: 80, max: 97 }, "HCM": { label: "26 — 34", min: 26, max: 34 }, "CHCM": { label: "32 — 36", min: 32, max: 36 }, "RDW": { label: "11,6 — 14,0", min: 11.6, max: 14 }, "Leucócitos": { label: "4,00 — 10,00", min: 4, max: 10 }, "Plaquetas": { label: "140 — 440", min: 140, max: 440 }, "Glicose": { label: "70 — 105", min: 70, max: 105 }, "Creatinina": { label: "0,74 — 1,35", min: .74, max: 1.35 }, "TFGe": { label: "≥ 60", min: 60 }, "Ácido úrico": { label: "3,7 — 7,7", min: 3.7, max: 7.7 }, "Colesterol total": { label: "< 190", max: 190 }, "Colesterol HDL": { label: "> 40", min: 40 }, "Triglicerídeos": { label: "< 150", max: 150 }, "PSA total": { label: "< 4,0", max: 4 },
+  },
+  "Marlene Soutelo": {
+    "Eritrócitos": { label: "3,90 — 5,20", min: 3.9, max: 5.2 }, "Hemoglobina": { label: "12,0 — 16,0", min: 12, max: 16 }, "Hematócrito": { label: "34,7 — 46,0", min: 34.7, max: 46 }, "VCM": { label: "80 — 97", min: 80, max: 97 }, "HCM": { label: "26 — 34", min: 26, max: 34 }, "CHCM": { label: "32 — 36", min: 32, max: 36 }, "RDW": { label: "11,6 — 14,0", min: 11.6, max: 14 }, "Leucócitos": { label: "4,00 — 10,00", min: 4, max: 10 }, "Plaquetas": { label: "140 — 440", min: 140, max: 440 }, "Glicose": { label: "70 — 105", min: 70, max: 105 }, "Creatinina": { label: "0,59 — 1,04", min: .59, max: 1.04 }, "TFGe": { label: "≥ 60", min: 60 }, "AST/GOT": { label: "5 — 34", min: 5, max: 34 }, "ALT/GPT": { label: "< 56", max: 56 }, "Ferro": { label: "50 — 170", min: 50, max: 170 }, "Ferritina": { label: "11 — 307", min: 11, max: 307 }, "Ácido úrico": { label: "2,6 — 6,0", min: 2.6, max: 6 }, "Colesterol total": { label: "< 190", max: 190 }, "Colesterol HDL": { label: "> 40", min: 40 }, "Colesterol LDL": { label: "< 100", max: 100 }, "Triglicerídeos": { label: "< 150", max: 150 },
   },
 };
 
@@ -358,16 +394,24 @@ function ExamsView({ records, profile }: { records: HealthRecord[]; profile: Pro
 }
 
 function ClinicalComparison({ profile }: { profile: Profile }) {
-  const comparison = clinicalComparisons[profile];
-  return <section className="clinical-comparison"><div className="clinical-heading"><div><p className="eyebrow">Comparação de análises</p><h3>Resultados face à análise anterior</h3><p>Resultado de {displayMetricDate(comparison.currentDate)} comparado com {displayMetricDate(comparison.previousDate)}.</p></div><span>{comparison.groups.reduce((sum, group) => sum + group.metrics.length, 0)} parâmetros</span></div>{comparison.groups.map((group) => <div className="clinical-group" key={group.title}><h4>{group.title}</h4><div className="clinical-table-wrap"><table><thead><tr><th>Parâmetro</th><th>Resultado atual</th><th>Anterior</th><th>Variação</th></tr></thead><tbody>{group.metrics.map((item) => <ClinicalRow key={item.label} item={item} />)}</tbody></table></div></div>)}<p className="clinical-disclaimer">A variação percentual é calculada sobre o valor anterior. Esta comparação organiza os resultados do relatório e não substitui a interpretação por um profissional de saúde.</p></section>;
+  const comparisons = clinicalComparisons[profile];
+  const [month, setMonth] = useState("all");
+  const [year, setYear] = useState("all");
+  const [selectedDate, setSelectedDate] = useState(comparisons[comparisons.length - 1].currentDate);
+  const years = [...new Set(comparisons.map((item) => item.currentDate.slice(0, 4)))].sort().reverse();
+  const visible = comparisons.filter((item) => (month === "all" || item.currentDate.slice(5, 7) === month) && (year === "all" || item.currentDate.slice(0, 4) === year));
+  const comparison = visible.find((item) => item.currentDate === selectedDate) ?? visible[visible.length - 1] ?? comparisons[comparisons.length - 1];
+  return <section className="clinical-comparison"><div className="clinical-heading"><div><p className="eyebrow">Comparação de análises</p><h3>Resultados, referências e evolução</h3><p>Resultado de {displayMetricDate(comparison.currentDate)} comparado com {displayMetricDate(comparison.previousDate)}.</p></div><span>{comparison.groups.reduce((sum, group) => sum + group.metrics.length, 0)} parâmetros</span></div><div className="comparison-filters"><label>Mês<select value={month} onChange={(event) => setMonth(event.target.value)}><option value="all">Todos os meses</option>{[...new Set(comparisons.map((item) => item.currentDate.slice(5, 7)))].sort().map((value) => <option key={value} value={value}>{new Intl.DateTimeFormat("pt-PT", { month: "long" }).format(new Date(`2026-${value}-01T12:00:00`))}</option>)}</select></label><label>Ano<select value={year} onChange={(event) => setYear(event.target.value)}><option value="all">Todos os anos</option>{years.map((value) => <option key={value} value={value}>{value}</option>)}</select></label><label>Análise<select value={comparison.currentDate} onChange={(event) => setSelectedDate(event.target.value)}>{visible.map((item) => <option key={item.currentDate} value={item.currentDate}>{displayMetricDate(item.currentDate)}</option>)}</select></label></div>{comparison.groups.map((group) => <div className="clinical-group" key={group.title}><h4>{group.title}</h4><div className="clinical-table-wrap"><table><thead><tr><th>Parâmetro</th><th>Resultado<br/>{displayMetricDate(comparison.currentDate)}</th><th>Referência</th><th>Face à referência</th><th>Anterior<br/>{displayMetricDate(comparison.previousDate)}</th><th>Variação</th></tr></thead><tbody>{group.metrics.map((item) => <ClinicalRow key={item.label} item={item} profile={profile} />)}</tbody></table></div></div>)}<p className="clinical-disclaimer">Os valores de referência são os indicados nos relatórios. A comparação com a referência é apenas descritiva (dentro, abaixo ou acima do intervalo); a variação percentual é calculada face ao resultado anterior e não substitui interpretação clínica.</p></section>;
 }
 
-function ClinicalRow({ item }: { item: ClinicalMetric }) {
+function ClinicalRow({ item, profile }: { item: ClinicalMetric; profile: Profile }) {
   const delta = item.current - item.previous;
   const percent = (delta / item.previous) * 100;
   const digits = Math.max(Number.isInteger(item.current) ? 0 : 2, Number.isInteger(item.previous) ? 0 : 2);
   const format = (value: number) => new Intl.NumberFormat("pt-PT", { maximumFractionDigits: digits }).format(value);
-  return <tr><td><strong>{item.label}</strong><small>{item.unit}</small></td><td>{format(item.current)}</td><td>{format(item.previous)}</td><td><span className={`clinical-delta ${delta === 0 ? "flat" : delta > 0 ? "up" : "down"}`}>{delta > 0 ? "↑" : delta < 0 ? "↓" : "—"} {Math.abs(percent).toFixed(1)}%</span></td></tr>;
+  const reference = clinicalReferences[profile][item.label];
+  const referenceStatus = !reference ? "Sem referência" : reference.min !== undefined && item.current < reference.min ? "Abaixo" : reference.max !== undefined && item.current > reference.max ? "Acima" : "Dentro";
+  return <tr><td><strong>{item.label}</strong><small>{item.unit}</small></td><td>{format(item.current)} <small>{item.unit}</small></td><td>{reference?.label ?? "—"} <small>{item.unit}</small></td><td><span className={`reference-status ${referenceStatus.toLocaleLowerCase("pt-PT")}`}>{referenceStatus}</span></td><td>{format(item.previous)} <small>{item.unit}</small></td><td><span className={`clinical-delta ${delta === 0 ? "flat" : delta > 0 ? "up" : "down"}`}>{delta > 0 ? "↑" : delta < 0 ? "↓" : "—"} {Math.abs(percent).toFixed(1)}%</span></td></tr>;
 }
 
 function DocumentGroup({ title, records }: { title: string; records: HealthRecord[] }) {
@@ -391,6 +435,10 @@ function HealthManagerView({ metrics, profile }: { metrics: HealthMetric[]; prof
   const sourceUrl = metrics.find((item) => item.sourceUrl)?.sourceUrl;
   const dates = metrics.map((item) => item.recordedAt.slice(0, 10)).sort();
   const distinctMetrics = new Set(metrics.map((item) => item.metricKey)).size;
+  const metricOptions = [...new Map(metrics.map((item) => [item.metricKey, item])).values()];
+  const [selectedMetric, setSelectedMetric] = useState("weight");
+  const activeMetric = metricOptions.find((item) => item.metricKey === selectedMetric) ?? metricOptions[0];
+  const selectedRecords = activeMetric ? metrics.filter((item) => item.metricKey === activeMetric.metricKey) : [];
   return <section className="page-panel health-manager-page">
     <div className="section-title"><div><p className="eyebrow">Relatório HealthManager Pro</p><h2>Evolução de {profile.split(" ")[0]}</h2><p>Todas as métricas disponíveis no ficheiro partilhado, organizadas por tema e por data.</p></div>{sourceUrl && <a className="source-button" href={sourceUrl} target="_blank" rel="noreferrer">Abrir relatório <span>↗</span></a>}</div>
     <div className="hm-overview">
@@ -398,23 +446,36 @@ function HealthManagerView({ metrics, profile }: { metrics: HealthMetric[]; prof
       <div><strong>{metrics.length || "—"}</strong><span>Valores registados</span></div>
       <div><strong>{dates.length ? `${displayMetricDate(dates[0])} — ${displayMetricDate(dates[dates.length - 1])}` : "—"}</strong><span>Período disponível</span></div>
     </div>
+    <section className="hm-controls"><div><p className="eyebrow">Explorar métricas</p><h3>Escolha a métrica para atualizar o gráfico e a tabela</h3><p>O filtro mantém a mesma métrica no gráfico de evolução e na tabela detalhada, para que cada leitura possa ser comparada com a anterior.</p></div><label>Métrica<select value={activeMetric?.metricKey ?? ""} onChange={(event) => setSelectedMetric(event.target.value)}>{metricOptions.map((item) => <option key={item.metricKey} value={item.metricKey}>{item.metricLabel} · {item.unit || "Índice"}</option>)}</select></label></section>
+    <LatestMetricCards metrics={metrics.filter((item) => item.groupName === "body")} />
     <BodyCompositionAnalysis metrics={metrics.filter((item) => item.groupName === "body")} />
-    {(["body", "pressure", "activity"] as MetricGroup[]).map((group) => {
-      const groupMetrics = metrics.filter((item) => item.groupName === group);
-      const keys = [...new Set(groupMetrics.map((item) => item.metricKey))];
-      return <section className="hm-section" key={group}>
-        <div className="hm-section-heading"><div><h3>{metricGroupDetails[group].title}</h3><p>{metricGroupDetails[group].description}</p></div><span>{keys.length} {keys.length === 1 ? "métrica" : "métricas"}</span></div>
-        {keys.length ? <div className="hm-chart-grid">{keys.map((key) => <MetricTrendCard key={key} records={groupMetrics.filter((item) => item.metricKey === key)} />)}</div> : <div className="hm-empty">O relatório deste perfil não contém registos de {group === "activity" ? "atividade" : metricGroupDetails[group].title.toLocaleLowerCase("pt-PT")}.</div>}
-      </section>;
-    })}
-    <div className="hm-note"><strong>Leitura dos gráficos</strong><span>Cada gráfico usa uma escala focada na variação da própria métrica. Os valores e unidades seguem o relatório original; as lacunas não foram estimadas.</span></div>
+    <section className="hm-section"><div className="hm-section-heading"><div><h3>Gráfico da métrica selecionada</h3><p>Os valores aparecem sobre cada barra e seguem a escala própria desta métrica.</p></div><span>{activeMetric ? metricGroupDetails[activeMetric.groupName].title : "—"}</span></div>{selectedRecords.length ? <div className="hm-chart-grid"><MetricTrendCard records={selectedRecords} /></div> : <div className="hm-empty">Selecione uma métrica com dados disponíveis.</div>}</section>
+    <MetricEvolutionTable records={selectedRecords} />
+    <div className="hm-note"><strong>Como ler esta informação</strong><span>Os cartões mostram a última leitura registada de cada métrica de composição corporal. A tabela apresenta cada leitura da métrica escolhida, com a diferença e a percentagem calculadas face à leitura imediatamente anterior. Os valores e unidades são reproduzidos do relatório; lacunas não são estimadas.</span></div>
   </section>;
+}
+
+function metricIcon(key: string, label: string) {
+  const text = `${key} ${label}`.toLocaleLowerCase("pt-PT");
+  if (text.includes("peso")) return "⚖";
+  if (text.includes("imc") || text.includes("bmi")) return "◫";
+  if (text.includes("gord") || text.includes("fat")) return "◔";
+  if (text.includes("água") || text.includes("agua") || text.includes("water")) return "≈";
+  if (text.includes("músc") || text.includes("musc") || text.includes("muscle")) return "↗";
+  if (text.includes("óss") || text.includes("oss") || text.includes("bone")) return "◇";
+  return "●";
+}
+
+function LatestMetricCards({ metrics }: { metrics: HealthMetric[] }) {
+  const keys = [...new Set(metrics.map((item) => item.metricKey))];
+  if (!keys.length) return null;
+  return <section className="latest-metrics"><div className="latest-metrics-heading"><p className="eyebrow">Últimos resultados</p><p>Leitura mais recente de cada métrica de peso e composição corporal.</p></div><div className="latest-metric-grid">{keys.map((key) => { const records = metrics.filter((item) => item.metricKey === key).sort((a,b) => b.recordedAt.localeCompare(a.recordedAt)); const latest = records[0]; return <article className="latest-metric-card" key={key}><span className="latest-metric-icon">{metricIcon(key, latest.metricLabel)}</span><div><small>{latest.metricLabel}</small><strong>{metricValue(latest.value, latest.unit)}</strong><time>{displayMetricDate(latest.recordedAt)}</time></div></article>; })}</div></section>;
 }
 
 function BodyCompositionAnalysis({ metrics }: { metrics: HealthMetric[] }) {
   const keys = [...new Set(metrics.map((item) => item.metricKey))];
   if (!keys.length) return null;
-  return <section className="body-analysis"><div className="body-analysis-heading"><div><p className="eyebrow">Análise de composição corporal</p><h3>Peso e métricas associadas</h3><p>Comparação entre a primeira e a última leitura disponível para cada métrica.</p></div><span>{keys.length} métricas</span></div><div className="body-analysis-table-wrap"><table><thead><tr><th>Métrica</th><th>Última leitura</th><th>Primeira leitura</th><th>Variação</th><th>Intervalo observado</th></tr></thead><tbody>{keys.map((key) => <BodyAnalysisRow key={key} records={metrics.filter((item) => item.metricKey === key)} />)}</tbody></table></div><p className="body-analysis-note">A percentagem de variação é calculada sobre a primeira leitura da métrica. As medições sem composição corporal no relatório não são estimadas.</p></section>;
+  return <section className="body-analysis"><div className="body-analysis-heading"><div><p className="eyebrow">Análise de composição corporal</p><h3>Peso e métricas associadas</h3><p>Comparação entre a primeira e a última leitura disponível para cada métrica; a variação usa a primeira leitura como base.</p></div><span>{keys.length} métricas</span></div><div className="body-analysis-table-wrap"><table><thead><tr><th>Métrica</th><th>Primeira leitura</th><th>Última leitura</th><th>Variação</th><th>Intervalo observado</th></tr></thead><tbody>{keys.map((key) => <BodyAnalysisRow key={key} records={metrics.filter((item) => item.metricKey === key)} />)}</tbody></table></div><p className="body-analysis-note">Esta síntese mostra a evolução de cada métrica desde a primeira leitura disponível. As medições sem composição corporal no relatório não são estimadas.</p></section>;
 }
 
 function BodyAnalysisRow({ records }: { records: HealthMetric[] }) {
@@ -424,7 +485,14 @@ function BodyAnalysisRow({ records }: { records: HealthMetric[] }) {
   const delta = latest.value - first.value; const percent = first.value ? (delta / first.value) * 100 : 0;
   const digits = [first.value, latest.value, min, max].some((value) => !Number.isInteger(value)) ? 2 : 0;
   const format = (value: number) => new Intl.NumberFormat("pt-PT", { maximumFractionDigits: digits }).format(value);
-  return <tr><td><strong>{latest.metricLabel}</strong><small>{latest.unit || "Índice"} · {ordered.length} leituras</small></td><td>{format(latest.value)} <small>{latest.unit}</small></td><td>{format(first.value)} <small>{first.unit}</small></td><td><span className={`body-delta ${delta === 0 ? "flat" : delta > 0 ? "up" : "down"}`}>{delta > 0 ? "↑" : delta < 0 ? "↓" : "—"} {Math.abs(delta).toFixed(digits)}{latest.unit ? ` ${latest.unit}` : ""}<em>{delta === 0 ? "Sem alteração" : `${percent > 0 ? "+" : ""}${percent.toFixed(1)}%`}</em></span></td><td>{format(min)} — {format(max)} <small>{latest.unit}</small></td></tr>;
+  return <tr><td><strong>{latest.metricLabel}</strong><small>{latest.unit || "Índice"} · {ordered.length} leituras</small></td><td>{format(first.value)} <small>{first.unit}</small></td><td>{format(latest.value)} <small>{latest.unit}</small></td><td><span className={`body-delta ${delta === 0 ? "flat" : delta > 0 ? "up" : "down"}`}>{delta > 0 ? "↑" : delta < 0 ? "↓" : "—"} {Math.abs(delta).toFixed(digits)}{latest.unit ? ` ${latest.unit}` : ""}<em>{delta === 0 ? "Sem alteração" : `${percent > 0 ? "+" : ""}${percent.toFixed(1)}%`}</em></span></td><td>{format(min)} — {format(max)} <small>{latest.unit}</small></td></tr>;
+}
+
+function MetricEvolutionTable({ records }: { records: HealthMetric[] }) {
+  const chronological = [...records].sort((a, b) => a.recordedAt.localeCompare(b.recordedAt));
+  if (!chronological.length) return null;
+  const latest = chronological[chronological.length - 1];
+  return <section className="metric-evolution"><div className="body-analysis-heading"><div><p className="eyebrow">Tabela de evolução</p><h3>{latest.metricLabel}</h3><p>Valores ordenados do mais recente para o mais antigo; cada variação compara com o registo imediatamente anterior.</p></div><span>{chronological.length} leituras</span></div><div className="body-analysis-table-wrap"><table><thead><tr><th>Data</th><th>Valor</th><th>Leitura anterior</th><th>Variação</th><th>Evolução</th></tr></thead><tbody>{chronological.map((item, index) => { const previous = chronological[index - 1]; const delta = previous ? item.value - previous.value : null; const percent = delta !== null && previous.value ? delta / previous.value * 100 : null; return <tr key={item.id}><td>{displayMetricDate(item.recordedAt)}</td><td><strong>{metricValue(item.value, item.unit)}</strong></td><td>{previous ? metricValue(previous.value, previous.unit) : "—"}</td><td>{delta === null ? "—" : `${delta > 0 ? "+" : ""}${metricValue(delta, item.unit)}`}</td><td><span className={`body-delta ${delta === null || delta === 0 ? "flat" : delta > 0 ? "up" : "down"}`}>{percent === null ? "Primeira leitura" : `${delta! > 0 ? "↑" : delta! < 0 ? "↓" : "—"} ${Math.abs(percent).toFixed(1)}%`}</span></td></tr>; }).reverse()}</tbody></table></div></section>;
 }
 
 function displayMetricDate(value: string) {
@@ -437,7 +505,7 @@ function metricValue(value: number, unit: string | null) {
 }
 
 function MetricTrendCard({ records }: { records: HealthMetric[] }) {
-  const ordered = [...records].sort((a, b) => a.recordedAt.localeCompare(b.recordedAt));
+  const ordered = [...records].sort((a, b) => a.recordedAt.localeCompare(b.recordedAt)).slice(-20);
   const values = ordered.map((item) => item.value);
   const min = Math.min(...values);
   const max = Math.max(...values);
@@ -450,7 +518,7 @@ function MetricTrendCard({ records }: { records: HealthMetric[] }) {
     <div className="hm-bars" aria-label={`Evolução de ${latest.metricLabel}`}>
       {ordered.map((item) => {
         const height = 18 + ((item.value - min) / range) * 64;
-        return <span className="hm-bar-slot" key={`${item.recordedAt}-${item.id}`} title={`${displayMetricDate(item.recordedAt)} · ${metricValue(item.value, item.unit)}`}><i style={{ height: `${height}%` }} /></span>;
+        return <span className="hm-bar-slot" key={`${item.recordedAt}-${item.id}`} title={`${displayMetricDate(item.recordedAt)} · ${metricValue(item.value, item.unit)}`}><b style={{ bottom: `calc(${height}% + 2px)` }}>{new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 1 }).format(item.value)}</b><i style={{ height: `${height}%` }} /></span>;
       })}
     </div>
     <div className="hm-axis"><span>{displayMetricDate(ordered[0].recordedAt)}</span><span>{ordered.length} leituras</span><span>{displayMetricDate(latest.recordedAt)}</span></div>
