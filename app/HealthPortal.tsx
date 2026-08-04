@@ -31,6 +31,17 @@ type HealthMetric = {
   note: string | null;
 };
 
+type FinanceDocument = {
+  category: string;
+  provider: string;
+  detail: string;
+  value: string | null;
+  date: string;
+  icon: string;
+  url: string;
+  tone: string;
+};
+
 const profiles: { name: Profile; initials: string; tint: string }[] = [
   { name: "Tiago Soutelo", initials: "TS", tint: "blue" },
   { name: "Marlene Soutelo", initials: "MS", tint: "plum" },
@@ -52,6 +63,13 @@ const fallback: HealthRecord[] = [
 ];
 
 const navItems = ["Visão geral", "Registos", "Atividade", "Evolução", "Exames", "Health Manager"] as const;
+
+const financeDocuments: FinanceDocument[] = [
+  { category: "Internet & TV", provider: "Vodafone", detail: "Fatura de 16 jun a 15 jul", value: "73,33 €", date: "18 jul 2026", icon: "◌", tone: "violet", url: "https://drive.google.com/file/d/1y0NT5TvkIE2Q0erzj5YxsrHdBwQrBabb/view?usp=drivesdk" },
+  { category: "Água", provider: "Águas de Gaia", detail: "Período de faturação: 9 abr a 8 mai", value: "56,28 €", date: "8 mai 2026", icon: "≈", tone: "aqua", url: "https://drive.google.com/file/d/1yzdruDN_ady6ACSz_TXaxPWrHIkEySUZ/view?usp=drivesdk" },
+  { category: "Mobilidade elétrica", provider: "EDP", detail: "Fatura de mobilidade elétrica", value: "118,15 €", date: "2 jun 2026", icon: "↯", tone: "gold", url: "https://drive.google.com/file/d/1OL8IZSqhu467T_QGO3-Ouqi3C1e5GVGL/view?usp=drivesdk" },
+  { category: "Eletricidade", provider: "EDP", detail: "Período de faturação: 4 abr a 3 mai", value: "89,18 €", date: "6 mai 2026", icon: "◈", tone: "orange", url: "https://drive.google.com/file/d/1d6fpF66En1F_Jpy7x3X66VbQ6rzdmqn6/view?usp=drivesdk" },
+];
 
 function displayDate(value: string) {
   return new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "short" }).format(new Date(`${value}T12:00:00`));
@@ -176,7 +194,7 @@ export default function HealthPortal() {
       </aside>
 
       <main>
-        {area === "Financeiro" ? <FinancialPlaceholder /> : <>
+        {area === "Financeiro" ? <FinanceDashboard /> : <>
         <header className="topbar">
           <div>
             <p className="eyebrow">{activeNav}</p>
@@ -247,17 +265,25 @@ export default function HealthPortal() {
   );
 }
 
-function FinancialPlaceholder() {
+function FinanceDashboard() {
   return <section className="finance-page">
-    <header className="topbar finance-header"><div><p className="eyebrow">Financeiro</p><h1>Finanças da família</h1><p>Um espaço reservado para organizar a informação financeira mais à frente.</p></div><span className="coming-tag">Em preparação</span></header>
-    <div className="finance-empty">
-      <span className="finance-symbol">€</span>
-      <p className="eyebrow">Próxima área de trabalho</p>
-      <h2>A estrutura está pronta</h2>
-      <p>Quando avançarmos, esta área poderá receber os dados financeiros mantendo-os separados dos registos de saúde.</p>
-      <div className="future-sections"><span>Informação financeira</span><span>Análise e acompanhamento</span></div>
-    </div>
+    <header className="topbar finance-header"><div><p className="eyebrow">Financeiro</p><h1>Finanças da família</h1><p>Documentos bancários e despesas recorrentes organizados a partir da pasta financeira partilhada.</p></div><a className="source-button" href="https://drive.google.com/drive/folders/1Bhtz_GJ5_bQfyqd0wGyqHkHwCV6Sk44x" target="_blank" rel="noreferrer">Abrir pasta financeira <span>↗</span></a></header>
+    <section className="finance-metrics" aria-label="Resumo financeiro do último extrato disponível">
+      <article className="finance-metric balance"><span>Saldo à ordem</span><strong>5 578,03 €</strong><small>Millennium BCP · extrato de julho de 2026</small></article>
+      <article className="finance-metric lending"><span>Empréstimos</span><strong>4 847,01 €</strong><small>Saldo devedor indicado no extrato</small></article>
+      <article className="finance-metric card"><span>Cartão de crédito</span><strong>2 692,54 €</strong><small>Saldo em dívida no último extrato</small></article>
+      <article className="finance-metric docs"><span>Documentos organizados</span><strong>44</strong><small>28 despesas e 16 extratos disponíveis</small></article>
+    </section>
+    <section className="finance-layout">
+      <article className="panel finance-commitments"><div className="panel-heading"><div><p className="eyebrow">Despesas recorrentes</p><h2>Últimos documentos</h2></div><span className="subtle-tag">Valores por documento</span></div><div className="finance-doc-list">{financeDocuments.map((document) => <a className="finance-doc" key={document.category} href={document.url} target="_blank" rel="noreferrer"><span className={`finance-doc-icon ${document.tone}`}>{document.icon}</span><span className="finance-doc-info"><strong>{document.category}</strong><small>{document.provider} · {document.detail}</small></span><span className="finance-doc-amount"><strong>{document.value}</strong><small>{document.date} <b>↗</b></small></span></a>)}</div><p className="finance-caption">Os valores representam o último documento confirmado em cada categoria e não são somados, pois os períodos de faturação são diferentes.</p></article>
+      <article className="panel finance-accounts"><div className="panel-heading"><div><p className="eyebrow">Instituições</p><h2>Contas e extratos</h2></div></div><div className="bank-list"><a href="https://drive.google.com/drive/folders/16c24b2PraLZCBLiePfqYHbMPM2zGRzj9" target="_blank" rel="noreferrer"><span className="bank-mark bcp">M</span><span><strong>Millennium BCP</strong><small>8 extratos de conta e 8 de cartão</small></span><b>↗</b></a><div className="bank-empty"><span className="bank-mark nb">N</span><span><strong>Novo Banco</strong><small>Ainda sem documentos na pasta</small></span></div><div className="bank-empty"><span className="bank-mark bpi">B</span><span><strong>BPI</strong><small>Ainda sem documentos na pasta</small></span></div></div><div className="finance-note"><strong>Âmbito atual</strong><span>A informação apresentada é documental. Não são calculados saldos globais entre bancos nem classificações automáticas de movimentos.</span></div></article>
+    </section>
+    <section className="finance-folders"><div className="section-title"><div><p className="eyebrow">Arquivo financeiro</p><h2>Pastas acompanhadas</h2><p>Acesso direto aos documentos originais, mantendo a organização já existente.</p></div></div><div className="folder-grid"><FinanceFolder name="Gastos Gerais" detail="Água, eletricidade, mobilidade elétrica e Internet/TV" count="28 documentos" url="https://drive.google.com/drive/folders/1MiX4nsnwC9MBUYhy3_63AvCf49KYOhxI" icon="▤" /><FinanceFolder name="Bancos" detail="Millennium BCP, Novo Banco e BPI" count="16 documentos" url="https://drive.google.com/drive/folders/1Sbi7pi246h6M1qm23c2erU1haltD46D9" icon="⌂" /></div></section>
   </section>;
+}
+
+function FinanceFolder({ name, detail, count, url, icon }: { name: string; detail: string; count: string; url: string; icon: string }) {
+  return <a className="finance-folder" href={url} target="_blank" rel="noreferrer"><span className="folder-icon">{icon}</span><span><strong>{name}</strong><small>{detail}</small></span><em>{count}</em><b>↗</b></a>;
 }
 
 function MetricCard({ tone, label, value, detail, icon, unit }: { tone: string; label: string; value: string; detail: string; icon: string; unit?: string }) {
