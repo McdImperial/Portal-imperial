@@ -41,6 +41,8 @@ type FinanceDocument = {
   url: string;
   tone: string;
 };
+type ClinicalMetric = { label: string; current: number; previous: number; unit: string; };
+type ClinicalGroup = { title: string; metrics: ClinicalMetric[]; };
 
 const profiles: { name: Profile; initials: string; tint: string }[] = [
   { name: "Tiago Soutelo", initials: "TS", tint: "blue" },
@@ -70,6 +72,30 @@ const financeDocuments: FinanceDocument[] = [
   { category: "Mobilidade elétrica", provider: "EDP", detail: "Fatura de mobilidade elétrica", value: "118,15 €", date: "2 jun 2026", icon: "↯", tone: "gold", url: "https://drive.google.com/file/d/1OL8IZSqhu467T_QGO3-Ouqi3C1e5GVGL/view?usp=drivesdk" },
   { category: "Eletricidade", provider: "EDP", detail: "Período de faturação: 4 abr a 3 mai", value: "89,18 €", date: "6 mai 2026", icon: "◈", tone: "orange", url: "https://drive.google.com/file/d/1d6fpF66En1F_Jpy7x3X66VbQ6rzdmqn6/view?usp=drivesdk" },
 ];
+
+const clinicalComparisons: Record<Profile, { currentDate: string; previousDate: string; groups: ClinicalGroup[] }> = {
+  "Tiago Soutelo": {
+    currentDate: "2026-05-27", previousDate: "2025-12-17", groups: [
+      { title: "Hemograma", metrics: [
+        { label:"Eritrócitos",current:5.19,previous:5.27,unit:"x10¹²/L" },{ label:"Hemoglobina",current:14.6,previous:15.2,unit:"g/dL" },{ label:"Hematócrito",current:44.6,previous:45.5,unit:"%" },{ label:"VCM",current:85.9,previous:86.3,unit:"fL" },{ label:"HCM",current:28.1,previous:28.8,unit:"pg" },{ label:"CHCM",current:32.7,previous:33.4,unit:"g/dL" },{ label:"RDW",current:12.6,previous:13.3,unit:"%" },{ label:"Leucócitos",current:5.14,previous:5.46,unit:"x10⁹/L" },{ label:"Neutrófilos",current:2.69,previous:3.10,unit:"x10⁹/L" },{ label:"Linfócitos",current:1.85,previous:1.76,unit:"x10⁹/L" },{ label:"Monócitos",current:.35,previous:.37,unit:"x10⁹/L" },{ label:"Eosinófilos",current:.22,previous:.19,unit:"x10⁹/L" },{ label:"Basófilos",current:.03,previous:.04,unit:"x10⁹/L" },{ label:"Plaquetas",current:316,previous:292,unit:"x10⁹/L" },{ label:"MPV",current:10.8,previous:10.2,unit:"fL" },{ label:"PDW",current:13.5,previous:11.8,unit:"10(GSD)" },{ label:"PCT",current:.34,previous:.30,unit:"%" },
+      ] },
+      { title: "Glicemia, função renal e lípidos", metrics: [
+        { label:"Glicose",current:91,previous:100,unit:"mg/dL" },{ label:"HbA1c (NGSP)",current:5.2,previous:5.3,unit:"%" },{ label:"Glicemia média estimada",current:103,previous:105,unit:"mg/dL" },{ label:"Creatinina",current:.80,previous:.83,unit:"mg/dL" },{ label:"TFGe",current:117,previous:112,unit:"mL/min/1,73m²" },{ label:"Ácido úrico",current:5.7,previous:5.9,unit:"mg/dL" },{ label:"Colesterol total",current:161,previous:195,unit:"mg/dL" },{ label:"Colesterol HDL",current:33,previous:29,unit:"mg/dL" },{ label:"Triglicerídeos",current:93,previous:275,unit:"mg/dL" },
+      ] },
+      { title: "Marcadores", metrics: [{ label:"PSA total",current:.809,previous:.839,unit:"ng/mL" }] },
+    ],
+  },
+  "Marlene Soutelo": {
+    currentDate: "2026-05-27", previousDate: "2026-02-19", groups: [
+      { title: "Hemograma", metrics: [
+        { label:"Eritrócitos",current:4.78,previous:4.95,unit:"x10¹²/L" },{ label:"Hemoglobina",current:15.1,previous:15.9,unit:"g/dL" },{ label:"Hematócrito",current:44.3,previous:45.8,unit:"%" },{ label:"VCM",current:92.7,previous:92.5,unit:"fL" },{ label:"HCM",current:31.6,previous:32.1,unit:"pg" },{ label:"CHCM",current:34.1,previous:34.7,unit:"g/dL" },{ label:"RDW",current:12.5,previous:12.3,unit:"%" },{ label:"Leucócitos",current:6.92,previous:8.55,unit:"x10⁹/L" },{ label:"Neutrófilos",current:4.69,previous:6.03,unit:"x10⁹/L" },{ label:"Linfócitos",current:1.33,previous:1.43,unit:"x10⁹/L" },{ label:"Monócitos",current:.70,previous:.90,unit:"x10⁹/L" },{ label:"Eosinófilos",current:.16,previous:.14,unit:"x10⁹/L" },{ label:"Basófilos",current:.04,previous:.05,unit:"x10⁹/L" },{ label:"Plaquetas",current:249,previous:306,unit:"x10⁹/L" },{ label:"MPV",current:11.4,previous:10.4,unit:"fL" },{ label:"PDW",current:13.5,previous:11.8,unit:"10(GSD)" },{ label:"PCT",current:.28,previous:.32,unit:"%" },
+      ] },
+      { title: "Bioquímica", metrics: [
+        { label:"Creatinina",current:.79,previous:.76,unit:"mg/dL" },{ label:"TFGe",current:88,previous:92,unit:"mL/min/1,73m²" },{ label:"AST/GOT",current:23,previous:17,unit:"U/L" },{ label:"ALT/GPT",current:24,previous:24,unit:"U/L" },{ label:"Ferro",current:121,previous:208,unit:"µg/dL" },{ label:"Ferritina",current:87,previous:129,unit:"ng/mL" },{ label:"Colesterol total",current:120,previous:216,unit:"mg/dL" },{ label:"Colesterol LDL",current:64,previous:151,unit:"mg/dL" },
+      ] },
+    ],
+  },
+};
 
 function displayDate(value: string) {
   return new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "short" }).format(new Date(`${value}T12:00:00`));
@@ -326,8 +352,22 @@ function ExamsView({ records, profile }: { records: HealthRecord[]; profile: Pro
     <div className="exam-summary"><div><span className="summary-icon">▤</span><p><strong>{exams.length}</strong><small>Exames e relatórios</small></p></div><div><span className="summary-icon lab">◇</span><p><strong>{analyses.length}</strong><small>Análises clínicas</small></p></div></div>
     {exams.length > 0 && <DocumentGroup title="Exames e relatórios" records={exams} />}
     {analyses.length > 0 && <DocumentGroup title="Análises clínicas" records={analyses} />}
+    <ClinicalComparison profile={profile} />
     {!documents.length && <div className="empty">Ainda não existem exames associados a este perfil.</div>}
   </section>;
+}
+
+function ClinicalComparison({ profile }: { profile: Profile }) {
+  const comparison = clinicalComparisons[profile];
+  return <section className="clinical-comparison"><div className="clinical-heading"><div><p className="eyebrow">Comparação de análises</p><h3>Resultados face à análise anterior</h3><p>Resultado de {displayMetricDate(comparison.currentDate)} comparado com {displayMetricDate(comparison.previousDate)}.</p></div><span>{comparison.groups.reduce((sum, group) => sum + group.metrics.length, 0)} parâmetros</span></div>{comparison.groups.map((group) => <div className="clinical-group" key={group.title}><h4>{group.title}</h4><div className="clinical-table-wrap"><table><thead><tr><th>Parâmetro</th><th>Resultado atual</th><th>Anterior</th><th>Variação</th></tr></thead><tbody>{group.metrics.map((item) => <ClinicalRow key={item.label} item={item} />)}</tbody></table></div></div>)}<p className="clinical-disclaimer">A variação percentual é calculada sobre o valor anterior. Esta comparação organiza os resultados do relatório e não substitui a interpretação por um profissional de saúde.</p></section>;
+}
+
+function ClinicalRow({ item }: { item: ClinicalMetric }) {
+  const delta = item.current - item.previous;
+  const percent = (delta / item.previous) * 100;
+  const digits = Math.max(Number.isInteger(item.current) ? 0 : 2, Number.isInteger(item.previous) ? 0 : 2);
+  const format = (value: number) => new Intl.NumberFormat("pt-PT", { maximumFractionDigits: digits }).format(value);
+  return <tr><td><strong>{item.label}</strong><small>{item.unit}</small></td><td>{format(item.current)}</td><td>{format(item.previous)}</td><td><span className={`clinical-delta ${delta === 0 ? "flat" : delta > 0 ? "up" : "down"}`}>{delta > 0 ? "↑" : delta < 0 ? "↓" : "—"} {Math.abs(percent).toFixed(1)}%</span></td></tr>;
 }
 
 function DocumentGroup({ title, records }: { title: string; records: HealthRecord[] }) {
@@ -358,6 +398,7 @@ function HealthManagerView({ metrics, profile }: { metrics: HealthMetric[]; prof
       <div><strong>{metrics.length || "—"}</strong><span>Valores registados</span></div>
       <div><strong>{dates.length ? `${displayMetricDate(dates[0])} — ${displayMetricDate(dates[dates.length - 1])}` : "—"}</strong><span>Período disponível</span></div>
     </div>
+    <BodyCompositionAnalysis metrics={metrics.filter((item) => item.groupName === "body")} />
     {(["body", "pressure", "activity"] as MetricGroup[]).map((group) => {
       const groupMetrics = metrics.filter((item) => item.groupName === group);
       const keys = [...new Set(groupMetrics.map((item) => item.metricKey))];
@@ -368,6 +409,22 @@ function HealthManagerView({ metrics, profile }: { metrics: HealthMetric[]; prof
     })}
     <div className="hm-note"><strong>Leitura dos gráficos</strong><span>Cada gráfico usa uma escala focada na variação da própria métrica. Os valores e unidades seguem o relatório original; as lacunas não foram estimadas.</span></div>
   </section>;
+}
+
+function BodyCompositionAnalysis({ metrics }: { metrics: HealthMetric[] }) {
+  const keys = [...new Set(metrics.map((item) => item.metricKey))];
+  if (!keys.length) return null;
+  return <section className="body-analysis"><div className="body-analysis-heading"><div><p className="eyebrow">Análise de composição corporal</p><h3>Peso e métricas associadas</h3><p>Comparação entre a primeira e a última leitura disponível para cada métrica.</p></div><span>{keys.length} métricas</span></div><div className="body-analysis-table-wrap"><table><thead><tr><th>Métrica</th><th>Última leitura</th><th>Primeira leitura</th><th>Variação</th><th>Intervalo observado</th></tr></thead><tbody>{keys.map((key) => <BodyAnalysisRow key={key} records={metrics.filter((item) => item.metricKey === key)} />)}</tbody></table></div><p className="body-analysis-note">A percentagem de variação é calculada sobre a primeira leitura da métrica. As medições sem composição corporal no relatório não são estimadas.</p></section>;
+}
+
+function BodyAnalysisRow({ records }: { records: HealthMetric[] }) {
+  const ordered = [...records].sort((a, b) => a.recordedAt.localeCompare(b.recordedAt));
+  const first = ordered[0]; const latest = ordered[ordered.length - 1];
+  const values = ordered.map((item) => item.value); const min = Math.min(...values); const max = Math.max(...values);
+  const delta = latest.value - first.value; const percent = first.value ? (delta / first.value) * 100 : 0;
+  const digits = [first.value, latest.value, min, max].some((value) => !Number.isInteger(value)) ? 2 : 0;
+  const format = (value: number) => new Intl.NumberFormat("pt-PT", { maximumFractionDigits: digits }).format(value);
+  return <tr><td><strong>{latest.metricLabel}</strong><small>{latest.unit || "Índice"} · {ordered.length} leituras</small></td><td>{format(latest.value)} <small>{latest.unit}</small></td><td>{format(first.value)} <small>{first.unit}</small></td><td><span className={`body-delta ${delta === 0 ? "flat" : delta > 0 ? "up" : "down"}`}>{delta > 0 ? "↑" : delta < 0 ? "↓" : "—"} {Math.abs(delta).toFixed(digits)}{latest.unit ? ` ${latest.unit}` : ""}<em>{delta === 0 ? "Sem alteração" : `${percent > 0 ? "+" : ""}${percent.toFixed(1)}%`}</em></span></td><td>{format(min)} — {format(max)} <small>{latest.unit}</small></td></tr>;
 }
 
 function displayMetricDate(value: string) {
