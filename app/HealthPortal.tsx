@@ -31,16 +31,8 @@ type HealthMetric = {
   note: string | null;
 };
 
-type FinanceDocument = {
-  category: string;
-  provider: string;
-  detail: string;
-  value: string | null;
-  date: string;
-  icon: string;
-  url: string;
-  tone: string;
-};
+type FinanceCategory = "Eletricidade" | "Água" | "Mobilidade elétrica" | "Internet & TV";
+type FinanceInvoice = { category: FinanceCategory; date: string; total: number; provider: string; url: string; period: string };
 type ClinicalMetric = { label: string; current: number; previous: number; unit: string; };
 type ClinicalGroup = { title: string; metrics: ClinicalMetric[]; };
 type ClinicalComparisonSet = { currentDate: string; previousDate: string; groups: ClinicalGroup[] };
@@ -67,11 +59,11 @@ const fallback: HealthRecord[] = [
 
 const navItems = ["Visão geral", "Registos", "Atividade", "Evolução", "Exames", "Health Manager"] as const;
 
-const financeDocuments: FinanceDocument[] = [
-  { category: "Internet & TV", provider: "Vodafone", detail: "Fatura de 16 jun a 15 jul", value: "73,33 €", date: "18 jul 2026", icon: "◌", tone: "violet", url: "https://drive.google.com/file/d/1y0NT5TvkIE2Q0erzj5YxsrHdBwQrBabb/view?usp=drivesdk" },
-  { category: "Água", provider: "Águas de Gaia", detail: "Período de faturação: 9 abr a 8 mai", value: "56,28 €", date: "8 mai 2026", icon: "≈", tone: "aqua", url: "https://drive.google.com/file/d/1yzdruDN_ady6ACSz_TXaxPWrHIkEySUZ/view?usp=drivesdk" },
-  { category: "Mobilidade elétrica", provider: "EDP", detail: "Fatura de mobilidade elétrica", value: "118,15 €", date: "2 jun 2026", icon: "↯", tone: "gold", url: "https://drive.google.com/file/d/1OL8IZSqhu467T_QGO3-Ouqi3C1e5GVGL/view?usp=drivesdk" },
-  { category: "Eletricidade", provider: "EDP", detail: "Período de faturação: 4 abr a 3 mai", value: "89,18 €", date: "6 mai 2026", icon: "◈", tone: "orange", url: "https://drive.google.com/file/d/1d6fpF66En1F_Jpy7x3X66VbQ6rzdmqn6/view?usp=drivesdk" },
+const financeInvoices: FinanceInvoice[] = [
+  { category: "Eletricidade", date: "2026-05-06", total: 89.18, provider: "EDP", period: "4 abr — 3 mai 2026", url: "https://drive.google.com/file/d/1d6fpF66En1F_Jpy7x3X66VbQ6rzdmqn6/view?usp=drivesdk" },
+  { category: "Água", date: "2026-05-08", total: 56.28, provider: "Águas de Gaia", period: "9 abr — 8 mai 2026", url: "https://drive.google.com/file/d/1yzdruDN_ady6ACSz_TXaxPWrHIkEySUZ/view?usp=drivesdk" },
+  { category: "Mobilidade elétrica", date: "2026-06-02", total: 118.15, provider: "EDP", period: "Fatura de mobilidade elétrica", url: "https://drive.google.com/file/d/1OL8IZSqhu467T_QGO3-Ouqi3C1e5GVGL/view?usp=drivesdk" },
+  { category: "Internet & TV", date: "2026-07-18", total: 73.33, provider: "Vodafone", period: "16 jun — 15 jul 2026", url: "https://drive.google.com/file/d/1y0NT5TvkIE2Q0erzj5YxsrHdBwQrBabb/view?usp=drivesdk" },
 ];
 
 const latestClinicalComparisons: Record<Profile, ClinicalComparisonSet> = {
@@ -328,25 +320,35 @@ export default function HealthPortal() {
 }
 
 function FinanceDashboard() {
+  const [section, setSection] = useState<"Gastos gerais" | "Bancos">("Gastos gerais");
   return <section className="finance-page">
-    <header className="topbar finance-header"><div><p className="eyebrow">Financeiro</p><h1>Finanças da família</h1><p>Documentos bancários e despesas recorrentes organizados a partir da pasta financeira partilhada.</p></div><a className="source-button" href="https://drive.google.com/drive/folders/1Bhtz_GJ5_bQfyqd0wGyqHkHwCV6Sk44x" target="_blank" rel="noreferrer">Abrir pasta financeira <span>↗</span></a></header>
-    <section className="finance-metrics" aria-label="Resumo financeiro do último extrato disponível">
-      <article className="finance-metric balance"><span>Saldo à ordem</span><strong>5 578,03 €</strong><small>Millennium BCP · extrato de julho de 2026</small></article>
-      <article className="finance-metric lending"><span>Empréstimos</span><strong>4 847,01 €</strong><small>Saldo devedor indicado no extrato</small></article>
-      <article className="finance-metric card"><span>Cartão de crédito</span><strong>2 692,54 €</strong><small>Saldo em dívida no último extrato</small></article>
-      <article className="finance-metric docs"><span>Documentos organizados</span><strong>44</strong><small>28 despesas e 16 extratos disponíveis</small></article>
-    </section>
-    <section className="finance-layout">
-      <article className="panel finance-commitments"><div className="panel-heading"><div><p className="eyebrow">Despesas recorrentes</p><h2>Últimos documentos</h2></div><span className="subtle-tag">Valores por documento</span></div><div className="finance-doc-list">{financeDocuments.map((document) => <a className="finance-doc" key={document.category} href={document.url} target="_blank" rel="noreferrer"><span className={`finance-doc-icon ${document.tone}`}>{document.icon}</span><span className="finance-doc-info"><strong>{document.category}</strong><small>{document.provider} · {document.detail}</small></span><span className="finance-doc-amount"><strong>{document.value}</strong><small>{document.date} <b>↗</b></small></span></a>)}</div><p className="finance-caption">Os valores representam o último documento confirmado em cada categoria e não são somados, pois os períodos de faturação são diferentes.</p></article>
-      <article className="panel finance-accounts"><div className="panel-heading"><div><p className="eyebrow">Instituições</p><h2>Contas e extratos</h2></div></div><div className="bank-list"><a href="https://drive.google.com/drive/folders/16c24b2PraLZCBLiePfqYHbMPM2zGRzj9" target="_blank" rel="noreferrer"><span className="bank-mark bcp">M</span><span><strong>Millennium BCP</strong><small>8 extratos de conta e 8 de cartão</small></span><b>↗</b></a><div className="bank-empty"><span className="bank-mark nb">N</span><span><strong>Novo Banco</strong><small>Ainda sem documentos na pasta</small></span></div><div className="bank-empty"><span className="bank-mark bpi">B</span><span><strong>BPI</strong><small>Ainda sem documentos na pasta</small></span></div></div><div className="finance-note"><strong>Âmbito atual</strong><span>A informação apresentada é documental. Não são calculados saldos globais entre bancos nem classificações automáticas de movimentos.</span></div></article>
-    </section>
-    <section className="finance-folders"><div className="section-title"><div><p className="eyebrow">Arquivo financeiro</p><h2>Pastas acompanhadas</h2><p>Acesso direto aos documentos originais, mantendo a organização já existente.</p></div></div><div className="folder-grid"><FinanceFolder name="Gastos Gerais" detail="Água, eletricidade, mobilidade elétrica e Internet/TV" count="28 documentos" url="https://drive.google.com/drive/folders/1MiX4nsnwC9MBUYhy3_63AvCf49KYOhxI" icon="▤" /><FinanceFolder name="Bancos" detail="Millennium BCP, Novo Banco e BPI" count="16 documentos" url="https://drive.google.com/drive/folders/1Sbi7pi246h6M1qm23c2erU1haltD46D9" icon="⌂" /></div></section>
+    <header className="topbar finance-header"><div><p className="eyebrow">Financeiro</p><h1>Finanças da família</h1><p>Despesas recorrentes e documentos bancários organizados a partir da pasta financeira partilhada.</p></div><a className="source-button" href="https://drive.google.com/drive/folders/1Bhtz_GJ5_bQfyqd0wGyqHkHwCV6Sk44x" target="_blank" rel="noreferrer">Abrir pasta financeira <span>↗</span></a></header>
+    <div className="finance-tabs" role="tablist"><button role="tab" aria-selected={section === "Gastos gerais"} className={section === "Gastos gerais" ? "active" : ""} onClick={() => setSection("Gastos gerais")}><span>◌</span> Gastos gerais</button><button role="tab" aria-selected={section === "Bancos"} className={section === "Bancos" ? "active" : ""} onClick={() => setSection("Bancos")}><span>⌂</span> Bancos</button></div>
+    {section === "Gastos gerais" ? <GeneralExpenses /> : <BanksView />}
   </section>;
 }
 
-function FinanceFolder({ name, detail, count, url, icon }: { name: string; detail: string; count: string; url: string; icon: string }) {
-  return <a className="finance-folder" href={url} target="_blank" rel="noreferrer"><span className="folder-icon">{icon}</span><span><strong>{name}</strong><small>{detail}</small></span><em>{count}</em><b>↗</b></a>;
+const expenseCategories: { name: FinanceCategory; icon: string; folder: string }[] = [
+  { name: "Eletricidade", icon: "↯", folder: "https://drive.google.com/drive/folders/156F3kV34912P0AyfzWXUepzx-GaChpD9" },
+  { name: "Água", icon: "≈", folder: "https://drive.google.com/drive/folders/1LyqNPMfZJiWmtujb5eMDZPqy-bpW4S-L" },
+  { name: "Mobilidade elétrica", icon: "⌁", folder: "https://drive.google.com/drive/folders/1WXNum9MgeFu26swN1XcbGmFJHISgv8JK" },
+  { name: "Internet & TV", icon: "◉", folder: "https://drive.google.com/drive/folders/1WOLTyRy-q2nH2GRpLJfiQA76nEnVVRqx" },
+];
+
+function euro(value: number) { return new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(value); }
+
+function GeneralExpenses() {
+  const [category, setCategory] = useState<FinanceCategory>("Eletricidade");
+  const [month, setMonth] = useState("all");
+  const current = expenseCategories.find((item) => item.name === category)!;
+  const invoices = financeInvoices.filter((item) => item.category === category && (month === "all" || item.date.slice(0, 7) === month));
+  const availableMonths = [...new Set(financeInvoices.filter((item) => item.category === category).map((item) => item.date.slice(0, 7)))].sort().reverse();
+  const total = invoices.reduce((sum, item) => sum + item.total, 0);
+  const maximum = Math.max(...invoices.map((item) => item.total), 1);
+  return <><section className="expense-category-tabs" aria-label="Rubricas de gastos gerais">{expenseCategories.map((item) => <button key={item.name} className={category === item.name ? "active" : ""} onClick={() => { setCategory(item.name); setMonth("all"); }}><span>{item.icon}</span>{item.name}</button>)}</section><section className="expense-header"><div><p className="eyebrow">Gastos gerais · {current.name}</p><h2>{current.icon} {current.name}</h2><p>Resumo das faturas confirmadas. Escolha um mês para analisar o custo e o respetivo total de faturação.</p></div><label>Filtro mensal<select value={month} onChange={(event) => setMonth(event.target.value)}><option value="all">Todos os meses</option>{availableMonths.map((value) => <option key={value} value={value}>{new Intl.DateTimeFormat("pt-PT", { month: "long", year: "numeric" }).format(new Date(`${value}-01T12:00:00`))}</option>)}</select></label></section><section className="expense-summary"><article><span>Total de faturas</span><strong>{euro(total)}</strong><small>{invoices.length} {invoices.length === 1 ? "fatura confirmada" : "faturas confirmadas"}</small></article><article><span>Última fatura</span><strong>{invoices.length ? euro(invoices[invoices.length - 1].total) : "—"}</strong><small>{invoices.length ? displayMetricDate(invoices[invoices.length - 1].date) : "Sem documento no filtro"}</small></article><article><span>Consulta de documentos</span><a href={current.folder} target="_blank" rel="noreferrer">Abrir pasta ↗</a><small>Arquivo original da rubrica</small></article></section><section className="expense-grid"><article className="panel expense-chart"><div className="panel-heading"><div><p className="eyebrow">Evolução mensal</p><h2>Total por fatura</h2></div><span className="subtle-tag">{current.name}</span></div>{invoices.length ? <div className="expense-bars">{invoices.map((item) => <div key={item.date} className="expense-bar-wrap"><strong>{euro(item.total)}</strong><i style={{ height: `${28 + item.total / maximum * 122}px` }} /><small>{displayMetricDate(item.date)}</small></div>)}</div> : <div className="hm-empty">Não existem faturas confirmadas para este mês.</div>}</article><article className="panel expense-invoices"><div className="panel-heading"><div><p className="eyebrow">Documentos</p><h2>Faturas incluídas</h2></div></div>{invoices.map((item) => <a key={item.url} href={item.url} target="_blank" rel="noreferrer" className="expense-invoice"><span>{current.icon}</span><div><strong>{item.provider}</strong><small>{item.period} · {displayMetricDate(item.date)}</small></div><b>{euro(item.total)} <em>↗</em></b></a>)}{!invoices.length && <div className="hm-empty">Sem faturas no filtro selecionado.</div>}</article></section></>;
 }
+
+function BanksView() { return <><section className="finance-metrics" aria-label="Resumo bancário"><article className="finance-metric balance"><span>Saldo à ordem</span><strong>5 578,03 €</strong><small>Millennium BCP · extrato de julho de 2026</small></article><article className="finance-metric lending"><span>Empréstimos</span><strong>4 847,01 €</strong><small>Saldo devedor indicado no extrato</small></article><article className="finance-metric card"><span>Cartão de crédito</span><strong>2 692,54 €</strong><small>Saldo em dívida no último extrato</small></article><article className="finance-metric docs"><span>Documentos organizados</span><strong>16</strong><small>Extratos disponíveis na pasta Bancos</small></article></section><section className="finance-layout"><article className="panel finance-accounts"><div className="panel-heading"><div><p className="eyebrow">Instituições</p><h2>Contas e extratos</h2></div></div><div className="bank-list"><a href="https://drive.google.com/drive/folders/16c24b2PraLZCBLiePfqYHbMPM2zGRzj9" target="_blank" rel="noreferrer"><span className="bank-mark bcp">M</span><span><strong>Millennium BCP</strong><small>8 extratos de conta e 8 de cartão</small></span><b>↗</b></a><a href="https://drive.google.com/drive/folders/1wyB6OsW24H7DW0fB9jwqqwHuqAOA3R4R" target="_blank" rel="noreferrer"><span className="bank-mark nb">N</span><span><strong>Novo Banco</strong><small>Pasta dedicada a documentos futuros</small></span><b>↗</b></a><a href="https://drive.google.com/drive/folders/1goFYvBtMiJ2u6VFuAFJoqMByCTBBwUR0" target="_blank" rel="noreferrer"><span className="bank-mark bpi">B</span><span><strong>BPI</strong><small>Pasta dedicada a documentos futuros</small></span><b>↗</b></a></div></article><article className="panel finance-commitments"><div className="panel-heading"><div><p className="eyebrow">Âmbito</p><h2>Informação documental</h2></div></div><div className="finance-note"><strong>Leitura responsável</strong><span>Os valores apresentados reproduzem os últimos extratos disponíveis. Não são calculados saldos globais entre bancos nem classificações automáticas de movimentos.</span></div></article></section></> }
 
 function MetricCard({ tone, label, value, detail, icon, unit }: { tone: string; label: string; value: string; detail: string; icon: string; unit?: string }) {
   return <article className={`metric-card ${tone}`}><div className="metric-top"><span>{label}</span><span className="metric-icon">{icon}</span></div><div className="metric-value">{value} {unit && <small>{unit}</small>}</div><p>{detail}</p></article>;
