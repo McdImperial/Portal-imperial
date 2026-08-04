@@ -38,7 +38,7 @@ const fallback: HealthRecord[] = [
   { id: 12, profile: "Marlene Soutelo", kind: "medical", recordedAt: "2026-07-18", value1: null, value2: null, unit: null, title: "Análises clínicas", notes: "Resultados arquivados.", duration: null },
 ];
 
-const navItems = ["Visão geral", "Registos", "Atividade", "Evolução"] as const;
+const navItems = ["Visão geral", "Registos", "Atividade", "Evolução", "Exames"] as const;
 
 function displayDate(value: string) {
   return new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "short" }).format(new Date(`${value}T12:00:00`));
@@ -207,6 +207,7 @@ export default function HealthPortal() {
         {activeNav === "Registos" && <RecordsView records={personRecords} onAdd={() => setModal("medical")} />}
         {activeNav === "Atividade" && <ActivityView records={activities} onAdd={() => setModal("activity")} />}
         {activeNav === "Evolução" && <TrendsView records={personRecords} chartWeights={chartWeights} />}
+        {activeNav === "Exames" && <ExamsView records={medical} profile={profile} />}
         </>}
 
         <footer><span>Portal Soutelo · Espaço familiar privado</span><span>{area === "Saúde" ? "Os registos organizam informação e não substituem aconselhamento médico." : "Área financeira reservada para desenvolvimento futuro."}</span></footer>
@@ -261,6 +262,30 @@ function ActivityView({ records, onAdd }: { records: HealthRecord[]; onAdd: () =
   const totalDistance = records.reduce((s, r) => s + (r.value1 ?? 0), 0);
   const totalMinutes = records.reduce((s,r)=>s+(r.duration??0),0);
   return <section className="page-panel"><div className="section-title"><div><p className="eyebrow">Movimento</p><h2>Atividade física</h2><p>Acompanhe dias ativos, distância, passos e sessões adicionadas.</p></div><button className="primary" onClick={onAdd}>＋ Nova atividade</button></div><div className="activity-summary"><MetricCard tone="sky" label={totalMinutes ? "Tempo total" : "Dias registados"} value={totalMinutes ? `${totalMinutes} min` : `${records.length}`} detail={totalMinutes ? `${records.length} sessões` : "Com dados de atividade"} icon="⌁"/><MetricCard tone="sage" label="Distância" value={`${totalDistance.toFixed(1)} km`} detail="No histórico importado" icon="↗"/><MetricCard tone="gold" label="Passos" value={new Intl.NumberFormat("pt-PT").format(records.reduce((s,r)=>s+(r.value2??0),0))} detail="Total registado" icon="↑"/></div><div className="records-table">{records.map((item) => <RecordRow key={item.id} item={item} />)}</div></section>;
+}
+
+function ExamsView({ records, profile }: { records: HealthRecord[]; profile: Profile }) {
+  const documents = records.filter((item) => item.notes?.includes("drive.google.com"));
+  const analyses = documents.filter((item) => item.title?.toLocaleLowerCase("pt-PT").includes("análises"));
+  const exams = documents.filter((item) => !item.title?.toLocaleLowerCase("pt-PT").includes("análises"));
+  return <section className="page-panel exams-page">
+    <div className="section-title"><div><p className="eyebrow">Documentos clínicos</p><h2>Exames de {profile.split(" ")[0]}</h2><p>Exames, relatórios e análises guardados na pasta pessoal do Google Drive.</p></div><span className="document-count">{documents.length} documentos</span></div>
+    <div className="exam-summary"><div><span className="summary-icon">▤</span><p><strong>{exams.length}</strong><small>Exames e relatórios</small></p></div><div><span className="summary-icon lab">◇</span><p><strong>{analyses.length}</strong><small>Análises clínicas</small></p></div></div>
+    {exams.length > 0 && <DocumentGroup title="Exames e relatórios" records={exams} />}
+    {analyses.length > 0 && <DocumentGroup title="Análises clínicas" records={analyses} />}
+    {!documents.length && <div className="empty">Ainda não existem exames associados a este perfil.</div>}
+  </section>;
+}
+
+function DocumentGroup({ title, records }: { title: string; records: HealthRecord[] }) {
+  return <section className="document-group"><div className="document-group-title"><h3>{title}</h3><span>{records.length}</span></div><div className="document-grid">{records.map((item) => <DocumentCard key={item.id} item={item} />)}</div></section>;
+}
+
+function DocumentCard({ item }: { item: HealthRecord }) {
+  const driveUrl = item.notes?.match(/https:\/\/drive\.google\.com\/\S+/)?.[0] ?? null;
+  const note = driveUrl ? item.notes?.replace(driveUrl, "").trim() : item.notes;
+  const needsConfirmation = item.title?.includes("data a confirmar");
+  return <article className="document-card"><div className="document-card-top"><span className="document-icon">PDF</span>{needsConfirmation && <span className="confirm-tag">A confirmar</span>}</div><h4>{item.title}</h4><time>{new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "long", year: "numeric" }).format(new Date(`${item.recordedAt}T12:00:00`))}</time>{note && <p>{note}</p>}{driveUrl && <a href={driveUrl} target="_blank" rel="noreferrer">Abrir no Google Drive <span>↗</span></a>}</article>;
 }
 
 function TrendsView({ records, chartWeights }: { records: HealthRecord[]; chartWeights: HealthRecord[] }) {
