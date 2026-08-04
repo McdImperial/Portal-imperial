@@ -17,6 +17,19 @@ type HealthRecord = {
   notes: string | null;
   duration: number | null;
 };
+type MetricGroup = "body" | "pressure" | "activity";
+type HealthMetric = {
+  id: number;
+  profile: Profile;
+  groupName: MetricGroup;
+  metricKey: string;
+  metricLabel: string;
+  recordedAt: string;
+  value: number;
+  unit: string | null;
+  sourceUrl: string | null;
+  note: string | null;
+};
 
 const profiles: { name: Profile; initials: string; tint: string }[] = [
   { name: "Tiago Soutelo", initials: "TS", tint: "blue" },
@@ -38,7 +51,7 @@ const fallback: HealthRecord[] = [
   { id: 12, profile: "Marlene Soutelo", kind: "medical", recordedAt: "2026-07-18", value1: null, value2: null, unit: null, title: "Análises clínicas", notes: "Resultados arquivados.", duration: null },
 ];
 
-const navItems = ["Visão geral", "Registos", "Atividade", "Evolução", "Exames"] as const;
+const navItems = ["Visão geral", "Registos", "Atividade", "Evolução", "Exames", "Health Manager"] as const;
 
 function displayDate(value: string) {
   return new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "short" }).format(new Date(`${value}T12:00:00`));
@@ -53,6 +66,7 @@ export default function HealthPortal() {
   const [profile, setProfile] = useState<Profile>("Tiago Soutelo");
   const [activeNav, setActiveNav] = useState<(typeof navItems)[number]>("Visão geral");
   const [records, setRecords] = useState<HealthRecord[]>(fallback);
+  const [metrics, setMetrics] = useState<HealthMetric[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<RecordKind | null>(null);
   const [saved, setSaved] = useState(false);
@@ -64,6 +78,11 @@ export default function HealthPortal() {
         const data = (await response.json()) as { records: HealthRecord[] };
         setRecords(data.records);
       }
+      const metricsResponse = await fetch("/api/metrics", { cache: "no-store" });
+      if (metricsResponse.ok) {
+        const data = (await metricsResponse.json()) as { metrics: HealthMetric[] };
+        setMetrics(data.metrics);
+      }
     } catch {
       // The in-product preview uses realistic examples until cloud storage is available.
     } finally {
@@ -71,7 +90,10 @@ export default function HealthPortal() {
     }
   }, []);
 
-  useEffect(() => { void loadRecords(); }, [loadRecords]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadRecords(); }, 0);
+    return () => window.clearTimeout(timer);
+  }, [loadRecords]);
 
   const personRecords = useMemo(
     () => records.filter((item) => item.profile === profile).sort((a, b) => b.recordedAt.localeCompare(a.recordedAt)),
@@ -85,6 +107,10 @@ export default function HealthPortal() {
   const activityDistance = activities.reduce((sum, item) => sum + (item.value1 ?? 0), 0);
   const steps = activities.reduce((sum, item) => sum + (item.value2 ?? 0), 0);
   const medical = personRecords.filter((r) => r.kind === "medical");
+  const personMetrics = useMemo(
+    () => metrics.filter((item) => item.profile === profile),
+    [metrics, profile],
+  );
 
   async function submitRecord(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -208,6 +234,7 @@ export default function HealthPortal() {
         {activeNav === "Atividade" && <ActivityView records={activities} onAdd={() => setModal("activity")} />}
         {activeNav === "Evolução" && <TrendsView records={personRecords} chartWeights={chartWeights} />}
         {activeNav === "Exames" && <ExamsView records={medical} profile={profile} />}
+        {activeNav === "Health Manager" && <HealthManagerView metrics={personMetrics} profile={profile} />}
         </>}
 
         <footer><span>Portal Soutelo · Espaço familiar privado</span><span>{area === "Saúde" ? "Os registos organizam informação e não substituem aconselhamento médico." : "Área financeira reservada para desenvolvimento futuro."}</span></footer>
@@ -241,7 +268,7 @@ function WeightChart({ records }: { records: HealthRecord[] }) {
   if (!records.length) return <div className="empty">Ainda não existem medições de peso.</div>;
   const values = records.map((r) => Number(r.value1));
   const min = Math.min(...values) - 0.6; const max = Math.max(...values) + 0.6;
-  return <div className="chart"><div className="chart-area">{records.map((item, i) => { const height = 24 + ((Number(item.value1) - min) / Math.max(max - min, 1)) * 90; return <div className="bar-wrap" key={item.id}><div className="bar" style={{ height }}><span>{item.value1}</span></div><small>{displayDate(item.recordedAt)}</small></div>; })}</div><div className="chart-summary"><strong>{values[values.length - 1]} kg</strong><span>{values.length > 1 ? `${(values[values.length - 1] - values[0]).toFixed(1)} kg no período` : "Primeira medição"}</span></div></div>;
+  return <div className="chart"><div className="chart-area">{records.map((item) => { const height = 24 + ((Number(item.value1) - min) / Math.max(max - min, 1)) * 90; return <div className="bar-wrap" key={item.id}><div className="bar" style={{ height }}><span>{item.value1}</span></div><small>{displayDate(item.recordedAt)}</small></div>; })}</div><div className="chart-summary"><strong>{values[values.length - 1]} kg</strong><span>{values.length > 1 ? `${(values[values.length - 1] - values[0]).toFixed(1)} kg no período` : "Primeira medição"}</span></div></div>;
 }
 
 function RecordRow({ item }: { item: HealthRecord }) {
@@ -286,6 +313,66 @@ function DocumentCard({ item }: { item: HealthRecord }) {
   const note = driveUrl ? item.notes?.replace(driveUrl, "").trim() : item.notes;
   const needsConfirmation = item.title?.includes("data a confirmar");
   return <article className="document-card"><div className="document-card-top"><span className="document-icon">PDF</span>{needsConfirmation && <span className="confirm-tag">A confirmar</span>}</div><h4>{item.title}</h4><time>{new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "long", year: "numeric" }).format(new Date(`${item.recordedAt}T12:00:00`))}</time>{note && <p>{note}</p>}{driveUrl && <a href={driveUrl} target="_blank" rel="noreferrer">Abrir no Google Drive <span>↗</span></a>}</article>;
+}
+
+const metricGroupDetails: Record<MetricGroup, { title: string; description: string }> = {
+  body: { title: "Composição corporal", description: "Peso, IMC e medições de composição disponíveis no relatório." },
+  pressure: { title: "Tensão e pulsação", description: "Medições de tensão arterial, pulsação e pressão arterial média." },
+  activity: { title: "Atividade", description: "Passos, distância, energia e área-alvo quando registada." },
+};
+
+function HealthManagerView({ metrics, profile }: { metrics: HealthMetric[]; profile: Profile }) {
+  const sourceUrl = metrics.find((item) => item.sourceUrl)?.sourceUrl;
+  const dates = metrics.map((item) => item.recordedAt.slice(0, 10)).sort();
+  const distinctMetrics = new Set(metrics.map((item) => item.metricKey)).size;
+  return <section className="page-panel health-manager-page">
+    <div className="section-title"><div><p className="eyebrow">Relatório HealthManager Pro</p><h2>Evolução de {profile.split(" ")[0]}</h2><p>Todas as métricas disponíveis no ficheiro partilhado, organizadas por tema e por data.</p></div>{sourceUrl && <a className="source-button" href={sourceUrl} target="_blank" rel="noreferrer">Abrir relatório <span>↗</span></a>}</div>
+    <div className="hm-overview">
+      <div><strong>{distinctMetrics || "—"}</strong><span>Métricas acompanhadas</span></div>
+      <div><strong>{metrics.length || "—"}</strong><span>Valores registados</span></div>
+      <div><strong>{dates.length ? `${displayMetricDate(dates[0])} — ${displayMetricDate(dates[dates.length - 1])}` : "—"}</strong><span>Período disponível</span></div>
+    </div>
+    {(["body", "pressure", "activity"] as MetricGroup[]).map((group) => {
+      const groupMetrics = metrics.filter((item) => item.groupName === group);
+      const keys = [...new Set(groupMetrics.map((item) => item.metricKey))];
+      return <section className="hm-section" key={group}>
+        <div className="hm-section-heading"><div><h3>{metricGroupDetails[group].title}</h3><p>{metricGroupDetails[group].description}</p></div><span>{keys.length} {keys.length === 1 ? "métrica" : "métricas"}</span></div>
+        {keys.length ? <div className="hm-chart-grid">{keys.map((key) => <MetricTrendCard key={key} records={groupMetrics.filter((item) => item.metricKey === key)} />)}</div> : <div className="hm-empty">O relatório deste perfil não contém registos de {group === "activity" ? "atividade" : metricGroupDetails[group].title.toLocaleLowerCase("pt-PT")}.</div>}
+      </section>;
+    })}
+    <div className="hm-note"><strong>Leitura dos gráficos</strong><span>Cada gráfico usa uma escala focada na variação da própria métrica. Os valores e unidades seguem o relatório original; as lacunas não foram estimadas.</span></div>
+  </section>;
+}
+
+function displayMetricDate(value: string) {
+  return new Intl.DateTimeFormat("pt-PT", { day: "2-digit", month: "short", year: "2-digit" }).format(new Date(`${value.slice(0, 10)}T12:00:00`));
+}
+
+function metricValue(value: number, unit: string | null) {
+  const maximumDigits = Number.isInteger(value) ? 0 : 2;
+  return `${new Intl.NumberFormat("pt-PT", { maximumFractionDigits: maximumDigits }).format(value)}${unit ? ` ${unit}` : ""}`;
+}
+
+function MetricTrendCard({ records }: { records: HealthMetric[] }) {
+  const ordered = [...records].sort((a, b) => a.recordedAt.localeCompare(b.recordedAt));
+  const values = ordered.map((item) => item.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = Math.max(max - min, Math.abs(max) * .02, 1);
+  const latest = ordered[ordered.length - 1];
+  const change = latest.value - ordered[0].value;
+  const changeUnit = latest.unit ? ` ${latest.unit}` : "";
+  return <article className="hm-chart-card">
+    <div className="hm-card-heading"><div><h4>{latest.metricLabel}</h4><span>{latest.unit || "Índice"}</span></div><div className="hm-latest"><strong>{metricValue(latest.value, latest.unit)}</strong><small>{change === 0 ? "Sem alteração" : `${change > 0 ? "+" : ""}${new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 2 }).format(change)}${changeUnit} no período`}</small></div></div>
+    <div className="hm-bars" aria-label={`Evolução de ${latest.metricLabel}`}>
+      {ordered.map((item) => {
+        const height = 18 + ((item.value - min) / range) * 64;
+        return <span className="hm-bar-slot" key={`${item.recordedAt}-${item.id}`} title={`${displayMetricDate(item.recordedAt)} · ${metricValue(item.value, item.unit)}`}><i style={{ height: `${height}%` }} /></span>;
+      })}
+    </div>
+    <div className="hm-axis"><span>{displayMetricDate(ordered[0].recordedAt)}</span><span>{ordered.length} leituras</span><span>{displayMetricDate(latest.recordedAt)}</span></div>
+    {ordered.length < 3 && <p className="limited-data">Apenas {ordered.length} leituras disponíveis; tendência ainda limitada.</p>}
+  </article>;
 }
 
 function TrendsView({ records, chartWeights }: { records: HealthRecord[]; chartWeights: HealthRecord[] }) {
