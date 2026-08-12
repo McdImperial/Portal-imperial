@@ -33,6 +33,7 @@ type HealthMetric = {
 
 type FinanceCategory = "Eletricidade" | "Água" | "Mobilidade elétrica" | "Internet & TV";
 type FinanceInvoice = { category: FinanceCategory; date: string; total: number; provider: string; url: string; period: string };
+type FinanceSection = "Gastos gerais" | "Bancos";
 type ClinicalMetric = { label: string; current: number; previous: number; unit: string; };
 type ClinicalGroup = { title: string; metrics: ClinicalMetric[]; };
 type ClinicalComparisonSet = { currentDate: string; previousDate: string; groups: ClinicalGroup[] };
@@ -135,6 +136,7 @@ function lastOf(items: HealthRecord[], kind: RecordKind) {
 
 export default function HealthPortal() {
   const [area, setArea] = useState<Area>("Saúde");
+  const [financeSection, setFinanceSection] = useState<FinanceSection>("Gastos gerais");
   const [profile, setProfile] = useState<Profile>("Tiago Soutelo");
   const [activeNav, setActiveNav] = useState<(typeof navItems)[number]>("Visão geral");
   const [records, setRecords] = useState<HealthRecord[]>(fallback);
@@ -225,7 +227,7 @@ export default function HealthPortal() {
         <p className="side-label">Áreas</p>
         <div className="area-list">
           <button className={`area-button ${area === "Financeiro" ? "selected" : ""}`} onClick={() => setArea("Financeiro")}>
-            <span className="area-icon finance">€</span><span><strong>Financeiro</strong><small>Em preparação</small></span>
+            <span className="area-icon finance">€</span><span><strong>Financeiro</strong><small>Documentos e despesas</small></span>
           </button>
           <button className={`area-button ${area === "Saúde" ? "selected" : ""}`} onClick={() => setArea("Saúde")}>
             <span className="area-icon health">♡</span><span><strong>Saúde</strong><small>Registos e evolução</small></span>
@@ -244,11 +246,18 @@ export default function HealthPortal() {
             {navItems.map((item) => <button key={item} className={activeNav === item ? "active" : ""} onClick={() => setActiveNav(item)}><span className="nav-dot" />{item}</button>)}
           </nav>
         </div>}
+        {area === "Financeiro" && <div className="finance-navigation">
+          <p className="side-label profile-label">Financeiro</p>
+          <nav aria-label="Navegação da área financeira">
+            <button className={financeSection === "Gastos gerais" ? "active" : ""} onClick={() => setFinanceSection("Gastos gerais")}><span className="nav-dot" />Gastos gerais</button>
+            <button className={financeSection === "Bancos" ? "active" : ""} onClick={() => setFinanceSection("Bancos")}><span className="nav-dot" />Bancos</button>
+          </nav>
+        </div>}
         <div className="privacy-note"><span>Espaço privado</span><small>Apenas as pessoas autorizadas podem aceder a este portal.</small></div>
       </aside>
 
       <main>
-        {area === "Financeiro" ? <FinanceDashboard /> : <>
+        {area === "Financeiro" ? <FinanceDashboard section={financeSection} /> : <>
         <header className="topbar">
           <div>
             <p className="eyebrow">{activeNav}</p>
@@ -319,11 +328,9 @@ export default function HealthPortal() {
   );
 }
 
-function FinanceDashboard() {
-  const [section, setSection] = useState<"Gastos gerais" | "Bancos">("Gastos gerais");
+function FinanceDashboard({ section }: { section: FinanceSection }) {
   return <section className="finance-page">
     <header className="topbar finance-header"><div><p className="eyebrow">Financeiro</p><h1>Finanças da família</h1><p>Despesas recorrentes e documentos bancários organizados a partir da pasta financeira partilhada.</p></div><a className="source-button" href="https://drive.google.com/drive/folders/1Bhtz_GJ5_bQfyqd0wGyqHkHwCV6Sk44x" target="_blank" rel="noreferrer">Abrir pasta financeira <span>↗</span></a></header>
-    <div className="finance-tabs" role="tablist"><button role="tab" aria-selected={section === "Gastos gerais"} className={section === "Gastos gerais" ? "active" : ""} onClick={() => setSection("Gastos gerais")}><span>◌</span> Gastos gerais</button><button role="tab" aria-selected={section === "Bancos"} className={section === "Bancos" ? "active" : ""} onClick={() => setSection("Bancos")}><span>⌂</span> Bancos</button></div>
     {section === "Gastos gerais" ? <GeneralExpenses /> : <BanksView />}
   </section>;
 }
