@@ -158,6 +158,7 @@ function lastOf(items: HealthRecord[], kind: RecordKind) {
 export default function HealthPortal() {
   const [area, setArea] = useState<Area>("Saúde");
   const [financeSection, setFinanceSection] = useState<FinanceSection>("Gastos gerais");
+  const [financeCategory, setFinanceCategory] = useState<FinanceCategory>("Eletricidade");
   const [profile, setProfile] = useState<Profile>("Tiago Soutelo");
   const [activeNav, setActiveNav] = useState<(typeof navItems)[number]>("Visão geral");
   const [records, setRecords] = useState<HealthRecord[]>(fallback);
@@ -271,6 +272,7 @@ export default function HealthPortal() {
           <p className="side-label profile-label">Financeiro</p>
           <nav aria-label="Navegação da área financeira">
             <button className={financeSection === "Gastos gerais" ? "active" : ""} onClick={() => setFinanceSection("Gastos gerais")}><span className="nav-dot" />Gastos gerais</button>
+            {financeSection === "Gastos gerais" && <div className="finance-subnav">{expenseCategories.map((item) => <button key={item.name} className={financeCategory === item.name ? "active" : ""} onClick={() => { setFinanceSection("Gastos gerais"); setFinanceCategory(item.name); }}><span>{item.icon}</span>{item.name}</button>)}</div>}
             <button className={financeSection === "Bancos" ? "active" : ""} onClick={() => setFinanceSection("Bancos")}><span className="nav-dot" />Bancos</button>
           </nav>
         </div>}
@@ -278,7 +280,7 @@ export default function HealthPortal() {
       </aside>
 
       <main>
-        {area === "Financeiro" ? <FinanceDashboard section={financeSection} /> : <>
+        {area === "Financeiro" ? <FinanceDashboard section={financeSection} category={financeCategory} onCategoryChange={setFinanceCategory} /> : <>
         <header className="topbar">
           <div>
             <p className="eyebrow">{activeNav}</p>
@@ -349,10 +351,10 @@ export default function HealthPortal() {
   );
 }
 
-function FinanceDashboard({ section }: { section: FinanceSection }) {
+function FinanceDashboard({ section, category, onCategoryChange }: { section: FinanceSection; category: FinanceCategory; onCategoryChange: (category: FinanceCategory) => void }) {
   return <section className="finance-page">
     <header className="topbar finance-header"><div><p className="eyebrow">Financeiro</p><h1>Finanças da família</h1><p>Despesas recorrentes e documentos bancários organizados a partir da pasta financeira partilhada.</p></div><a className="source-button" href="https://drive.google.com/drive/folders/1Bhtz_GJ5_bQfyqd0wGyqHkHwCV6Sk44x" target="_blank" rel="noreferrer">Abrir pasta financeira <span>↗</span></a></header>
-    {section === "Gastos gerais" ? <GeneralExpenses /> : <BanksView />}
+    {section === "Gastos gerais" ? <GeneralExpenses category={category} onCategoryChange={onCategoryChange} /> : <BanksView />}
   </section>;
 }
 
@@ -365,8 +367,7 @@ const expenseCategories: { name: FinanceCategory; icon: string; folder: string }
 
 function euro(value: number) { return new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(value); }
 
-function GeneralExpenses() {
-  const [category, setCategory] = useState<FinanceCategory>("Eletricidade");
+function GeneralExpenses({ category, onCategoryChange }: { category: FinanceCategory; onCategoryChange: (category: FinanceCategory) => void }) {
   const [month, setMonth] = useState("all");
   const current = expenseCategories.find((item) => item.name === category)!;
   const invoices = financeInvoices.filter((item) => item.category === category && (month === "all" || item.date.slice(0, 7) === month));
@@ -375,7 +376,7 @@ function GeneralExpenses() {
   const total = pricedInvoices.reduce((sum, item) => sum + item.total!, 0);
   const maximum = Math.max(...pricedInvoices.map((item) => item.total!), 1);
   const latest = [...invoices].sort((a,b) => b.date.localeCompare(a.date))[0];
-  return <><section className="expense-category-tabs" aria-label="Rubricas de gastos gerais">{expenseCategories.map((item) => <button key={item.name} className={category === item.name ? "active" : ""} onClick={() => { setCategory(item.name); setMonth("all"); }}><span>{item.icon}</span>{item.name}</button>)}</section><section className="expense-header"><div><p className="eyebrow">Gastos gerais · {current.name}</p><h2>{current.icon} {current.name}</h2><p>Histórico de todos os documentos na pasta partilhada. Os valores são mostrados apenas quando constam da fatura importada.</p></div><label>Filtro mensal<select value={month} onChange={(event) => setMonth(event.target.value)}><option value="all">Todos os meses</option>{availableMonths.map((value) => <option key={value} value={value}>{new Intl.DateTimeFormat("pt-PT", { month: "long", year: "numeric" }).format(new Date(`${value}-01T12:00:00`))}</option>)}</select></label></section><section className="expense-summary"><article><span>Total com valor importado</span><strong>{pricedInvoices.length ? euro(total) : "—"}</strong><small>{pricedInvoices.length} de {invoices.length} faturas com valor lido</small></article><article><span>Documento mais recente</span><strong>{latest?.total !== null && latest ? euro(latest.total) : "Ver fatura"}</strong><small>{latest ? displayMetricDate(latest.date) : "Sem documento no filtro"}</small></article><article><span>Consulta de documentos</span><a href={current.folder} target="_blank" rel="noreferrer">Abrir pasta ↗</a><small>{invoices.length} documentos no histórico</small></article></section><section className="expense-grid"><article className="panel expense-chart"><div className="panel-heading"><div><p className="eyebrow">Evolução mensal</p><h2>Total por fatura</h2></div><span className="subtle-tag">{current.name}</span></div>{pricedInvoices.length ? <div className="expense-bars">{pricedInvoices.map((item) => <div key={item.url} className="expense-bar-wrap"><strong>{euro(item.total!)}</strong><i style={{ height: `${28 + item.total! / maximum * 122}px` }} /><small>{displayMetricDate(item.date)}</small></div>)}</div> : <div className="hm-empty">Os documentos deste filtro estão disponíveis abaixo. Abra cada fatura para consultar o valor original.</div>}</article><article className="panel expense-invoices"><div className="panel-heading"><div><p className="eyebrow">Documentos</p><h2>Histórico completo</h2></div><span className="subtle-tag">{invoices.length}</span></div>{[...invoices].sort((a,b)=>b.date.localeCompare(a.date)).map((item) => <a key={item.url} href={item.url} target="_blank" rel="noreferrer" className="expense-invoice"><span>{current.icon}</span><div><strong>{item.fileName || item.provider}</strong><small>{item.period} · {displayMetricDate(item.date)}</small></div><b>{item.total !== null ? euro(item.total) : "Abrir"} <em>↗</em></b></a>)}{!invoices.length && <div className="hm-empty">Sem faturas no filtro selecionado.</div>}</article></section></>;
+  return <><section className="expense-category-tabs" aria-label="Rubricas de gastos gerais">{expenseCategories.map((item) => <button key={item.name} className={category === item.name ? "active" : ""} onClick={() => { onCategoryChange(item.name); setMonth("all"); }}><span>{item.icon}</span>{item.name}</button>)}</section><section className="expense-header"><div><p className="eyebrow">Gastos gerais · {current.name}</p><h2>{current.icon} {current.name}</h2><p>Histórico de todos os documentos na pasta partilhada. Os valores são mostrados apenas quando constam da fatura importada.</p></div><label>Filtro mensal<select value={month} onChange={(event) => setMonth(event.target.value)}><option value="all">Todos os meses</option>{availableMonths.map((value) => <option key={value} value={value}>{new Intl.DateTimeFormat("pt-PT", { month: "long", year: "numeric" }).format(new Date(`${value}-01T12:00:00`))}</option>)}</select></label></section><section className="expense-summary"><article><span>Total com valor importado</span><strong>{pricedInvoices.length ? euro(total) : "—"}</strong><small>{pricedInvoices.length} de {invoices.length} faturas com valor lido</small></article><article><span>Documento mais recente</span><strong>{latest?.total !== null && latest ? euro(latest.total) : "Ver fatura"}</strong><small>{latest ? displayMetricDate(latest.date) : "Sem documento no filtro"}</small></article><article><span>Consulta de documentos</span><a href={current.folder} target="_blank" rel="noreferrer">Abrir pasta ↗</a><small>{invoices.length} documentos no histórico</small></article></section><section className="expense-grid"><article className="panel expense-chart"><div className="panel-heading"><div><p className="eyebrow">Evolução mensal</p><h2>Total por fatura</h2></div><span className="subtle-tag">{invoices.length} documentos</span></div>{invoices.length ? <div className="expense-bars">{[...invoices].sort((a,b)=>a.date.localeCompare(b.date)).map((item) => <div key={item.url} className={`expense-bar-wrap ${item.total === null ? "unpriced" : ""}`}><strong>{item.total !== null ? euro(item.total) : "Ver"}</strong><i style={{ height: `${item.total === null ? 18 : 28 + item.total / maximum * 122}px` }} /><small>{displayMetricDate(item.date)}</small></div>)}</div> : <div className="hm-empty">Não existem documentos para este mês.</div>}</article><article className="panel expense-invoices"><div className="panel-heading"><div><p className="eyebrow">Documentos</p><h2>Histórico completo</h2></div><span className="subtle-tag">{invoices.length}</span></div>{[...invoices].sort((a,b)=>b.date.localeCompare(a.date)).map((item) => <a key={item.url} href={item.url} target="_blank" rel="noreferrer" className="expense-invoice"><span>{current.icon}</span><div><strong>{item.fileName || item.provider}</strong><small>{item.period} · {displayMetricDate(item.date)}</small></div><b>{item.total !== null ? euro(item.total) : "Abrir"} <em>↗</em></b></a>)}{!invoices.length && <div className="hm-empty">Sem faturas no filtro selecionado.</div>}</article></section></>;
 }
 
 const bcpStatements = [
