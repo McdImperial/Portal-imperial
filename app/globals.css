@@ -429,6 +429,20 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .cleaning-areas-catalog article div { min-width: 0; display: grid; gap: 4px; }
 .cleaning-areas-catalog strong { font-size: 10px; }
 .cleaning-areas-catalog small { color: var(--muted); font-size: 8px; }
+.department-evaluation-history { border-top: 1px solid var(--line); background: #fff; }
+.department-evaluation-history-heading { padding: 17px 20px 13px; display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+.department-evaluation-history-heading h3 { margin: 4px 0 0; font-size: 14px; }
+.department-evaluation-history-heading > span { color: var(--muted); font-size: 8px; }
+.department-history-list { display: grid; border-top: 1px solid var(--line); }
+.department-history-list article { min-height: 64px; padding: 11px 20px; display: grid; grid-template-columns: 1.25fr .7fr .7fr; align-items: center; gap: 14px; border-bottom: 1px solid var(--line); }
+.department-history-list article > div, .department-history-list article > span { display: grid; gap: 4px; }
+.department-history-list strong { color: #294238; font-size: 10px; text-transform: capitalize; }
+.department-history-list small { color: #81908a; text-transform: uppercase; letter-spacing: .4px; font-size: 7px; font-weight: 800; }
+.history-rating { display: flex; align-items: center; gap: 6px; color: #354b42; font-family: Georgia, serif; font-size: 18px; font-weight: 500; }
+.history-rating i { width: 8px; height: 8px; border-radius: 50%; background: #c8d2cd; }
+.history-rating.bom i { background: #43a473; }.history-rating.aceitável i { background: #428db5; }.history-rating.necessita-melhorar i { background: #df921b; }.history-rating.não-aceitável i { background: #cf4050; }.history-rating.por-atualizar i { background: #c8d2cd; }
+.department-history-empty { min-height: 88px; padding: 17px 20px; display: flex; align-items: center; justify-content: center; gap: 11px; border-top: 1px solid var(--line); color: #64746d; }
+.department-history-empty > span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; color: #896722; background: #fff0d9; }.department-history-empty div { display: grid; gap: 3px; }.department-history-empty strong { font-size: 10px; }.department-history-empty small { color: var(--muted); font-size: 8px; }
 .intervention-form { margin: 18px 20px; overflow: hidden; border: 1px solid #cfe0d8; border-radius: 12px; background: #f7fbf9; box-shadow: 0 7px 18px rgba(27,70,55,.06); }
 .intervention-form-heading { padding: 14px 16px; display: flex; align-items: end; justify-content: space-between; gap: 12px; border-bottom: 1px solid #dce8e2; background: white; }
 .intervention-form-heading h3 { margin: 4px 0 0; font-size: 13px; }

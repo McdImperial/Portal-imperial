@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { areaEvaluations } from "../../../db/schema";
 import { requireUser } from "../auth/_lib";
@@ -30,7 +30,14 @@ function validMonth(month: string) {
 export async function GET(request: Request) {
   const auth = await requireUser(request);
   if (auth.error) return auth.error;
-  const month = new URL(request.url).searchParams.get("month") || "";
+  const params = new URL(request.url).searchParams;
+  const department = params.get("department") as EvaluationDepartment | null;
+  if (department) {
+    if (!(department in areasByDepartment)) return Response.json({ error: "Departamento inválido." }, { status: 400 });
+    const evaluations = await getDb().select().from(areaEvaluations).where(eq(areaEvaluations.department, department)).orderBy(desc(areaEvaluations.month), asc(areaEvaluations.area));
+    return Response.json({ evaluations });
+  }
+  const month = params.get("month") || "";
   if (!validMonth(month)) return Response.json({ error: "Mês inválido." }, { status: 400 });
   const evaluations = await getDb().select().from(areaEvaluations).where(eq(areaEvaluations.month, month)).orderBy(asc(areaEvaluations.department), asc(areaEvaluations.area));
   return Response.json({ evaluations });

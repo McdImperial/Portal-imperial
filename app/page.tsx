@@ -386,6 +386,7 @@ export default function Home() {
   const [interventionBusy, setInterventionBusy] = useState(false);
   const [evaluationMonth, setEvaluationMonth] = useState("2026-08");
   const [areaEvaluationDraft, setAreaEvaluationDraft] = useState<AreaEvaluationDraft>({});
+  const [areaEvaluationHistory, setAreaEvaluationHistory] = useState<AreaEvaluation[]>([]);
   const [evaluationBusy, setEvaluationBusy] = useState(false);
   const [evaluationUpdatedAt, setEvaluationUpdatedAt] = useState<string | null>(null);
   const [collapsedEvaluationDepartments, setCollapsedEvaluationDepartments] = useState<Partial<Record<EvaluationDepartment, boolean>>>({});
@@ -441,6 +442,9 @@ export default function Home() {
     fetch(`/api/cleaning-interventions/?department=${interventionDepartment}`).then((response) => response.ok ? response.json() : Promise.reject()).then((data: { interventions: CleaningIntervention[] }) => {
       if (active) setCleaningInterventions(data.interventions);
     }).catch(() => setNotice("Não foi possível carregar o planeamento das intervenções."));
+    fetch(`/api/area-evaluations/?department=${interventionDepartment}`).then((response) => response.ok ? response.json() : Promise.reject()).then((data: { evaluations: AreaEvaluation[] }) => {
+      if (active) setAreaEvaluationHistory(data.evaluations);
+    }).catch(() => setAreaEvaluationHistory([]));
     return () => { active = false; };
   }, [currentUser, department, view]);
 
@@ -515,6 +519,23 @@ export default function Home() {
       maintenancePercent: areaRatingPercentage(maintenanceRatings),
     };
   }), [areaEvaluationDraft]);
+  const departmentEvaluationHistorySummaries = useMemo(() => {
+    const byMonth = new Map<string, AreaEvaluation[]>();
+    areaEvaluationHistory.forEach((item) => byMonth.set(item.month, [...(byMonth.get(item.month) ?? []), item]));
+    return [...byMonth.entries()].map(([month, items]) => {
+      const cleaningRatings = items.map((item) => item.cleaningRating);
+      const maintenanceRatings = items.map((item) => item.maintenanceRating);
+      return {
+        month,
+        cleaningPercent: areaRatingPercentage(cleaningRatings),
+        cleaningRating: globalAreaRating(cleaningRatings),
+        maintenancePercent: areaRatingPercentage(maintenanceRatings),
+        maintenanceRating: globalAreaRating(maintenanceRatings),
+        rated: items.filter((item) => item.cleaningRating || item.maintenanceRating).length,
+        total: selectedCleaningAreas.length,
+      };
+    }).sort((a, b) => b.month.localeCompare(a.month));
+  }, [areaEvaluationHistory, selectedCleaningAreas.length]);
   const selectedObjectiveMonth = objectiveMonthOptions.find((item) => item.value === objectiveMonth) ?? objectiveMonthOptions[6];
   const selectedObjectiveSnapshot = objectivesByMonth[objectiveMonth];
   const allSelectedObjectives = selectedObjectiveSnapshot?.objectives ?? [];
@@ -1472,6 +1493,15 @@ export default function Home() {
                   return <article key={area} className={areaOpen ? "has-open" : ""}><span>{areaOpen ? "◷" : "✓"}</span><div><strong>{area}</strong><small>{areaOpen ? `${areaOpen} ${areaOpen === 1 ? "intervenção aberta" : "intervenções abertas"}` : areaInterventions.length ? "Sem intervenções abertas" : "Sem intervenções agendadas"}</small></div></article>;
                 })}
               </div>
+
+              <section className="department-evaluation-history" aria-labelledby="department-evaluation-history-title">
+                <div className="department-evaluation-history-heading"><div><span className="eyebrow">Consulta</span><h3 id="department-evaluation-history-title">Histórico de avaliações</h3></div><span>Limpeza e manutenção</span></div>
+                {departmentEvaluationHistorySummaries.length ? <div className="department-history-list">{departmentEvaluationHistorySummaries.map((item) => <article key={item.month}>
+                  <div><strong>{new Date(`${item.month}-01T12:00:00`).toLocaleDateString("pt-PT", { month: "long", year: "numeric" })}</strong><small>{item.rated}/{item.total} áreas avaliadas</small></div>
+                  <span><small>Limpeza</small><b className={`history-rating ${statusClass(item.cleaningRating || "Por avaliar")}`}><i />{item.cleaningPercent === null ? "—" : `${item.cleaningPercent}%`}</b></span>
+                  <span><small>Manutenção</small><b className={`history-rating ${statusClass(item.maintenanceRating || "Por avaliar")}`}><i />{item.maintenancePercent === null ? "—" : `${item.maintenancePercent}%`}</b></span>
+                </article>)}</div> : <div className="department-history-empty"><span>◷</span><div><strong>Sem avaliações anteriores</strong><small>As avaliações guardadas pelo administrador ficarão disponíveis aqui, mês a mês.</small></div></div>}
+              </section>
 
               {showInterventionForm && canManageCleaning && <form className="intervention-form" onSubmit={scheduleIntervention}>
                 <div className="intervention-form-heading"><div><span className="eyebrow">Novo agendamento</span><h3>Detalhes da intervenção</h3></div><small>Todos os campos são obrigatórios</small></div>
