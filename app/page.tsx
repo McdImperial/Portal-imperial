@@ -7,7 +7,7 @@ import r2pDataJson from "./data/r2p-data.json";
 import tellTheArchesDataJson from "./data/tell-the-arches.json";
 import teamMilestonesDataJson from "./data/team-milestones.json";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "r2p" | "tellarches" | "configuracoes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "r2p" | "tellarches" | "gerenteloja" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -156,6 +156,7 @@ const viewLabels: Record<View, string> = {
   custos: "Custo, Comida, Papel e OPS",
   r2p: "Tempos de serviço · R2P",
   tellarches: "Tell The Arches",
+  gerenteloja: "Gerente Loja",
   configuracoes: "Configurações",
 };
 
@@ -944,6 +945,7 @@ export default function Home() {
     { id: "objetivos", label: "Objetivos", glyph: "◎" },
     { id: "areasglobais", label: "Áreas", glyph: "⌂" },
     { id: "equipa", label: "Equipa", glyph: "♟" },
+    { id: "gerenteloja" as View, label: "Gerente Loja", glyph: "♛" },
     ...(currentUser?.role === "admin" ? [{ id: "configuracoes" as View, label: "Configurações", glyph: "⚙" }] : []),
   ];
 
@@ -1145,6 +1147,13 @@ export default function Home() {
                 <article className="team-directory-card"><div className="team-section-heading"><div><span className="eyebrow">Equipa relações públicas</span><h2>Relações públicas</h2></div><span className="team-section-count">{teamMilestonesData.organisation.publicRelations.length}</span></div><div className="team-person-list">{teamMilestonesData.organisation.publicRelations.map((person) => <div key={person.name}><span>🤝</span><p><strong>{person.name}</strong><small>{person.role}</small></p></div>)}</div></article>
                 <article className="team-directory-card employees-card"><span className="employees-icon">👥</span><span className="eyebrow">Equipa funcionários</span><strong>{teamMilestonesData.organisation.employees}</strong><p>funcionários ativos na equipa Imperial</p></article>
               </section>
+            </section>
+          )}
+
+          {view === "gerenteloja" && (
+            <section className="manager-page" aria-label="Gerente Loja">
+              <div className="manager-page-heading"><div><span className="eyebrow">Gerente Loja</span><h2>Disponibilidades</h2><p>Consulta integrada das disponibilidades da equipa.</p></div><a href="https://analise-disponibilidades-equipa.tiagosoutelo.chatgpt.site/" target="_blank" rel="noreferrer">Abrir em nova página ↗</a></div>
+              <div className="availability-frame"><iframe title="Análise de disponibilidades da equipa" src="https://analise-disponibilidades-equipa.tiagosoutelo.chatgpt.site/" /></div>
             </section>
           )}
 

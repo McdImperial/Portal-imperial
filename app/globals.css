@@ -691,6 +691,13 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .manager-task-summary strong { font-size: 9px; }
 .manager-task-summary small { color: #718078; font-size: 8px; white-space: nowrap; }
 .manager-task-summary b { color: #245f4b; }
+.manager-page { display: grid; gap: 16px; }
+.manager-page-heading { padding: 20px 22px; display: flex; align-items: end; justify-content: space-between; gap: 16px; border: 1px solid var(--line); border-radius: 16px; background: #fff; }
+.manager-page-heading h2 { margin-top: 5px; font-family: Georgia, serif; font-size: 27px; font-weight: 500; }
+.manager-page-heading p { margin: 6px 0 0; color: var(--muted); font-size: 10px; }
+.manager-page-heading a { color: #2f7058; font-size: 10px; font-weight: 800; text-decoration: none; }
+.availability-frame { min-height: 760px; overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: #fff; }
+.availability-frame iframe { width: 100%; height: 760px; display: block; border: 0; }
 .source-mark { width: 31px; height: 31px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 8px; color: white; background: #34775d; font-size: 8px; font-weight: 900; }
 .board-titlebar { padding: 24px 26px 17px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
 .board-titlebar h2 { margin: 5px 0 5px; font-family: Georgia, serif; font-size: 25px; font-weight: 500; }
