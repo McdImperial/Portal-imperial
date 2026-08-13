@@ -1,0 +1,24 @@
+{
+  "month": "2026-08",
+  "label": "Agosto 2026",
+  "sourceUrl": "https://docs.google.com/spreadsheets/d/1DbMC7HW_t7QR7DoAy_AwdnszSKHcpVzILmyBmuWp7UM/edit?usp=sharing",
+  "birthdays": [
+    { "name": "Érica D'avó", "role": "Funcionário", "day": 13 },
+    { "name": "Matos Leonardo", "role": "Treinador", "day": 17 },
+    { "name": "Alexandrino José", "role": "Funcionário", "day": 19 },
+    { "name": "Sara Mota", "role": "Funcionário", "day": 20 },
+    { "name": "Tiago Moreira", "role": "Funcionário", "day": 22 },
+    { "name": "Marlene Soutelo", "role": "Administrativa", "day": 28 },
+    { "name": "Sara Sousa", "role": "Assistente Gerência", "day": 5 },
+    { "name": "Isis Ferreira", "role": "Funcionário", "day": 6 },
+    { "name": "Rúben Pinto", "role": "Funcionário", "day": 9 }
+  ],
+  "anniversaries": [
+    { "name": "David Santos", "role": "Treinador", "day": 1, "years": 8 },
+    { "name": "Ana Carvalho", "role": "Treinador", "day": 4, "years": 12 },
+    { "name": "Andreia Faria", "role": "Administrativa", "day": 10, "years": 24 },
+    { "name": "Ana Sousa", "role": "Assistente Gerência", "day": 16, "years": 5 },
+    { "name": "Carlos Borges", "role": "Funcionário", "day": 19, "years": 2 },
+    { "name": "Albertino Gonçalves", "role": "Funcionário", "day": 23, "years": 10 }
+  ]
+}

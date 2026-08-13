@@ -5,6 +5,7 @@ import inventoryProductsData from "./data/inventory-products.json";
 import objectivesDataJson from "./data/objectives-data.json";
 import r2pDataJson from "./data/r2p-data.json";
 import tellTheArchesDataJson from "./data/tell-the-arches.json";
+import teamMilestonesDataJson from "./data/team-milestones.json";
 
 type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "custos" | "r2p" | "tellarches" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
@@ -268,12 +269,15 @@ type TellTheArchesMonth = {
   weekdays: number[]; dayparts: number[]; satisfactionFactors: Record<string, number>; dissatisfactionFactors: Record<string, number>; reportUrl: string;
 };
 type TellTheArchesData = { folderUrl: string; snapshotDate: string; ytd: TellTheArchesMonth; months: TellTheArchesMonth[] };
+type TeamMilestone = { name: string; role: string; day: number; years?: number };
+type TeamMilestonesData = { month: string; label: string; sourceUrl: string; birthdays: TeamMilestone[]; anniversaries: TeamMilestone[] };
 type SharedFolder = { id: string; name: string; description: string; url: string; fileCount: number; updatedAt: string };
 
 const inventoryProducts = inventoryProductsData as InventoryProduct[];
 const inventoryCategoryLabels: Record<InventoryCategory, string> = { food: "Comida", paper: "Papel", ops: "OPS" };
 const r2pData = r2pDataJson as R2PData;
 const tellTheArchesData = tellTheArchesDataJson as TellTheArchesData;
+const teamMilestonesData = teamMilestonesDataJson as TeamMilestonesData;
 const qualityTasksSourceUrl = "https://docs.google.com/spreadsheets/d/1aH533lMTXySB8jVm4xRFVNpsoBVuPiqgMbpi_GzWVKY/edit?usp=sharing";
 const objectivesSourceUrl = "https://docs.google.com/spreadsheets/d/1xrRSvUDCORagI5FmL0scOvWB7Df-5d3zULKJ0K5w-1s/edit?gid=1860306038#gid=1860306038";
 const defaultSharedFolders: SharedFolder[] = [
@@ -1040,19 +1044,20 @@ export default function Home() {
           {view === "resumo" && department === "global" && (
             <section className="team-milestones" aria-labelledby="team-milestones-title">
               <div className="team-milestones-heading">
-                <div><span className="eyebrow">Equipa</span><h2 id="team-milestones-title">Aniversários e antiguidade</h2><p>Reconhecimento das datas importantes da equipa Imperial.</p></div>
+                <div><span className="eyebrow">Equipa · {teamMilestonesData.label}</span><h2 id="team-milestones-title">Aniversários e antiguidade</h2><p>Próximas celebrações e marcos de permanência da equipa Imperial.</p></div>
                 <span className="team-milestones-icon" aria-hidden="true">🎉</span>
               </div>
               <div className="team-milestones-grid">
                 <article className="milestone-card birthdays">
                   <span className="milestone-icon" aria-hidden="true">🎂</span>
-                  <div><span className="eyebrow">Aniversários</span><h3>Próximas celebrações</h3><p>A informação será apresentada aqui assim que receber o ficheiro da equipa.</p></div>
+                  <div className="milestone-content"><span className="eyebrow">Aniversários</span><h3>{teamMilestonesData.birthdays.length} celebrações em agosto</h3><div className="milestone-list">{teamMilestonesData.birthdays.slice(0, 4).map((person) => <div key={person.name}><time>{String(person.day).padStart(2, "0")} Ago</time><span><strong>{person.name}</strong><small>{person.role}</small></span></div>)}</div></div>
                 </article>
                 <article className="milestone-card tenure">
                   <span className="milestone-icon" aria-hidden="true">🏅</span>
-                  <div><span className="eyebrow">Antiguidade</span><h3>Marcos de permanência</h3><p>Os anos de casa e as próximas datas de reconhecimento serão organizados neste espaço.</p></div>
+                  <div className="milestone-content"><span className="eyebrow">Antiguidade</span><h3>{teamMilestonesData.anniversaries.length} marcos em agosto</h3><div className="milestone-list">{teamMilestonesData.anniversaries.slice(0, 4).map((person) => <div key={person.name}><time>{String(person.day).padStart(2, "0")} Ago</time><span><strong>{person.name}</strong><small>{person.role}</small></span><b>{person.years} anos</b></div>)}</div></div>
                 </article>
               </div>
+              <a className="team-source-link" href={teamMilestonesData.sourceUrl} target="_blank" rel="noreferrer">Consultar ficheiro da equipa ↗</a>
             </section>
           )}
 

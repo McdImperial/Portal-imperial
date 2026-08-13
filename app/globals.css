@@ -382,12 +382,23 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .team-milestones-heading p { margin: 6px 0 0; color: var(--muted); font-size: 10px; }
 .team-milestones-icon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 14px; background: #fbf0d9; font-size: 23px; }
 .team-milestones-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.milestone-card { min-height: 104px; padding: 17px; display: flex; align-items: center; gap: 14px; border: 1px solid #dfe8e3; border-radius: 13px; }
+.milestone-card { min-height: 168px; padding: 17px; display: flex; align-items: flex-start; gap: 14px; border: 1px solid #dfe8e3; border-radius: 13px; }
 .milestone-card.birthdays { background: #fff8ea; border-color: #f1dfb8; }
 .milestone-card.tenure { background: #edf5f1; border-color: #d5e8de; }
 .milestone-icon { width: 41px; height: 41px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 12px; background: rgba(255,255,255,.78); font-size: 19px; }
+.milestone-content { min-width: 0; flex: 1; }
 .milestone-card h3 { margin: 5px 0 0; color: #233a31; font-size: 13px; }
 .milestone-card p { margin: 6px 0 0; color: #75837d; font-size: 9px; line-height: 1.5; }
+.milestone-list { margin-top: 11px; display: grid; gap: 7px; }
+.milestone-list > div { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.milestone-list time { color: #8f6d25; font-size: 8px; font-weight: 850; }
+.tenure .milestone-list time { color: #34765d; }
+.milestone-list span { min-width: 0; display: grid; gap: 1px; }
+.milestone-list strong { overflow: hidden; color: #2d4039; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.milestone-list small { overflow: hidden; color: #7a8882; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+.milestone-list b { padding: 3px 5px; border-radius: 999px; color: #2e7258; background: rgba(255,255,255,.7); font-size: 7px; white-space: nowrap; }
+.team-source-link { justify-self: end; color: #39765f; font-size: 9px; font-weight: 800; text-decoration: none; }
+.team-source-link:hover { text-decoration: underline; }
 
 .objectives-section { display: grid; gap: 14px; }
 .objective-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }

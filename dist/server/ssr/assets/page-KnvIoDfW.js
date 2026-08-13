@@ -12518,6 +12518,96 @@ var tell_the_arches_default = {
 		}
 	]
 };
+var team_milestones_default = {
+	month: "2026-08",
+	label: "Agosto 2026",
+	sourceUrl: "https://docs.google.com/spreadsheets/d/1DbMC7HW_t7QR7DoAy_AwdnszSKHcpVzILmyBmuWp7UM/edit?usp=sharing",
+	birthdays: [
+		{
+			"name": "Érica D'avó",
+			"role": "Funcionário",
+			"day": 13
+		},
+		{
+			"name": "Matos Leonardo",
+			"role": "Treinador",
+			"day": 17
+		},
+		{
+			"name": "Alexandrino José",
+			"role": "Funcionário",
+			"day": 19
+		},
+		{
+			"name": "Sara Mota",
+			"role": "Funcionário",
+			"day": 20
+		},
+		{
+			"name": "Tiago Moreira",
+			"role": "Funcionário",
+			"day": 22
+		},
+		{
+			"name": "Marlene Soutelo",
+			"role": "Administrativa",
+			"day": 28
+		},
+		{
+			"name": "Sara Sousa",
+			"role": "Assistente Gerência",
+			"day": 5
+		},
+		{
+			"name": "Isis Ferreira",
+			"role": "Funcionário",
+			"day": 6
+		},
+		{
+			"name": "Rúben Pinto",
+			"role": "Funcionário",
+			"day": 9
+		}
+	],
+	anniversaries: [
+		{
+			"name": "David Santos",
+			"role": "Treinador",
+			"day": 1,
+			"years": 8
+		},
+		{
+			"name": "Ana Carvalho",
+			"role": "Treinador",
+			"day": 4,
+			"years": 12
+		},
+		{
+			"name": "Andreia Faria",
+			"role": "Administrativa",
+			"day": 10,
+			"years": 24
+		},
+		{
+			"name": "Ana Sousa",
+			"role": "Assistente Gerência",
+			"day": 16,
+			"years": 5
+		},
+		{
+			"name": "Carlos Borges",
+			"role": "Funcionário",
+			"day": 19,
+			"years": 2
+		},
+		{
+			"name": "Albertino Gonçalves",
+			"role": "Funcionário",
+			"day": 23,
+			"years": 10
+		}
+	]
+};
 //#endregion
 //#region app/page.tsx
 var import_jsx_runtime = require_jsx_runtime();
@@ -13446,6 +13536,7 @@ var inventoryCategoryLabels = {
 };
 var r2pData = r2p_data_default;
 var tellTheArchesData = tell_the_arches_default;
+var teamMilestonesData = team_milestones_default;
 var qualityTasksSourceUrl = "https://docs.google.com/spreadsheets/d/1aH533lMTXySB8jVm4xRFVNpsoBVuPiqgMbpi_GzWVKY/edit?usp=sharing";
 var objectivesSourceUrl = "https://docs.google.com/spreadsheets/d/1xrRSvUDCORagI5FmL0scOvWB7Df-5d3zULKJ0K5w-1s/edit?gid=1860306038#gid=1860306038";
 var defaultSharedFolders = [
@@ -14792,55 +14883,81 @@ function Home() {
 						view === "resumo" && department === "global" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 							className: "team-milestones",
 							"aria-labelledby": "team-milestones-title",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "team-milestones-heading",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "eyebrow",
-										children: "Equipa"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-										id: "team-milestones-title",
-										children: "Aniversários e antiguidade"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Reconhecimento das datas importantes da equipa Imperial." })
-								] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "team-milestones-icon",
-									"aria-hidden": "true",
-									children: "🎉"
-								})]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "team-milestones-grid",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-									className: "milestone-card birthdays",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "milestone-icon",
-										"aria-hidden": "true",
-										children: "🎂"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "team-milestones-heading",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 											className: "eyebrow",
-											children: "Aniversários"
+											children: ["Equipa · ", teamMilestonesData.label]
 										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Próximas celebrações" }),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "A informação será apresentada aqui assim que receber o ficheiro da equipa." })
-									] })]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-									className: "milestone-card tenure",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "milestone-icon",
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+											id: "team-milestones-title",
+											children: "Aniversários e antiguidade"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Próximas celebrações e marcos de permanência da equipa Imperial." })
+									] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "team-milestones-icon",
 										"aria-hidden": "true",
-										children: "🏅"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "eyebrow",
-											children: "Antiguidade"
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Marcos de permanência" }),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Os anos de casa e as próximas datas de reconhecimento serão organizados neste espaço." })
-									] })]
-								})]
-							})]
+										children: "🎉"
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "team-milestones-grid",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+										className: "milestone-card birthdays",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "milestone-icon",
+											"aria-hidden": "true",
+											children: "🎂"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "milestone-content",
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "eyebrow",
+													children: "Aniversários"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [teamMilestonesData.birthdays.length, " celebrações em agosto"] }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+													className: "milestone-list",
+													children: teamMilestonesData.birthdays.slice(0, 4).map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("time", { children: [String(person.day).padStart(2, "0"), " Ago"] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.role })] })] }, person.name))
+												})
+											]
+										})]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+										className: "milestone-card tenure",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "milestone-icon",
+											"aria-hidden": "true",
+											children: "🏅"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "milestone-content",
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "eyebrow",
+													children: "Antiguidade"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [teamMilestonesData.anniversaries.length, " marcos em agosto"] }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+													className: "milestone-list",
+													children: teamMilestonesData.anniversaries.slice(0, 4).map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+														/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("time", { children: [String(person.day).padStart(2, "0"), " Ago"] }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.role })] }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [person.years, " anos"] })
+													] }, person.name))
+												})
+											]
+										})]
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+									className: "team-source-link",
+									href: teamMilestonesData.sourceUrl,
+									target: "_blank",
+									rel: "noreferrer",
+									children: "Consultar ficheiro da equipa ↗"
+								})
+							]
 						}),
 						view === "tarefas" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 							className: canEdit ? "board-page" : "board-page read-only",
