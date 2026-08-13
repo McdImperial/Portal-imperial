@@ -387,6 +387,8 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .team-calendar-navigation strong { min-width: 150px; color: #355447; text-align: center; font-size: 11px; text-transform: capitalize; }
 .team-calendar-navigation button { width: 27px; height: 27px; display: grid; place-items: center; border: 1px solid #d7e4de; border-radius: 8px; color: #39765f; background: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
 .team-calendar-navigation button:hover { background: #edf7f1; }
+.team-calendar-navigation button:disabled { opacity: .35; cursor: not-allowed; }
+.team-calendar-month-counts { margin-left: 8px; color: #63756c; font-size: 9px; font-weight: 800; white-space: nowrap; }
 .team-calendar { width: min(840px, 100%); margin: 0 auto; overflow: visible; border: 1px solid #e2eae6; border-radius: 13px; background: #fbfcfb; }
 .team-calendar-weekdays, .team-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
 .team-calendar-weekdays { border-bottom: 1px solid #e2eae6; }

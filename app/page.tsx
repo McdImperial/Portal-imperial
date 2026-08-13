@@ -271,8 +271,8 @@ type TellTheArchesMonth = {
 };
 type TellTheArchesData = { folderUrl: string; snapshotDate: string; ytd: TellTheArchesMonth; months: TellTheArchesMonth[] };
 type TeamMilestone = { name: string; role: string; day: number; years?: number };
-type TeamPerson = { name: string; role: string; level?: string };
-type TeamMilestonesData = { month: string; label: string; sourceUrl: string; birthdays: TeamMilestone[]; anniversaries: TeamMilestone[]; organisation: { franchisee: TeamPerson[]; supervision: TeamPerson[]; managementLevels: TeamPerson[][]; managementSupport: TeamPerson[]; trainers: TeamPerson[]; publicRelations: TeamPerson[]; employees: number } };
+type TeamPerson = { name: string; role: string; level?: string; label?: string };
+type TeamMilestonesData = { month: string; label: string; sourceUrl: string; birthdays: TeamMilestone[]; anniversaries: TeamMilestone[]; calendarByMonth: Record<string, { birthdays: TeamMilestone[]; anniversaries: TeamMilestone[] }>; organisation: { franchisee: TeamPerson[]; supervision: TeamPerson[]; leadershipLevels: TeamPerson[][]; managementLevels: TeamPerson[][]; managementSupport: TeamPerson[]; trainers: TeamPerson[]; publicRelations: TeamPerson[]; employees: number } };
 type SharedFolder = { id: string; name: string; description: string; url: string; fileCount: number; updatedAt: string };
 
 const inventoryProducts = inventoryProductsData as InventoryProduct[];
@@ -359,13 +359,13 @@ function TeamCalendar() {
   const firstWeekday = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
   const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
   const events = new Map<number, { type: "birthday" | "tenure"; name: string; role: string; years?: number }[]>();
-  const isDataMonth = year === initialYear && month === initialMonth;
-  if (isDataMonth) {
-    teamMilestonesData.birthdays.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "birthday", name: person.name, role: person.role }]));
-    teamMilestonesData.anniversaries.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "tenure", name: person.name, role: person.role, years: person.years }]));
+  const monthEvents = year === initialYear ? teamMilestonesData.calendarByMonth[String(month)] ?? { birthdays: [], anniversaries: [] } : { birthdays: [], anniversaries: [] };
+  if (year === initialYear) {
+    monthEvents.birthdays.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "birthday", name: person.name, role: person.role }]));
+    monthEvents.anniversaries.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "tenure", name: person.name, role: person.role, years: person.years }]));
   }
-  const navigateMonth = (direction: number) => setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() + direction, 1));
-  return <><div className="team-calendar-navigation"><button type="button" onClick={() => navigateMonth(-1)} aria-label="Mês anterior">‹</button><strong>{monthLabel}</strong><button type="button" onClick={() => navigateMonth(1)} aria-label="Mês seguinte">›</button></div><div className="team-calendar" aria-label={`Calendário de ${monthLabel}`}>
+  const navigateMonth = (direction: number) => setVisibleMonth((current) => new Date(initialYear, Math.min(11, Math.max(0, current.getMonth() + direction)), 1));
+  return <><div className="team-calendar-navigation"><button type="button" onClick={() => navigateMonth(-1)} disabled={month === 1} aria-label="Mês anterior">‹</button><strong>{monthLabel}</strong><button type="button" onClick={() => navigateMonth(1)} disabled={month === 12} aria-label="Mês seguinte">›</button><span className="team-calendar-month-counts">🎂 {monthEvents.birthdays.length}&nbsp;&nbsp;🏅 {monthEvents.anniversaries.length}</span></div><div className="team-calendar" aria-label={`Calendário de ${monthLabel}`}>
     <div className="team-calendar-weekdays">{["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((day) => <span key={day}>{day}</span>)}</div>
     <div className="team-calendar-grid">
       {Array.from({ length: firstWeekday }).map((_, index) => <span className="team-calendar-empty" key={`empty-${index}`} aria-hidden="true" />)}
@@ -1083,7 +1083,7 @@ export default function Home() {
               </div>
 
               <section className="team-milestones team-page-calendar" aria-labelledby="team-page-calendar-title">
-                <div className="team-milestones-heading"><div><span className="eyebrow">Agenda da equipa</span><h2 id="team-page-calendar-title">Aniversários e antiguidade</h2><p>Datas assinaladas com detalhe disponível no cursor.</p></div><div className="team-calendar-counts"><span>🎂 {teamMilestonesData.birthdays.length}</span><span>🏅 {teamMilestonesData.anniversaries.length}</span></div></div>
+                <div className="team-milestones-heading"><div><span className="eyebrow">Agenda da equipa</span><h2 id="team-page-calendar-title">Aniversários e antiguidade</h2><p>Datas assinaladas com detalhe disponível no cursor.</p></div></div>
                 <TeamCalendar />
               </section>
 
