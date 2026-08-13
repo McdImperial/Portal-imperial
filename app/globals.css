@@ -383,40 +383,40 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .team-milestones-icon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 14px; background: #fbf0d9; font-size: 23px; }
 .team-calendar-counts { display: flex; align-items: center; gap: 7px; }
 .team-calendar-counts span { padding: 8px 10px; border-radius: 999px; color: #5b6963; background: #f4f7f5; font-size: 10px; font-weight: 800; }
-.team-calendar-navigation { width: min(840px, 100%); margin: 0 auto -7px; display: flex; align-items: center; justify-content: center; gap: 12px; }
-.team-calendar-navigation strong { min-width: 150px; color: #355447; text-align: center; font-size: 11px; text-transform: capitalize; }
-.team-calendar-navigation button { width: 27px; height: 27px; display: grid; place-items: center; border: 1px solid #d7e4de; border-radius: 8px; color: #39765f; background: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+.team-calendar-navigation { width: min(1120px, 100%); margin: 0 auto -7px; display: flex; align-items: center; justify-content: center; gap: 14px; }
+.team-calendar-navigation strong { min-width: 180px; color: #355447; text-align: center; font-size: 14px; text-transform: capitalize; }
+.team-calendar-navigation button { width: 35px; height: 35px; display: grid; place-items: center; border: 1px solid #d7e4de; border-radius: 10px; color: #39765f; background: #fff; font-size: 25px; line-height: 1; cursor: pointer; }
 .team-calendar-navigation button:hover { background: #edf7f1; }
 .team-calendar-navigation button:disabled { opacity: .35; cursor: not-allowed; }
-.team-calendar-month-counts { margin-left: 8px; color: #63756c; font-size: 9px; font-weight: 800; white-space: nowrap; }
-.team-calendar { width: min(840px, 100%); margin: 0 auto; overflow: visible; border: 1px solid #e2eae6; border-radius: 13px; background: #fbfcfb; }
+.team-calendar-month-counts { margin-left: 10px; color: #63756c; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.team-calendar { width: min(1120px, 100%); margin: 0 auto; overflow: visible; border: 1px solid #e2eae6; border-radius: 15px; background: #fbfcfb; }
 .team-calendar-weekdays, .team-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
 .team-calendar-weekdays { border-bottom: 1px solid #e2eae6; }
-.team-calendar-weekdays span { padding: 9px 0; color: #8b9791; text-align: center; font-size: 8px; font-weight: 850; text-transform: uppercase; }
-.team-calendar-grid { padding: 5px; gap: 3px; }
-.team-calendar-empty, .team-calendar-day { min-height: 38px; border-radius: 8px; }
-.team-calendar-day { position: relative; padding: 5px; display: flex; align-items: flex-start; justify-content: space-between; color: #596861; outline: none; }
+.team-calendar-weekdays span { padding: 12px 0; color: #8b9791; text-align: center; font-size: 10px; font-weight: 850; text-transform: uppercase; }
+.team-calendar-grid { padding: 7px; gap: 5px; }
+.team-calendar-empty, .team-calendar-day { min-height: 68px; border-radius: 11px; }
+.team-calendar-day { position: relative; padding: 9px; display: flex; align-items: flex-start; justify-content: space-between; color: #596861; outline: none; }
 .team-calendar-day.has-event { color: #234c3e; background: #f0f7f3; cursor: help; }
 .team-calendar-day.has-event:hover, .team-calendar-day.has-event:focus { z-index: 3; background: #e1f0e8; box-shadow: 0 0 0 2px #b9daca; }
 .team-calendar-day.milestone-tenure { background: #fff7e6; box-shadow: inset 0 0 0 1px #f0cf8a; }
 .team-calendar-day.milestone-tenure:hover, .team-calendar-day.milestone-tenure:focus { background: #fff0cf; box-shadow: 0 0 0 2px #e4b75e; }
-.team-calendar-day time { font-size: 9px; font-weight: 800; }
-.team-calendar-icons { display: flex; align-items: center; gap: 1px; line-height: 1; }
-.team-calendar-icons i { font-style: normal; font-size: 10px; }
+.team-calendar-day time { font-size: 12px; font-weight: 800; }
+.team-calendar-icons { display: flex; align-items: center; gap: 3px; line-height: 1; }
+.team-calendar-icons i { font-style: normal; font-size: 14px; }
 .birthday-dot { background: #de9a38; }
 .tenure-dot { background: #4b9a74; }
-.team-calendar-tooltip { width: 210px; padding: 11px; display: none; position: absolute; z-index: 6; top: calc(100% + 7px); left: 50%; border: 1px solid #ccdcd4; border-radius: 10px; color: #31463d; background: white; box-shadow: 0 12px 26px rgba(25,62,48,.18); transform: translateX(-50%); }
+.team-calendar-tooltip { width: 250px; padding: 13px; display: none; position: absolute; z-index: 6; top: calc(100% + 8px); left: 50%; border: 1px solid #ccdcd4; border-radius: 11px; color: #31463d; background: white; box-shadow: 0 12px 26px rgba(25,62,48,.18); transform: translateX(-50%); }
 .team-calendar-day:nth-child(7n) .team-calendar-tooltip { left: auto; right: 0; transform: none; }
 .team-calendar-day:nth-child(7n + 1) .team-calendar-tooltip { left: 0; transform: none; }
 .team-calendar-day.has-event:hover .team-calendar-tooltip, .team-calendar-day.has-event:focus .team-calendar-tooltip { display: grid; gap: 8px; }
 .team-calendar-tooltip p { margin: 0; display: flex; align-items: center; gap: 8px; }
-.team-calendar-tooltip b { width: 23px; height: 23px; display: grid; place-items: center; border-radius: 7px; background: #f7f8f7; font-size: 11px; }
+.team-calendar-tooltip b { width: 29px; height: 29px; display: grid; place-items: center; border-radius: 8px; background: #f7f8f7; font-size: 14px; }
 .team-calendar-tooltip span { min-width: 0; display: grid; gap: 2px; }
-.team-calendar-tooltip strong { overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
-.team-calendar-tooltip small { color: #78867f; font-size: 7px; }
-.team-calendar-footer { width: min(840px, 100%); margin: 0 auto; display: flex; align-items: center; gap: 13px; color: #6d7b75; font-size: 8px; }
+.team-calendar-tooltip strong { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.team-calendar-tooltip small { color: #78867f; font-size: 9px; }
+.team-calendar-footer { width: min(1120px, 100%); margin: 0 auto; display: flex; align-items: center; gap: 15px; color: #6d7b75; font-size: 10px; }
 .team-calendar-footer span { display: inline-flex; align-items: center; gap: 5px; font-weight: 750; }
-.team-calendar-footer small { margin-left: auto; color: #8a9791; font-size: 8px; }
+.team-calendar-footer small { margin-left: auto; color: #8a9791; font-size: 9px; }
 .team-milestones-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .milestone-card { min-height: 168px; padding: 17px; display: flex; align-items: flex-start; gap: 14px; border: 1px solid #dfe8e3; border-radius: 13px; }
 .milestone-card.birthdays { background: #fff8ea; border-color: #f1dfb8; }
