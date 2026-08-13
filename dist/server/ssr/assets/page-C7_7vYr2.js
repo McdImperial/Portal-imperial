@@ -14738,6 +14738,85 @@ function Home() {
 								})
 							]
 						}),
+						view === "resumo" && department === "global" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+							className: "team-milestones",
+							"aria-labelledby": "team-milestones-title",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "team-milestones-heading",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "eyebrow",
+											children: ["Equipa · ", teamMilestonesData.label]
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+											id: "team-milestones-title",
+											children: "Aniversários e antiguidade"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Próximas celebrações e marcos de permanência da equipa Imperial." })
+									] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "team-milestones-icon",
+										"aria-hidden": "true",
+										children: "🎉"
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "team-milestones-grid",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+										className: "milestone-card birthdays",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "milestone-icon",
+											"aria-hidden": "true",
+											children: "🎂"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "milestone-content",
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "eyebrow",
+													children: "Aniversários"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [teamMilestonesData.birthdays.length, " celebrações em agosto"] }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+													className: "milestone-list",
+													children: teamMilestonesData.birthdays.slice(0, 4).map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("time", { children: [String(person.day).padStart(2, "0"), " Ago"] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.role })] })] }, person.name))
+												})
+											]
+										})]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+										className: "milestone-card tenure",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "milestone-icon",
+											"aria-hidden": "true",
+											children: "🏅"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "milestone-content",
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "eyebrow",
+													children: "Antiguidade"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [teamMilestonesData.anniversaries.length, " marcos em agosto"] }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+													className: "milestone-list",
+													children: teamMilestonesData.anniversaries.slice(0, 4).map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+														/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("time", { children: [String(person.day).padStart(2, "0"), " Ago"] }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.role })] }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [person.years, " anos"] })
+													] }, person.name))
+												})
+											]
+										})]
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+									className: "team-source-link",
+									href: teamMilestonesData.sourceUrl,
+									target: "_blank",
+									rel: "noreferrer",
+									children: "Consultar ficheiro da equipa ↗"
+								})
+							]
+						}),
 						view === "resumo" && department === "qualidade" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 							className: "quality-shortcuts",
 							"aria-labelledby": "quality-shortcuts-title",
@@ -14877,85 +14956,6 @@ function Home() {
 									className: "text-button",
 									onClick: () => setView("tarefas"),
 									children: ["Ver todas as tarefas ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "→" })]
-								})
-							]
-						}),
-						view === "resumo" && department === "global" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-							className: "team-milestones",
-							"aria-labelledby": "team-milestones-title",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "team-milestones-heading",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-											className: "eyebrow",
-											children: ["Equipa · ", teamMilestonesData.label]
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-											id: "team-milestones-title",
-											children: "Aniversários e antiguidade"
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Próximas celebrações e marcos de permanência da equipa Imperial." })
-									] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "team-milestones-icon",
-										"aria-hidden": "true",
-										children: "🎉"
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "team-milestones-grid",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-										className: "milestone-card birthdays",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "milestone-icon",
-											"aria-hidden": "true",
-											children: "🎂"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "milestone-content",
-											children: [
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-													className: "eyebrow",
-													children: "Aniversários"
-												}),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [teamMilestonesData.birthdays.length, " celebrações em agosto"] }),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-													className: "milestone-list",
-													children: teamMilestonesData.birthdays.slice(0, 4).map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("time", { children: [String(person.day).padStart(2, "0"), " Ago"] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.role })] })] }, person.name))
-												})
-											]
-										})]
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-										className: "milestone-card tenure",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "milestone-icon",
-											"aria-hidden": "true",
-											children: "🏅"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "milestone-content",
-											children: [
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-													className: "eyebrow",
-													children: "Antiguidade"
-												}),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [teamMilestonesData.anniversaries.length, " marcos em agosto"] }),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-													className: "milestone-list",
-													children: teamMilestonesData.anniversaries.slice(0, 4).map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-														/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("time", { children: [String(person.day).padStart(2, "0"), " Ago"] }),
-														/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.role })] }),
-														/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [person.years, " anos"] })
-													] }, person.name))
-												})
-											]
-										})]
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-									className: "team-source-link",
-									href: teamMilestonesData.sourceUrl,
-									target: "_blank",
-									rel: "noreferrer",
-									children: "Consultar ficheiro da equipa ↗"
 								})
 							]
 						}),

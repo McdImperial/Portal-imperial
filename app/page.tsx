@@ -992,6 +992,26 @@ export default function Home() {
             </section>
           )}
 
+          {view === "resumo" && department === "global" && (
+            <section className="team-milestones" aria-labelledby="team-milestones-title">
+              <div className="team-milestones-heading">
+                <div><span className="eyebrow">Equipa · {teamMilestonesData.label}</span><h2 id="team-milestones-title">Aniversários e antiguidade</h2><p>Próximas celebrações e marcos de permanência da equipa Imperial.</p></div>
+                <span className="team-milestones-icon" aria-hidden="true">🎉</span>
+              </div>
+              <div className="team-milestones-grid">
+                <article className="milestone-card birthdays">
+                  <span className="milestone-icon" aria-hidden="true">🎂</span>
+                  <div className="milestone-content"><span className="eyebrow">Aniversários</span><h3>{teamMilestonesData.birthdays.length} celebrações em agosto</h3><div className="milestone-list">{teamMilestonesData.birthdays.slice(0, 4).map((person) => <div key={person.name}><time>{String(person.day).padStart(2, "0")} Ago</time><span><strong>{person.name}</strong><small>{person.role}</small></span></div>)}</div></div>
+                </article>
+                <article className="milestone-card tenure">
+                  <span className="milestone-icon" aria-hidden="true">🏅</span>
+                  <div className="milestone-content"><span className="eyebrow">Antiguidade</span><h3>{teamMilestonesData.anniversaries.length} marcos em agosto</h3><div className="milestone-list">{teamMilestonesData.anniversaries.slice(0, 4).map((person) => <div key={person.name}><time>{String(person.day).padStart(2, "0")} Ago</time><span><strong>{person.name}</strong><small>{person.role}</small></span><b>{person.years} anos</b></div>)}</div></div>
+                </article>
+              </div>
+              <a className="team-source-link" href={teamMilestonesData.sourceUrl} target="_blank" rel="noreferrer">Consultar ficheiro da equipa ↗</a>
+            </section>
+          )}
+
           {view === "resumo" && department === "qualidade" && (
             <section className="quality-shortcuts" aria-labelledby="quality-shortcuts-title">
               <div className="shortcut-heading">
@@ -1038,26 +1058,6 @@ export default function Home() {
                 {currentWeekTasks.length === 0 && <div className="empty-state">Sem tarefas em curso para esta semana.</div>}
               </div>
               <button className="text-button" onClick={() => setView("tarefas")}>Ver todas as tarefas <span>→</span></button>
-            </section>
-          )}
-
-          {view === "resumo" && department === "global" && (
-            <section className="team-milestones" aria-labelledby="team-milestones-title">
-              <div className="team-milestones-heading">
-                <div><span className="eyebrow">Equipa · {teamMilestonesData.label}</span><h2 id="team-milestones-title">Aniversários e antiguidade</h2><p>Próximas celebrações e marcos de permanência da equipa Imperial.</p></div>
-                <span className="team-milestones-icon" aria-hidden="true">🎉</span>
-              </div>
-              <div className="team-milestones-grid">
-                <article className="milestone-card birthdays">
-                  <span className="milestone-icon" aria-hidden="true">🎂</span>
-                  <div className="milestone-content"><span className="eyebrow">Aniversários</span><h3>{teamMilestonesData.birthdays.length} celebrações em agosto</h3><div className="milestone-list">{teamMilestonesData.birthdays.slice(0, 4).map((person) => <div key={person.name}><time>{String(person.day).padStart(2, "0")} Ago</time><span><strong>{person.name}</strong><small>{person.role}</small></span></div>)}</div></div>
-                </article>
-                <article className="milestone-card tenure">
-                  <span className="milestone-icon" aria-hidden="true">🏅</span>
-                  <div className="milestone-content"><span className="eyebrow">Antiguidade</span><h3>{teamMilestonesData.anniversaries.length} marcos em agosto</h3><div className="milestone-list">{teamMilestonesData.anniversaries.slice(0, 4).map((person) => <div key={person.name}><time>{String(person.day).padStart(2, "0")} Ago</time><span><strong>{person.name}</strong><small>{person.role}</small></span><b>{person.years} anos</b></div>)}</div></div>
-                </article>
-              </div>
-              <a className="team-source-link" href={teamMilestonesData.sourceUrl} target="_blank" rel="noreferrer">Consultar ficheiro da equipa ↗</a>
             </section>
           )}
 
