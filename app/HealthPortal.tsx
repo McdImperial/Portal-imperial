@@ -34,6 +34,7 @@ type HealthMetric = {
 type FinanceCategory = "Eletricidade" | "Água" | "Mobilidade elétrica" | "Internet & TV";
 type FinanceInvoice = { category: FinanceCategory; date: string; total: number | null; provider: string; url: string; period: string; fileName?: string };
 type FinanceSection = "Gastos gerais" | "Bancos";
+type BankName = "Millennium BCP" | "Novo Banco" | "BPI";
 type ClinicalMetric = { label: string; current: number; previous: number; unit: string; };
 type ClinicalGroup = { title: string; metrics: ClinicalMetric[]; };
 type ClinicalComparisonSet = { currentDate: string; previousDate: string; groups: ClinicalGroup[] };
@@ -165,6 +166,7 @@ export default function HealthPortal() {
   const [area, setArea] = useState<Area>("Saúde");
   const [financeSection, setFinanceSection] = useState<FinanceSection>("Gastos gerais");
   const [financeCategory, setFinanceCategory] = useState<FinanceCategory>("Eletricidade");
+  const [selectedBank, setSelectedBank] = useState<BankName>("Millennium BCP");
   const [profile, setProfile] = useState<Profile>("Tiago Soutelo");
   const [activeNav, setActiveNav] = useState<(typeof navItems)[number]>("Visão geral");
   const [records, setRecords] = useState<HealthRecord[]>(fallback);
@@ -280,13 +282,14 @@ export default function HealthPortal() {
             <button className={financeSection === "Gastos gerais" ? "active" : ""} onClick={() => setFinanceSection("Gastos gerais")}><span className="nav-dot" />Gastos gerais</button>
             {financeSection === "Gastos gerais" && <div className="finance-subnav">{expenseCategories.map((item) => <button key={item.name} className={financeCategory === item.name ? "active" : ""} onClick={() => { setFinanceSection("Gastos gerais"); setFinanceCategory(item.name); }}><span>{item.icon}</span>{item.name}</button>)}</div>}
             <button className={financeSection === "Bancos" ? "active" : ""} onClick={() => setFinanceSection("Bancos")}><span className="nav-dot" />Bancos</button>
+            {financeSection === "Bancos" && <div className="finance-subnav">{bankFolders.map((bank) => <button key={bank.name} className={selectedBank === bank.name ? "active" : ""} onClick={() => { setFinanceSection("Bancos"); setSelectedBank(bank.name); }}><span>{bank.icon}</span>{bank.name}</button>)}</div>}
           </nav>
         </div>}
         <div className="privacy-note"><span>Espaço privado</span><small>Apenas as pessoas autorizadas podem aceder a este portal.</small></div>
       </aside>
 
       <main>
-        {area === "Financeiro" ? <FinanceDashboard section={financeSection} category={financeCategory} onCategoryChange={setFinanceCategory} /> : <>
+        {area === "Financeiro" ? <FinanceDashboard section={financeSection} category={financeCategory} selectedBank={selectedBank} onCategoryChange={setFinanceCategory} /> : <>
         <header className="topbar">
           <div>
             <p className="eyebrow">{activeNav}</p>
@@ -357,10 +360,10 @@ export default function HealthPortal() {
   );
 }
 
-function FinanceDashboard({ section, category, onCategoryChange }: { section: FinanceSection; category: FinanceCategory; onCategoryChange: (category: FinanceCategory) => void }) {
+function FinanceDashboard({ section, category, selectedBank, onCategoryChange }: { section: FinanceSection; category: FinanceCategory; selectedBank: BankName; onCategoryChange: (category: FinanceCategory) => void }) {
   return <section className="finance-page">
     <header className="topbar finance-header"><div><p className="eyebrow">Financeiro</p><h1>Finanças da família</h1><p>Despesas recorrentes e documentos bancários organizados a partir da pasta financeira partilhada.</p></div><a className="source-button" href="https://drive.google.com/drive/folders/1Bhtz_GJ5_bQfyqd0wGyqHkHwCV6Sk44x" target="_blank" rel="noreferrer">Abrir pasta financeira <span>↗</span></a></header>
-    {section === "Gastos gerais" ? <GeneralExpenses category={category} onCategoryChange={onCategoryChange} /> : <BanksView />}
+    {section === "Gastos gerais" ? <GeneralExpenses category={category} onCategoryChange={onCategoryChange} /> : <BanksView selectedBank={selectedBank} />}
   </section>;
 }
 
@@ -369,6 +372,12 @@ const expenseCategories: { name: FinanceCategory; icon: string; folder: string }
   { name: "Água", icon: "≈", folder: "https://drive.google.com/drive/folders/1LyqNPMfZJiWmtujb5eMDZPqy-bpW4S-L" },
   { name: "Mobilidade elétrica", icon: "⌁", folder: "https://drive.google.com/drive/folders/1WXNum9MgeFu26swN1XcbGmFJHISgv8JK" },
   { name: "Internet & TV", icon: "◉", folder: "https://drive.google.com/drive/folders/1WOLTyRy-q2nH2GRpLJfiQA76nEnVVRqx" },
+];
+
+const bankFolders: { name: BankName; icon: string; folder: string; documents: string }[] = [
+  { name: "Millennium BCP", icon: "M", folder: "https://drive.google.com/drive/folders/16c24b2PraLZCBLiePfqYHbMPM2zGRzj9", documents: "16 documentos no histórico" },
+  { name: "Novo Banco", icon: "N", folder: "https://drive.google.com/drive/folders/1wyB6OsW24H7DW0fB9jwqqwHuqAOA3R4R", documents: "Sem documentos na pasta" },
+  { name: "BPI", icon: "B", folder: "https://drive.google.com/drive/folders/1goFYvBtMiJ2u6VFuAFJoqMByCTBBwUR0", documents: "Sem documentos na pasta" },
 ];
 
 function euro(value: number) { return new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(value); }
@@ -389,7 +398,11 @@ const bcpStatements = [
   "2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07",
 ].map((month) => ({ month, kind:"Extrato combinado", url: ({"2025-12":"https://drive.google.com/file/d/1ypK-IJKOSstGGuD1WZB-XZKPQIRjVbkC/view?usp=drivesdk","2026-01":"https://drive.google.com/file/d/1OznBHr_VrwsUGFUyXvEU3FERknNA0ED2/view?usp=drivesdk","2026-02":"https://drive.google.com/file/d/1aasfeh0d4lj4CxsvHn-fHcgOMnwsm32b/view?usp=drivesdk","2026-03":"https://drive.google.com/file/d/1yisaw1jCeDpeCn24hl9oJVdQCFnDpIMk/view?usp=drivesdk","2026-04":"https://drive.google.com/file/d/1bP5oAr5-BwXR6pg6kCUg0wwSlzyvNuWj/view?usp=drivesdk","2026-05":"https://drive.google.com/file/d/1KOr3T_iOq7M-Q5veULPwk9Am9NpNPgjC/view?usp=drivesdk","2026-06":"https://drive.google.com/file/d/1dLIJLIsbBSiiIqSu29eR_jvCj5s_a7TK/view?usp=drivesdk","2026-07":"https://drive.google.com/file/d/19DDj3ZPuRCvbamOd0USYu5xnKktkb1DK/view?usp=drivesdk"} as Record<string,string>)[month] }));
 
-function BanksView() { return <><section className="finance-metrics" aria-label="Resumo bancário"><article className="finance-metric balance"><span>Saldo à ordem</span><strong>5 578,03 €</strong><small>Millennium BCP · extrato de julho de 2026</small></article><article className="finance-metric lending"><span>Empréstimos</span><strong>4 847,01 €</strong><small>Saldo devedor indicado no extrato</small></article><article className="finance-metric card"><span>Cartão de crédito</span><strong>2 692,54 €</strong><small>Saldo em dívida no último extrato</small></article><article className="finance-metric docs"><span>Histórico importado</span><strong>16</strong><small>8 extratos de conta e 8 de cartão</small></article></section><section className="finance-layout"><article className="panel finance-accounts"><div className="panel-heading"><div><p className="eyebrow">Instituições</p><h2>Contas e extratos</h2></div></div><div className="bank-list"><a href="https://drive.google.com/drive/folders/16c24b2PraLZCBLiePfqYHbMPM2zGRzj9" target="_blank" rel="noreferrer"><span className="bank-mark bcp">M</span><span><strong>Millennium BCP</strong><small>16 documentos no histórico</small></span><b>↗</b></a><a href="https://drive.google.com/drive/folders/1wyB6OsW24H7DW0fB9jwqqwHuqAOA3R4R" target="_blank" rel="noreferrer"><span className="bank-mark nb">N</span><span><strong>Novo Banco</strong><small>Sem documentos na pasta</small></span><b>↗</b></a><a href="https://drive.google.com/drive/folders/1goFYvBtMiJ2u6VFuAFJoqMByCTBBwUR0" target="_blank" rel="noreferrer"><span className="bank-mark bpi">B</span><span><strong>BPI</strong><small>Sem documentos na pasta</small></span><b>↗</b></a></div></article><article className="panel finance-commitments"><div className="panel-heading"><div><p className="eyebrow">Extratos Millennium</p><h2>Histórico de conta</h2></div></div><div className="bank-list">{bcpStatements.slice().reverse().map((item) => <a key={item.month} href={item.url} target="_blank" rel="noreferrer"><span className="bank-mark bcp">M</span><span><strong>{item.kind}</strong><small>{new Intl.DateTimeFormat("pt-PT", { month:"long", year:"numeric" }).format(new Date(`${item.month}-01T12:00:00`))}</small></span><b>↗</b></a>)}</div></article></section></> }
+function BanksView({ selectedBank }: { selectedBank: BankName }) {
+  const bank = bankFolders.find((item) => item.name === selectedBank)!;
+  const isMillennium = selectedBank === "Millennium BCP";
+  return <><section className="finance-metrics" aria-label="Resumo bancário">{isMillennium ? <><article className="finance-metric balance"><span>Saldo à ordem</span><strong>5 578,03 €</strong><small>Millennium BCP · extrato de julho de 2026</small></article><article className="finance-metric lending"><span>Empréstimos</span><strong>4 847,01 €</strong><small>Saldo devedor indicado no extrato</small></article><article className="finance-metric card"><span>Cartão de crédito</span><strong>2 692,54 €</strong><small>Saldo em dívida no último extrato</small></article><article className="finance-metric docs"><span>Histórico importado</span><strong>16</strong><small>8 extratos de conta e 8 de cartão</small></article></> : <article className="finance-metric docs"><span>{bank.name}</span><strong>—</strong><small>{bank.documents}</small></article>}</section><section className="finance-layout"><article className="panel finance-accounts"><div className="panel-heading"><div><p className="eyebrow">Banco selecionado</p><h2>{bank.name}</h2></div><a className="source-button" href={bank.folder} target="_blank" rel="noreferrer">Abrir pasta <span>↗</span></a></div><div className="bank-list"><a href={bank.folder} target="_blank" rel="noreferrer"><span className={`bank-mark ${selectedBank === "Millennium BCP" ? "bcp" : selectedBank === "Novo Banco" ? "nb" : "bpi"}`}>{bank.icon}</span><span><strong>{bank.name}</strong><small>{bank.documents}</small></span><b>↗</b></a></div></article><article className="panel finance-commitments"><div className="panel-heading"><div><p className="eyebrow">Histórico</p><h2>{isMillennium ? "Extratos de conta" : "Documentos disponíveis"}</h2></div></div>{isMillennium ? <div className="bank-list">{bcpStatements.slice().reverse().map((item) => <a key={item.month} href={item.url} target="_blank" rel="noreferrer"><span className="bank-mark bcp">M</span><span><strong>{item.kind}</strong><small>{new Intl.DateTimeFormat("pt-PT", { month:"long", year:"numeric" }).format(new Date(`${item.month}-01T12:00:00`))}</small></span><b>↗</b></a>)}</div> : <div className="bank-empty"><span className={`bank-mark ${selectedBank === "Novo Banco" ? "nb" : "bpi"}`}>{bank.icon}</span><span><strong>Sem documentos importados</strong><small>Quando adicionar documentos à pasta, poderão ser integrados neste separador.</small></span></div>}</article></section></>;
+}
 
 function MetricCard({ tone, label, value, detail, icon, unit }: { tone: string; label: string; value: string; detail: string; icon: string; unit?: string }) {
   return <article className={`metric-card ${tone}`}><div className="metric-top"><span>{label}</span><span className="metric-icon">{icon}</span></div><div className="metric-value">{value} {unit && <small>{unit}</small>}</div><p>{detail}</p></article>;
