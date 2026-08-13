@@ -12606,7 +12606,174 @@ var team_milestones_default = {
 			"day": 23,
 			"years": 10
 		}
-	]
+	],
+	organisation: {
+		"franchisee": [{
+			"name": "Jorge Azevedo",
+			"role": "Franqueado"
+		}],
+		"supervision": [
+			{
+				"name": "Nuno Correia",
+				"role": "Supervisor Geral"
+			},
+			{
+				"name": "António Aidos",
+				"role": "Supervisor Operações"
+			},
+			{
+				"name": "Marta Azevedo",
+				"role": "Supervisor MKT/RH"
+			}
+		],
+		"managementLevels": [
+			[{
+				"name": "Tiago Soutelo",
+				"role": "Gerente Loja",
+				"level": "Gerente de loja"
+			}],
+			[
+				{
+					"name": "Ricardo Teixeira",
+					"role": "Assistente Gerência",
+					"level": "Assistente 3+"
+				},
+				{
+					"name": "Susana Torres",
+					"role": "Assistente Gerência",
+					"level": "Assistente 3+"
+				},
+				{
+					"name": "Sara Sousa",
+					"role": "Assistente Gerência",
+					"level": "Assistente 3+"
+				}
+			],
+			[{
+				"name": "Miguel Matela",
+				"role": "Assistente Gerência",
+				"level": "Assistente 3"
+			}],
+			[{
+				"name": "Soraia Martins",
+				"role": "Assistente Gerência",
+				"level": "Assistente 2"
+			}, {
+				"name": "André Martins",
+				"role": "Assistente Gerência",
+				"level": "Assistente 2"
+			}],
+			[
+				{
+					"name": "Liliana Pacheco",
+					"role": "Assistente Gerência",
+					"level": "Assistente 1"
+				},
+				{
+					"name": "Diogo Cabral",
+					"role": "Assistente Gerência",
+					"level": "Assistente 1"
+				},
+				{
+					"name": "Sílvia Tavares",
+					"role": "Assistente Gerência",
+					"level": "Assistente 1"
+				},
+				{
+					"name": "Ana Sousa",
+					"role": "Assistente Gerência",
+					"level": "Assistente 1"
+				}
+			]
+		],
+		"managementSupport": [
+			{
+				"name": "Cristina Pinto",
+				"role": "Assistente Direção"
+			},
+			{
+				"name": "Marlene Soutelo",
+				"role": "Administrativa"
+			},
+			{
+				"name": "Andreia Faria",
+				"role": "Administrativa"
+			},
+			{
+				"name": "Sandra Freitas",
+				"role": "Assistente RH"
+			}
+		],
+		"trainers": [
+			{
+				"name": "Carlos Oliveira",
+				"role": "Treinador"
+			},
+			{
+				"name": "Ana Carvalho",
+				"role": "Treinador"
+			},
+			{
+				"name": "João Lopes",
+				"role": "Treinador"
+			},
+			{
+				"name": "Tiago Pereira",
+				"role": "Treinador"
+			},
+			{
+				"name": "Joana Guedes",
+				"role": "Treinador"
+			},
+			{
+				"name": "Rui Teixeira",
+				"role": "Treinador"
+			},
+			{
+				"name": "Ibélia Moutinho",
+				"role": "Treinador"
+			},
+			{
+				"name": "David Santos",
+				"role": "Treinador"
+			},
+			{
+				"name": "Tânia Nunes",
+				"role": "Treinador"
+			},
+			{
+				"name": "Matos Leonardo",
+				"role": "Treinador"
+			},
+			{
+				"name": "Dinis Nicola",
+				"role": "Treinador"
+			},
+			{
+				"name": "Conrad Meireles",
+				"role": "Treinador"
+			},
+			{
+				"name": "Ivo Costa",
+				"role": "Treinador"
+			}
+		],
+		"publicRelations": [
+			{
+				"name": "Cátia Sousa",
+				"role": "Relações Públicas"
+			},
+			{
+				"name": "Sandro Oliveira",
+				"role": "Relações Públicas"
+			},
+			{
+				"name": "José Peneda",
+				"role": "Relações Públicas"
+			}
+		],
+		"employees": 70
+	}
 };
 //#endregion
 //#region app/page.tsx
@@ -13303,6 +13470,7 @@ var viewLabels = {
 	objetivos: "Objetivos mensais",
 	areas: "Áreas de limpeza",
 	areasglobais: "Áreas",
+	equipa: "Equipa",
 	custos: "Custo, Comida, Papel e OPS",
 	r2p: "Tempos de serviço · R2P",
 	tellarches: "Tell The Arches",
@@ -13678,6 +13846,67 @@ function RankingPodium({ ranking }) {
 		})
 	});
 }
+function TeamCalendar() {
+	const [year, month] = teamMilestonesData.month.split("-").map(Number);
+	const firstWeekday = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
+	const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+	const events = /* @__PURE__ */ new Map();
+	teamMilestonesData.birthdays.forEach((person) => events.set(person.day, [...events.get(person.day) ?? [], {
+		type: "birthday",
+		name: person.name,
+		role: person.role
+	}]));
+	teamMilestonesData.anniversaries.forEach((person) => events.set(person.day, [...events.get(person.day) ?? [], {
+		type: "tenure",
+		name: person.name,
+		role: person.role,
+		years: person.years
+	}]));
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "team-calendar",
+		"aria-label": `Calendário de ${teamMilestonesData.label}`,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "team-calendar-weekdays",
+			children: [
+				"Seg",
+				"Ter",
+				"Qua",
+				"Qui",
+				"Sex",
+				"Sáb",
+				"Dom"
+			].map((day) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: day }, day))
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "team-calendar-grid",
+			children: [Array.from({ length: firstWeekday }).map((_, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "team-calendar-empty",
+				"aria-hidden": "true"
+			}, `empty-${index}`)), Array.from({ length: daysInMonth }, (_, index) => index + 1).map((day) => {
+				const dayEvents = events.get(day) ?? [];
+				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: dayEvents.length ? "team-calendar-day has-event" : "team-calendar-day",
+					tabIndex: dayEvents.length ? 0 : void 0,
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("time", { children: day }), dayEvents.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "team-calendar-dots",
+						"aria-label": `${dayEvents.length} evento${dayEvents.length > 1 ? "s" : ""}`,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: dayEvents.some((event) => event.type === "birthday") ? "birthday-dot" : "" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: dayEvents.some((event) => event.type === "tenure") ? "tenure-dot" : "" })]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "team-calendar-tooltip",
+						role: "tooltip",
+						children: dayEvents.map((event) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: event.type === "birthday" ? "🎂" : "🏅" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: event.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: event.type === "birthday" ? `Aniversário · ${event.role}` : `${event.years} anos · ${event.role}` })] })] }, `${event.type}-${event.name}`))
+					})] })]
+				}, day);
+			})]
+		})]
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "team-calendar-footer",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "birthday-dot" }), " Aniversários"] }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "tenure-dot" }), " Antiguidade"] }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Passe o cursor sobre uma data assinalada para ver o detalhe." })
+		]
+	})] });
+}
 function Home() {
 	const objectivesExportRef = (0, import_react.useRef)(null);
 	const [view, setView] = (0, import_react.useState)("resumo");
@@ -13986,28 +14215,6 @@ function Home() {
 		const status = task.status ?? (task.done ? "Concluído" : "Por fazer");
 		return !task.done && status !== "Concluído" && /^(Semanal|Hoje|Amanhã)/.test(task.due);
 	}), [scopedTasks]);
-	const teamCalendar = (0, import_react.useMemo)(() => {
-		const [year, month] = teamMilestonesData.month.split("-").map(Number);
-		const firstWeekday = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
-		const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
-		const events = /* @__PURE__ */ new Map();
-		teamMilestonesData.birthdays.forEach((person) => events.set(person.day, [...events.get(person.day) ?? [], {
-			type: "birthday",
-			name: person.name,
-			role: person.role
-		}]));
-		teamMilestonesData.anniversaries.forEach((person) => events.set(person.day, [...events.get(person.day) ?? [], {
-			type: "tenure",
-			name: person.name,
-			role: person.role,
-			years: person.years
-		}]));
-		return {
-			firstWeekday,
-			daysInMonth,
-			events
-		};
-	}, []);
 	const boardTasks = (0, import_react.useMemo)(() => scopedTasks.filter((task) => {
 		const status = task.status ?? (task.done ? "Concluído" : "Por fazer");
 		const matchesStatus = statusFilter === "Todos" || status === statusFilter;
@@ -14423,6 +14630,11 @@ function Home() {
 			label: "Áreas",
 			glyph: "⌂"
 		},
+		{
+			id: "equipa",
+			label: "Equipa",
+			glyph: "♟"
+		},
 		...currentUser?.role === "admin" ? [{
 			id: "configuracoes",
 			label: "Configurações",
@@ -14547,7 +14759,7 @@ function Home() {
 						className: view === item.id ? "nav-item active" : "nav-item",
 						onClick: () => {
 							setView(item.id);
-							if (item.id === "areasglobais" || item.id === "objetivos") setDepartment("global");
+							if (item.id === "areasglobais" || item.id === "objetivos" || item.id === "equipa") setDepartment("global");
 						},
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
@@ -14781,51 +14993,7 @@ function Home() {
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["🎂 ", teamMilestonesData.birthdays.length] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["🏅 ", teamMilestonesData.anniversaries.length] })]
 									})]
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "team-calendar",
-									"aria-label": `Calendário de ${teamMilestonesData.label}`,
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "team-calendar-weekdays",
-										children: [
-											"Seg",
-											"Ter",
-											"Qua",
-											"Qui",
-											"Sex",
-											"Sáb",
-											"Dom"
-										].map((day) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: day }, day))
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "team-calendar-grid",
-										children: [Array.from({ length: teamCalendar.firstWeekday }).map((_, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "team-calendar-empty",
-											"aria-hidden": "true"
-										}, `empty-${index}`)), Array.from({ length: teamCalendar.daysInMonth }, (_, index) => index + 1).map((day) => {
-											const events = teamCalendar.events.get(day) ?? [];
-											return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: events.length ? "team-calendar-day has-event" : "team-calendar-day",
-												tabIndex: events.length ? 0 : void 0,
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("time", { children: day }), events.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-													className: "team-calendar-dots",
-													"aria-label": `${events.length} evento${events.length > 1 ? "s" : ""}`,
-													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: events.some((event) => event.type === "birthday") ? "birthday-dot" : "" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: events.some((event) => event.type === "tenure") ? "tenure-dot" : "" })]
-												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-													className: "team-calendar-tooltip",
-													role: "tooltip",
-													children: events.map((event) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: event.type === "birthday" ? "🎂" : "🏅" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: event.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: event.type === "birthday" ? `Aniversário · ${event.role}` : `${event.years} anos · ${event.role}` })] })] }, `${event.type}-${event.name}`))
-												})] })]
-											}, day);
-										})]
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "team-calendar-footer",
-									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "birthday-dot" }), " Aniversários"] }),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "tenure-dot" }), " Antiguidade"] }),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Passe o cursor sobre uma data assinalada para ver o detalhe." })
-									]
-								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TeamCalendar, {}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
 									className: "team-source-link",
 									href: teamMilestonesData.sourceUrl,
@@ -14974,6 +15142,195 @@ function Home() {
 									className: "text-button",
 									onClick: () => setView("tarefas"),
 									children: ["Ver todas as tarefas ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "→" })]
+								})
+							]
+						}),
+						view === "equipa" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+							className: "team-page",
+							"aria-label": "Estrutura da equipa Imperial",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "team-page-heading",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "eyebrow",
+											children: "McDonald's Imperial"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Equipa" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Estrutura, celebrações e marcos de antiguidade da equipa." })
+									] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+										className: "team-source-link",
+										href: teamMilestonesData.sourceUrl,
+										target: "_blank",
+										rel: "noreferrer",
+										children: "Consultar ficheiro da equipa ↗"
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+									className: "team-milestones team-page-calendar",
+									"aria-labelledby": "team-page-calendar-title",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "team-milestones-heading",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "eyebrow",
+												children: teamMilestonesData.label
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+												id: "team-page-calendar-title",
+												children: "Aniversários e antiguidade"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Datas assinaladas com detalhe disponível no cursor." })
+										] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "team-calendar-counts",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["🎂 ", teamMilestonesData.birthdays.length] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["🏅 ", teamMilestonesData.anniversaries.length] })]
+										})]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TeamCalendar, {})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+									className: "team-org-section",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "team-section-heading",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "eyebrow",
+												children: "Estrutura organizacional"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Organograma da equipa" }),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "A organização é apresentada por níveis de responsabilidade." })
+										] })
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "team-org-chart",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "team-org-level franchisee-level",
+												children: teamMilestonesData.organisation.franchisee.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+													className: "team-org-card lead",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+														className: "team-org-avatar",
+														children: "★"
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Franqueado" }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: person.role })
+													] })]
+												}, person.name))
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "team-org-connector" }),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "team-org-level supervision-level",
+												children: teamMilestonesData.organisation.supervision.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+													className: "team-org-card supervision",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+														className: "team-org-avatar",
+														children: "◈"
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Supervisão" }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: person.role })
+													] })]
+												}, person.name))
+											})
+										]
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+									className: "team-org-section management-section",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "team-section-heading",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "eyebrow",
+													children: "Equipa de gestão"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Organograma de gestão" }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Estrutura por níveis, seguindo o modelo utilizado no portal HACCP." })
+											] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: "team-section-count",
+												children: [teamMilestonesData.organisation.managementLevels.flat().length, " elementos"]
+											})]
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "management-org-chart",
+											children: teamMilestonesData.organisation.managementLevels.map((level, levelIndex) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "management-org-level-wrap",
+												children: [levelIndex > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "team-org-connector" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+													className: `team-org-level management-level level-${levelIndex + 1}`,
+													children: level.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+														className: levelIndex === 0 ? "team-org-card lead" : "team-org-card management",
+														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+															className: "team-org-avatar",
+															children: levelIndex === 0 ? "♛" : "●"
+														}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+															/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.level }),
+															/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }),
+															/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: person.role })
+														] })]
+													}, person.name))
+												})]
+											}, `level-${levelIndex}`))
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "team-management-support",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "eyebrow",
+												children: "Apoio à gestão"
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: teamMilestonesData.organisation.managementSupport.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "◌" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.role })] })] }, person.name)) })]
+										})
+									]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+									className: "team-directory-grid",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+											className: "team-directory-card",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "team-section-heading",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "eyebrow",
+													children: "Equipa treinadores"
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Treinadores" })] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "team-section-count",
+													children: teamMilestonesData.organisation.trainers.length
+												})]
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "team-person-list",
+												children: teamMilestonesData.organisation.trainers.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "🎓" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.role })] })] }, person.name))
+											})]
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+											className: "team-directory-card",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "team-section-heading",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "eyebrow",
+													children: "Equipa relações públicas"
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Relações públicas" })] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "team-section-count",
+													children: teamMilestonesData.organisation.publicRelations.length
+												})]
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "team-person-list",
+												children: teamMilestonesData.organisation.publicRelations.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "🤝" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.role })] })] }, person.name))
+											})]
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+											className: "team-directory-card employees-card",
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "employees-icon",
+													children: "👥"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "eyebrow",
+													children: "Equipa funcionários"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: teamMilestonesData.organisation.employees }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "funcionários ativos na equipa Imperial" })
+											]
+										})
+									]
 								})
 							]
 						}),

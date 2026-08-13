@@ -20,5 +20,48 @@
     { "name": "Ana Sousa", "role": "Assistente Gerência", "day": 16, "years": 5 },
     { "name": "Carlos Borges", "role": "Funcionário", "day": 19, "years": 2 },
     { "name": "Albertino Gonçalves", "role": "Funcionário", "day": 23, "years": 10 }
-  ]
+  ],
+  "organisation": {
+    "franchisee": [{ "name": "Jorge Azevedo", "role": "Franqueado" }],
+    "supervision": [
+      { "name": "Nuno Correia", "role": "Supervisor Geral" },
+      { "name": "António Aidos", "role": "Supervisor Operações" },
+      { "name": "Marta Azevedo", "role": "Supervisor MKT/RH" }
+    ],
+    "managementLevels": [
+      [{ "name": "Tiago Soutelo", "role": "Gerente Loja", "level": "Gerente de loja" }],
+      [
+        { "name": "Ricardo Teixeira", "role": "Assistente Gerência", "level": "Assistente 3+" },
+        { "name": "Susana Torres", "role": "Assistente Gerência", "level": "Assistente 3+" },
+        { "name": "Sara Sousa", "role": "Assistente Gerência", "level": "Assistente 3+" }
+      ],
+      [{ "name": "Miguel Matela", "role": "Assistente Gerência", "level": "Assistente 3" }],
+      [
+        { "name": "Soraia Martins", "role": "Assistente Gerência", "level": "Assistente 2" },
+        { "name": "André Martins", "role": "Assistente Gerência", "level": "Assistente 2" }
+      ],
+      [
+        { "name": "Liliana Pacheco", "role": "Assistente Gerência", "level": "Assistente 1" },
+        { "name": "Diogo Cabral", "role": "Assistente Gerência", "level": "Assistente 1" },
+        { "name": "Sílvia Tavares", "role": "Assistente Gerência", "level": "Assistente 1" },
+        { "name": "Ana Sousa", "role": "Assistente Gerência", "level": "Assistente 1" }
+      ]
+    ],
+    "managementSupport": [
+      { "name": "Cristina Pinto", "role": "Assistente Direção" },
+      { "name": "Marlene Soutelo", "role": "Administrativa" },
+      { "name": "Andreia Faria", "role": "Administrativa" },
+      { "name": "Sandra Freitas", "role": "Assistente RH" }
+    ],
+    "trainers": [
+      { "name": "Carlos Oliveira", "role": "Treinador" }, { "name": "Ana Carvalho", "role": "Treinador" }, { "name": "João Lopes", "role": "Treinador" },
+      { "name": "Tiago Pereira", "role": "Treinador" }, { "name": "Joana Guedes", "role": "Treinador" }, { "name": "Rui Teixeira", "role": "Treinador" },
+      { "name": "Ibélia Moutinho", "role": "Treinador" }, { "name": "David Santos", "role": "Treinador" }, { "name": "Tânia Nunes", "role": "Treinador" },
+      { "name": "Matos Leonardo", "role": "Treinador" }, { "name": "Dinis Nicola", "role": "Treinador" }, { "name": "Conrad Meireles", "role": "Treinador" }, { "name": "Ivo Costa", "role": "Treinador" }
+    ],
+    "publicRelations": [
+      { "name": "Cátia Sousa", "role": "Relações Públicas" }, { "name": "Sandro Oliveira", "role": "Relações Públicas" }, { "name": "José Peneda", "role": "Relações Públicas" }
+    ],
+    "employees": 70
+  }
 }

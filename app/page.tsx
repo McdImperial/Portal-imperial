@@ -7,7 +7,7 @@ import r2pDataJson from "./data/r2p-data.json";
 import tellTheArchesDataJson from "./data/tell-the-arches.json";
 import teamMilestonesDataJson from "./data/team-milestones.json";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "custos" | "r2p" | "tellarches" | "configuracoes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "r2p" | "tellarches" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -152,6 +152,7 @@ const viewLabels: Record<View, string> = {
   objetivos: "Objetivos mensais",
   areas: "Áreas de limpeza",
   areasglobais: "Áreas",
+  equipa: "Equipa",
   custos: "Custo, Comida, Papel e OPS",
   r2p: "Tempos de serviço · R2P",
   tellarches: "Tell The Arches",
@@ -270,7 +271,8 @@ type TellTheArchesMonth = {
 };
 type TellTheArchesData = { folderUrl: string; snapshotDate: string; ytd: TellTheArchesMonth; months: TellTheArchesMonth[] };
 type TeamMilestone = { name: string; role: string; day: number; years?: number };
-type TeamMilestonesData = { month: string; label: string; sourceUrl: string; birthdays: TeamMilestone[]; anniversaries: TeamMilestone[] };
+type TeamPerson = { name: string; role: string; level?: string };
+type TeamMilestonesData = { month: string; label: string; sourceUrl: string; birthdays: TeamMilestone[]; anniversaries: TeamMilestone[]; organisation: { franchisee: TeamPerson[]; supervision: TeamPerson[]; managementLevels: TeamPerson[][]; managementSupport: TeamPerson[]; trainers: TeamPerson[]; publicRelations: TeamPerson[]; employees: number } };
 type SharedFolder = { id: string; name: string; description: string; url: string; fileCount: number; updatedAt: string };
 
 const inventoryProducts = inventoryProductsData as InventoryProduct[];
@@ -346,6 +348,28 @@ function RankingPodium({ ranking }: { ranking: ManagerRanking[] }) {
       <i>{position + 1}.º</i>
     </article>;
   })}</div>;
+}
+
+function TeamCalendar() {
+  const [year, month] = teamMilestonesData.month.split("-").map(Number);
+  const firstWeekday = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const events = new Map<number, { type: "birthday" | "tenure"; name: string; role: string; years?: number }[]>();
+  teamMilestonesData.birthdays.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "birthday", name: person.name, role: person.role }]));
+  teamMilestonesData.anniversaries.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "tenure", name: person.name, role: person.role, years: person.years }]));
+  return <><div className="team-calendar" aria-label={`Calendário de ${teamMilestonesData.label}`}>
+    <div className="team-calendar-weekdays">{["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((day) => <span key={day}>{day}</span>)}</div>
+    <div className="team-calendar-grid">
+      {Array.from({ length: firstWeekday }).map((_, index) => <span className="team-calendar-empty" key={`empty-${index}`} aria-hidden="true" />)}
+      {Array.from({ length: daysInMonth }, (_, index) => index + 1).map((day) => {
+        const dayEvents = events.get(day) ?? [];
+        return <div className={dayEvents.length ? "team-calendar-day has-event" : "team-calendar-day"} key={day} tabIndex={dayEvents.length ? 0 : undefined}>
+          <time>{day}</time>
+          {dayEvents.length > 0 && <><span className="team-calendar-dots" aria-label={`${dayEvents.length} evento${dayEvents.length > 1 ? "s" : ""}`}><i className={dayEvents.some((event) => event.type === "birthday") ? "birthday-dot" : ""} /><i className={dayEvents.some((event) => event.type === "tenure") ? "tenure-dot" : ""} /></span><div className="team-calendar-tooltip" role="tooltip">{dayEvents.map((event) => <p key={`${event.type}-${event.name}`}><b>{event.type === "birthday" ? "🎂" : "🏅"}</b><span><strong>{event.name}</strong><small>{event.type === "birthday" ? `Aniversário · ${event.role}` : `${event.years} anos · ${event.role}`}</small></span></p>)}</div></>}
+        </div>;
+      })}
+    </div>
+  </div><div className="team-calendar-footer"><span><i className="birthday-dot" /> Aniversários</span><span><i className="tenure-dot" /> Antiguidade</span><small>Passe o cursor sobre uma data assinalada para ver o detalhe.</small></div></>;
 }
 
 export default function Home() {
@@ -599,16 +623,6 @@ export default function Home() {
     const status = task.status ?? (task.done ? "Concluído" : "Por fazer");
     return !task.done && status !== "Concluído" && /^(Semanal|Hoje|Amanhã)/.test(task.due);
   }), [scopedTasks]);
-
-  const teamCalendar = useMemo(() => {
-    const [year, month] = teamMilestonesData.month.split("-").map(Number);
-    const firstWeekday = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
-    const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
-    const events = new Map<number, { type: "birthday" | "tenure"; name: string; role: string; years?: number }[]>();
-    teamMilestonesData.birthdays.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "birthday", name: person.name, role: person.role }]));
-    teamMilestonesData.anniversaries.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "tenure", name: person.name, role: person.role, years: person.years }]));
-    return { firstWeekday, daysInMonth, events };
-  }, []);
 
   const boardTasks = useMemo(() => scopedTasks.filter((task) => {
     const status = task.status ?? (task.done ? "Concluído" : "Por fazer");
@@ -891,6 +905,7 @@ export default function Home() {
     { id: "tarefas", label: "Tarefas", glyph: "✓" },
     { id: "objetivos", label: "Objetivos", glyph: "◎" },
     { id: "areasglobais", label: "Áreas", glyph: "⌂" },
+    { id: "equipa", label: "Equipa", glyph: "♟" },
     ...(currentUser?.role === "admin" ? [{ id: "configuracoes" as View, label: "Configurações", glyph: "⚙" }] : []),
   ];
 
@@ -923,7 +938,7 @@ export default function Home() {
         </div>
         <nav className="nav-list">
           {navItems.map((item) => (
-            <button key={item.id} className={view === item.id ? "nav-item active" : "nav-item"} onClick={() => { setView(item.id); if (item.id === "areasglobais" || item.id === "objetivos") setDepartment("global"); }}>
+            <button key={item.id} className={view === item.id ? "nav-item active" : "nav-item"} onClick={() => { setView(item.id); if (item.id === "areasglobais" || item.id === "objetivos" || item.id === "equipa") setDepartment("global"); }}>
               <span className="nav-glyph">{item.glyph}</span>{item.label}
               {item.id === "tarefas" && <span className="nav-count">{pending}</span>}
             </button>
@@ -1008,20 +1023,7 @@ export default function Home() {
                 <div><span className="eyebrow">Equipa · {teamMilestonesData.label}</span><h2 id="team-milestones-title">Aniversários e antiguidade</h2><p>Próximas celebrações e marcos de permanência da equipa Imperial.</p></div>
                 <div className="team-calendar-counts"><span>🎂 {teamMilestonesData.birthdays.length}</span><span>🏅 {teamMilestonesData.anniversaries.length}</span></div>
               </div>
-              <div className="team-calendar" aria-label={`Calendário de ${teamMilestonesData.label}`}>
-                <div className="team-calendar-weekdays">{["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((day) => <span key={day}>{day}</span>)}</div>
-                <div className="team-calendar-grid">
-                  {Array.from({ length: teamCalendar.firstWeekday }).map((_, index) => <span className="team-calendar-empty" key={`empty-${index}`} aria-hidden="true" />)}
-                  {Array.from({ length: teamCalendar.daysInMonth }, (_, index) => index + 1).map((day) => {
-                    const events = teamCalendar.events.get(day) ?? [];
-                    return <div className={events.length ? "team-calendar-day has-event" : "team-calendar-day"} key={day} tabIndex={events.length ? 0 : undefined}>
-                      <time>{day}</time>
-                      {events.length > 0 && <><span className="team-calendar-dots" aria-label={`${events.length} evento${events.length > 1 ? "s" : ""}`}><i className={events.some((event) => event.type === "birthday") ? "birthday-dot" : ""} /><i className={events.some((event) => event.type === "tenure") ? "tenure-dot" : ""} /></span><div className="team-calendar-tooltip" role="tooltip">{events.map((event) => <p key={`${event.type}-${event.name}`}><b>{event.type === "birthday" ? "🎂" : "🏅"}</b><span><strong>{event.name}</strong><small>{event.type === "birthday" ? `Aniversário · ${event.role}` : `${event.years} anos · ${event.role}`}</small></span></p>)}</div></>}
-                    </div>;
-                  })}
-                </div>
-              </div>
-              <div className="team-calendar-footer"><span><i className="birthday-dot" /> Aniversários</span><span><i className="tenure-dot" /> Antiguidade</span><small>Passe o cursor sobre uma data assinalada para ver o detalhe.</small></div>
+              <TeamCalendar />
               <a className="team-source-link" href={teamMilestonesData.sourceUrl} target="_blank" rel="noreferrer">Consultar ficheiro da equipa ↗</a>
             </section>
           )}
@@ -1072,6 +1074,46 @@ export default function Home() {
                 {currentWeekTasks.length === 0 && <div className="empty-state">Sem tarefas em curso para esta semana.</div>}
               </div>
               <button className="text-button" onClick={() => setView("tarefas")}>Ver todas as tarefas <span>→</span></button>
+            </section>
+          )}
+
+          {view === "equipa" && (
+            <section className="team-page" aria-label="Estrutura da equipa Imperial">
+              <div className="team-page-heading">
+                <div><span className="eyebrow">McDonald&apos;s Imperial</span><h2>Equipa</h2><p>Estrutura, celebrações e marcos de antiguidade da equipa.</p></div>
+                <a className="team-source-link" href={teamMilestonesData.sourceUrl} target="_blank" rel="noreferrer">Consultar ficheiro da equipa ↗</a>
+              </div>
+
+              <section className="team-milestones team-page-calendar" aria-labelledby="team-page-calendar-title">
+                <div className="team-milestones-heading"><div><span className="eyebrow">{teamMilestonesData.label}</span><h2 id="team-page-calendar-title">Aniversários e antiguidade</h2><p>Datas assinaladas com detalhe disponível no cursor.</p></div><div className="team-calendar-counts"><span>🎂 {teamMilestonesData.birthdays.length}</span><span>🏅 {teamMilestonesData.anniversaries.length}</span></div></div>
+                <TeamCalendar />
+              </section>
+
+              <section className="team-org-section">
+                <div className="team-section-heading"><div><span className="eyebrow">Estrutura organizacional</span><h2>Organograma da equipa</h2><p>A organização é apresentada por níveis de responsabilidade.</p></div></div>
+                <div className="team-org-chart">
+                  <div className="team-org-level franchisee-level">{teamMilestonesData.organisation.franchisee.map((person) => <article className="team-org-card lead" key={person.name}><span className="team-org-avatar">★</span><div><small>Franqueado</small><strong>{person.name}</strong><span>{person.role}</span></div></article>)}</div>
+                  <div className="team-org-connector" />
+                  <div className="team-org-level supervision-level">{teamMilestonesData.organisation.supervision.map((person) => <article className="team-org-card supervision" key={person.name}><span className="team-org-avatar">◈</span><div><small>Supervisão</small><strong>{person.name}</strong><span>{person.role}</span></div></article>)}</div>
+                </div>
+              </section>
+
+              <section className="team-org-section management-section">
+                <div className="team-section-heading"><div><span className="eyebrow">Equipa de gestão</span><h2>Organograma de gestão</h2><p>Estrutura por níveis, seguindo o modelo utilizado no portal HACCP.</p></div><span className="team-section-count">{teamMilestonesData.organisation.managementLevels.flat().length} elementos</span></div>
+                <div className="management-org-chart">
+                  {teamMilestonesData.organisation.managementLevels.map((level, levelIndex) => <div className="management-org-level-wrap" key={`level-${levelIndex}`}>
+                    {levelIndex > 0 && <div className="team-org-connector" />}
+                    <div className={`team-org-level management-level level-${levelIndex + 1}`}>{level.map((person) => <article className={levelIndex === 0 ? "team-org-card lead" : "team-org-card management"} key={person.name}><span className="team-org-avatar">{levelIndex === 0 ? "♛" : "●"}</span><div><small>{person.level}</small><strong>{person.name}</strong><span>{person.role}</span></div></article>)}</div>
+                  </div>)}
+                </div>
+                <div className="team-management-support"><span className="eyebrow">Apoio à gestão</span><div>{teamMilestonesData.organisation.managementSupport.map((person) => <article key={person.name}><span>◌</span><p><strong>{person.name}</strong><small>{person.role}</small></p></article>)}</div></div>
+              </section>
+
+              <section className="team-directory-grid">
+                <article className="team-directory-card"><div className="team-section-heading"><div><span className="eyebrow">Equipa treinadores</span><h2>Treinadores</h2></div><span className="team-section-count">{teamMilestonesData.organisation.trainers.length}</span></div><div className="team-person-list">{teamMilestonesData.organisation.trainers.map((person) => <div key={person.name}><span>🎓</span><p><strong>{person.name}</strong><small>{person.role}</small></p></div>)}</div></article>
+                <article className="team-directory-card"><div className="team-section-heading"><div><span className="eyebrow">Equipa relações públicas</span><h2>Relações públicas</h2></div><span className="team-section-count">{teamMilestonesData.organisation.publicRelations.length}</span></div><div className="team-person-list">{teamMilestonesData.organisation.publicRelations.map((person) => <div key={person.name}><span>🤝</span><p><strong>{person.name}</strong><small>{person.role}</small></p></div>)}</div></article>
+                <article className="team-directory-card employees-card"><span className="employees-icon">👥</span><span className="eyebrow">Equipa funcionários</span><strong>{teamMilestonesData.organisation.employees}</strong><p>funcionários ativos na equipa Imperial</p></article>
+              </section>
             </section>
           )}
 

@@ -429,6 +429,56 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .team-source-link { justify-self: end; color: #39765f; font-size: 9px; font-weight: 800; text-decoration: none; }
 .team-source-link:hover { text-decoration: underline; }
 
+.team-page { display: grid; gap: 20px; }
+.team-page-heading, .team-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; }
+.team-page-heading h2, .team-section-heading h2 { margin-top: 5px; font-family: Georgia, serif; font-size: 25px; font-weight: 500; }
+.team-page-heading p, .team-section-heading p { margin: 6px 0 0; color: var(--muted); font-size: 10px; }
+.team-page-calendar { box-shadow: none; }
+.team-org-section, .team-directory-card { padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: 0 3px 12px rgba(22,54,44,.035); }
+.team-org-chart, .management-org-chart { margin-top: 20px; display: grid; justify-items: center; }
+.team-org-level { width: 100%; display: flex; justify-content: center; gap: 12px; }
+.team-org-connector { width: 1px; height: 26px; background: #b8cec4; }
+.team-org-card { min-width: 214px; padding: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid #dce6e1; border-radius: 11px; background: #fff; box-shadow: 0 5px 16px rgba(36,78,60,.04); }
+.team-org-card.lead { min-width: 275px; border-color: #a9d8c4; background: #f4fbf8; }
+.team-org-card.supervision { width: min(250px, 31%); }
+.team-org-card.management { width: min(245px, 24%); }
+.team-org-avatar { width: 37px; height: 37px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 10px; color: #1f7054; background: #e9f4ef; font-size: 15px; }
+.team-org-card.lead .team-org-avatar { color: #fff; background: #267257; }
+.team-org-card > div { min-width: 0; display: grid; gap: 3px; }
+.team-org-card small { color: #438069; font-size: 7px; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
+.team-org-card strong { overflow: hidden; color: #263d34; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.team-org-card span:not(.team-org-avatar) { overflow: hidden; color: #7c8a84; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.management-org-chart { margin-top: 21px; }
+.management-org-level-wrap { width: 100%; display: grid; justify-items: center; }
+.management-level { flex-wrap: wrap; }
+.management-level.level-1 .team-org-card { width: 280px; }
+.management-level.level-2 .team-org-card { width: min(250px, 31%); }
+.management-level.level-3 .team-org-card { width: 255px; }
+.management-level.level-4 .team-org-card { width: min(250px, 42%); }
+.team-management-support { margin: 20px auto 0; padding: 13px; max-width: 860px; border-top: 1px solid #e3ebe6; }
+.team-management-support > div { margin-top: 9px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.team-management-support article { min-width: 0; padding: 8px; display: flex; align-items: center; gap: 7px; border-radius: 8px; background: #f7faf8; }
+.team-management-support article > span { width: 23px; height: 23px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 7px; color: #39765f; background: #e5f1eb; font-size: 10px; }
+.team-management-support p { min-width: 0; margin: 0; display: grid; gap: 2px; }
+.team-management-support strong, .team-management-support small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team-management-support strong { color: #34483f; font-size: 8px; }
+.team-management-support small { color: #819089; font-size: 7px; }
+.team-section-count { padding: 6px 9px; border-radius: 999px; color: #2f7058; background: #e8f3ed; font-size: 9px; font-weight: 800; white-space: nowrap; }
+.team-directory-grid { display: grid; grid-template-columns: 1fr 1fr .72fr; gap: 15px; }
+.team-directory-card { min-height: 224px; }
+.team-directory-card .team-section-heading { align-items: flex-start; }
+.team-directory-card .team-section-heading h2 { font-family: inherit; font-size: 15px; font-weight: 750; }
+.team-person-list { margin-top: 15px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 10px; }
+.team-person-list > div { min-width: 0; display: flex; align-items: center; gap: 7px; }
+.team-person-list > div > span { width: 25px; height: 25px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 8px; background: #edf5f1; font-size: 11px; }
+.team-person-list p { min-width: 0; margin: 0; display: grid; gap: 2px; }
+.team-person-list strong { overflow: hidden; color: #32463d; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.team-person-list small { overflow: hidden; color: #84918b; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+.employees-card { display: grid; align-content: center; justify-items: center; text-align: center; background: #f4faf7; border-color: #d3e7dc; }
+.employees-icon { width: 48px; height: 48px; margin-bottom: 10px; display: grid; place-items: center; border-radius: 14px; background: white; font-size: 22px; }
+.employees-card strong { margin-top: 7px; color: #245c48; font-family: Georgia, serif; font-size: 43px; font-weight: 500; }
+.employees-card p { margin: 4px 0 0; color: #728078; font-size: 9px; }
+
 .objectives-section { display: grid; gap: 14px; }
 .objective-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
 .objective-card { border-radius: 14px; padding: 18px; display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center; }
@@ -1048,6 +1098,12 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .team-calendar-day { padding: 6px; }
   .team-calendar-footer { align-items: flex-start; flex-wrap: wrap; }
   .team-calendar-footer small { width: 100%; margin-left: 0; }
+  .team-page-heading, .team-section-heading { align-items: flex-start; flex-direction: column; }
+  .team-page-heading .team-source-link { justify-self: auto; }
+  .team-org-level { flex-wrap: wrap; }
+  .team-org-card.supervision, .team-org-card.management, .management-level .team-org-card { width: min(320px, 46%); }
+  .team-management-support > div { grid-template-columns: repeat(2, 1fr); }
+  .team-directory-grid { grid-template-columns: 1fr; }
   .segmented { width: 100%; }
   .segmented button { flex: 1; }
   .task-row { grid-template-columns: 28px 1fr 36px; gap: 10px; padding: 13px 15px; }
