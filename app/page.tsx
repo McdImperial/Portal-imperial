@@ -517,7 +517,10 @@ export default function Home() {
   }), [areaEvaluationDraft]);
   const selectedObjectiveMonth = objectiveMonthOptions.find((item) => item.value === objectiveMonth) ?? objectiveMonthOptions[6];
   const selectedObjectiveSnapshot = objectivesByMonth[objectiveMonth];
-  const selectedObjectives = selectedObjectiveSnapshot?.objectives ?? [];
+  const allSelectedObjectives = selectedObjectiveSnapshot?.objectives ?? [];
+  const selectedObjectives = department === "global"
+    ? allSelectedObjectives
+    : allSelectedObjectives.filter((objective) => objectiveDepartments[objective.theme]?.name === activeDepartment?.label);
   const objectivePointGroups = useMemo(() => [...new Set(selectedObjectives.map((item) => item.possiblePoints))]
     .sort((a, b) => (b ?? -1) - (a ?? -1))
     .map((points) => ({
@@ -538,13 +541,13 @@ export default function Home() {
       total,
       possiblePoints,
       achievedPoints,
-      monthlyPercent: selectedObjectiveSnapshot?.monthlyPercent ?? (possiblePoints ? Math.round((achievedPoints / possiblePoints) * 100) : 0),
+      monthlyPercent: department === "global" ? (selectedObjectiveSnapshot?.monthlyPercent ?? (possiblePoints ? Math.round((achievedPoints / possiblePoints) * 100) : 0)) : (possiblePoints ? Math.round((achievedPoints / possiblePoints) * 100) : 0),
       superados: { count: superados, percent: percent(superados) },
       atingidos: { count: atingidos, percent: percent(atingidos) },
       proximos: { count: proximos, percent: percent(proximos) },
       naoAtingidos: { count: naoAtingidos, percent: percent(naoAtingidos) },
     };
-  }, [selectedObjectives, selectedObjectiveSnapshot]);
+  }, [selectedObjectives, selectedObjectiveSnapshot, department]);
   const objectiveAnalysis = useMemo(() => {
     const positive = selectedObjectives.filter((item) => ["Superado", "Atingido"].includes(getObjectiveResult(item)));
     const near = selectedObjectives.filter((item) => getObjectiveResult(item) === "Próximo");
@@ -1328,7 +1331,7 @@ export default function Home() {
           {view === "objetivos" && (
             <section ref={objectivesExportRef} className="restaurant-objectives" aria-labelledby="restaurant-objectives-title">
               <div className="restaurant-objectives-heading">
-                <div><span className="eyebrow">{selectedObjectiveMonth.label}</span><h2 id="restaurant-objectives-title">Objetivos mensais</h2><p>Leitura rápida das metas, resultados e pontuação.</p></div>
+                <div><span className="eyebrow">{selectedObjectiveMonth.label} · {department === "global" ? "Todos os departamentos" : activeDepartment?.label}</span><h2 id="restaurant-objectives-title">Objetivos mensais</h2><p>{department === "global" ? "Leitura rápida das metas, resultados e pontuação." : `Indicadores acompanhados por ${activeDepartment?.label}.`}</p></div>
                 <div className="objective-toolbar" data-export-exclude>
                   <label><span>Mês</span><select value={objectiveMonth} onChange={(event) => setObjectiveMonth(event.target.value)} aria-label="Filtrar objetivos por mês">{objectiveMonthOptions.map((month) => <option value={month.value} key={month.value}>{month.label}</option>)}</select></label>
                   <button type="button" className="objective-export" onClick={exportObjectives} disabled={!selectedObjectives.length}><span>⇩</span> Exportar PNG</button>
