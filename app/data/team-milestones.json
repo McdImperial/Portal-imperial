@@ -1260,22 +1260,22 @@
       { "name": "Marta Azevedo", "role": "Supervisor MKT/RH" }
     ],
     "managementLevels": [
-      [{ "name": "Tiago Soutelo", "role": "Gerente Loja", "level": "Gerente de loja" }],
+      [{ "name": "Tiago Soutelo", "role": "Gerente Loja", "level": "Gerente de loja", "department": "Coordenação geral" }],
       [
-        { "name": "Ricardo Teixeira", "role": "Assistente Gerência", "level": "Assistente 3+" },
-        { "name": "Susana Torres", "role": "Assistente Gerência", "level": "Assistente 3+" },
-        { "name": "Sara Sousa", "role": "Assistente Gerência", "level": "Assistente 3+" }
+        { "name": "Ricardo Teixeira", "role": "Assistente Gerência", "level": "Assistente 3+", "department": "Manutenção Seg. & IT" },
+        { "name": "Susana Torres", "role": "Assistente Gerência", "level": "Assistente 3+", "department": "Qualidade & Produtos" },
+        { "name": "Sara Sousa", "role": "Assistente Gerência", "level": "Assistente 3+", "department": "Pessoas" }
       ],
-      [{ "name": "Miguel Matela", "role": "Assistente Gerência", "level": "Assistente 3" }],
+      [{ "name": "Miguel Matela", "role": "Assistente Gerência", "level": "Assistente 3", "department": "Pessoas" }],
       [
-        { "name": "Soraia Martins", "role": "Assistente Gerência", "level": "Assistente 2" },
-        { "name": "André Martins", "role": "Assistente Gerência", "level": "Assistente 2" }
+        { "name": "Soraia Martins", "role": "Assistente Gerência", "level": "Assistente 2", "department": "Serviço Cliente" },
+        { "name": "André Martins", "role": "Assistente Gerência", "level": "Assistente 2", "department": "Manutenção Seg. & IT" }
       ],
       [
-        { "name": "Liliana Pacheco", "role": "Assistente Gerência", "level": "Assistente 1" },
-        { "name": "Diogo Cabral", "role": "Assistente Gerência", "level": "Assistente 1" },
-        { "name": "Sílvia Tavares", "role": "Assistente Gerência", "level": "Assistente 1" },
-        { "name": "Ana Sousa", "role": "Assistente Gerência", "level": "Assistente 1" }
+        { "name": "Liliana Pacheco", "role": "Assistente Gerência", "level": "Assistente 1", "department": "Serviço Cliente" },
+        { "name": "Diogo Cabral", "role": "Assistente Gerência", "level": "Assistente 1", "department": "Qualidade & Produtos" },
+        { "name": "Sílvia Tavares", "role": "Assistente Gerência", "level": "Assistente 1", "department": "Qualidade & Produtos" },
+        { "name": "Ana Sousa", "role": "Assistente Gerência", "level": "Assistente 1", "department": "Pessoas" }
       ]
     ],
     "managementSupport": [

@@ -271,7 +271,7 @@ type TellTheArchesMonth = {
 };
 type TellTheArchesData = { folderUrl: string; snapshotDate: string; ytd: TellTheArchesMonth; months: TellTheArchesMonth[] };
 type TeamMilestone = { name: string; role: string; day: number; years?: number };
-type TeamPerson = { name: string; role: string; level?: string; label?: string };
+type TeamPerson = { name: string; role: string; level?: string; label?: string; department?: string };
 type TeamMilestonesData = { month: string; label: string; sourceUrl: string; birthdays: TeamMilestone[]; anniversaries: TeamMilestone[]; calendarByMonth: Record<string, { birthdays: TeamMilestone[]; anniversaries: TeamMilestone[] }>; organisation: { franchisee: TeamPerson[]; supervision: TeamPerson[]; leadershipLevels: TeamPerson[][]; managementLevels: TeamPerson[][]; managementSupport: TeamPerson[]; trainers: TeamPerson[]; publicRelations: TeamPerson[]; employees: number } };
 type SharedFolder = { id: string; name: string; description: string; url: string; fileCount: number; updatedAt: string };
 
@@ -1103,7 +1103,7 @@ export default function Home() {
                 <div className="management-org-chart">
                   {teamMilestonesData.organisation.managementLevels.map((level, levelIndex) => <div className="management-org-level-wrap" key={`level-${levelIndex}`}>
                     {levelIndex > 0 && <div className="team-org-connector" />}
-                    <div className={`team-org-level management-level level-${levelIndex + 1}`}>{level.map((person) => <article className={levelIndex === 0 ? "team-org-card lead" : "team-org-card management"} key={person.name}><span className="team-org-avatar">{levelIndex === 0 ? "♛" : "●"}</span><div><small>{person.level}</small><strong>{person.name}</strong><span>{person.role}</span></div></article>)}</div>
+                    <div className={`team-org-level management-level level-${levelIndex + 1}`}>{level.map((person) => <article className={levelIndex === 0 ? "team-org-card lead" : "team-org-card management"} key={person.name}><span className="team-org-avatar">{levelIndex === 0 ? "♛" : "●"}</span><div><small>{person.level}</small><strong>{person.name}</strong><span>{person.role}</span>{person.department && <em className={`team-department ${person.department === "Qualidade & Produtos" ? "quality" : person.department === "Pessoas" ? "people" : person.department === "Serviço Cliente" ? "service" : person.department === "Manutenção Seg. & IT" ? "maintenance" : "general"}`}>{person.department === "Qualidade & Produtos" ? "🧪" : person.department === "Pessoas" ? "👥" : person.department === "Serviço Cliente" ? "🎧" : person.department === "Manutenção Seg. & IT" ? "🛠️" : "★"} {person.department}</em>}</div></article>)}</div>
                   </div>)}
                 </div>
               </section>

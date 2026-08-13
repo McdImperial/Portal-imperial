@@ -12660,59 +12660,70 @@ var team_milestones_default = {
 			[{
 				"name": "Tiago Soutelo",
 				"role": "Gerente Loja",
-				"level": "Gerente de loja"
+				"level": "Gerente de loja",
+				"department": "Coordenação geral"
 			}],
 			[
 				{
 					"name": "Ricardo Teixeira",
 					"role": "Assistente Gerência",
-					"level": "Assistente 3+"
+					"level": "Assistente 3+",
+					"department": "Manutenção Seg. & IT"
 				},
 				{
 					"name": "Susana Torres",
 					"role": "Assistente Gerência",
-					"level": "Assistente 3+"
+					"level": "Assistente 3+",
+					"department": "Qualidade & Produtos"
 				},
 				{
 					"name": "Sara Sousa",
 					"role": "Assistente Gerência",
-					"level": "Assistente 3+"
+					"level": "Assistente 3+",
+					"department": "Pessoas"
 				}
 			],
 			[{
 				"name": "Miguel Matela",
 				"role": "Assistente Gerência",
-				"level": "Assistente 3"
+				"level": "Assistente 3",
+				"department": "Pessoas"
 			}],
 			[{
 				"name": "Soraia Martins",
 				"role": "Assistente Gerência",
-				"level": "Assistente 2"
+				"level": "Assistente 2",
+				"department": "Serviço Cliente"
 			}, {
 				"name": "André Martins",
 				"role": "Assistente Gerência",
-				"level": "Assistente 2"
+				"level": "Assistente 2",
+				"department": "Manutenção Seg. & IT"
 			}],
 			[
 				{
 					"name": "Liliana Pacheco",
 					"role": "Assistente Gerência",
-					"level": "Assistente 1"
+					"level": "Assistente 1",
+					"department": "Serviço Cliente"
 				},
 				{
 					"name": "Diogo Cabral",
 					"role": "Assistente Gerência",
-					"level": "Assistente 1"
+					"level": "Assistente 1",
+					"department": "Qualidade & Produtos"
 				},
 				{
 					"name": "Sílvia Tavares",
 					"role": "Assistente Gerência",
-					"level": "Assistente 1"
+					"level": "Assistente 1",
+					"department": "Qualidade & Produtos"
 				},
 				{
 					"name": "Ana Sousa",
 					"role": "Assistente Gerência",
-					"level": "Assistente 1"
+					"level": "Assistente 1",
+					"department": "Pessoas"
 				}
 			]
 		],
@@ -15313,7 +15324,15 @@ function Home() {
 													}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
 														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.level }),
 														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }),
-														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: person.role })
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: person.role }),
+														person.department && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("em", {
+															className: `team-department ${person.department === "Qualidade & Produtos" ? "quality" : person.department === "Pessoas" ? "people" : person.department === "Serviço Cliente" ? "service" : person.department === "Manutenção Seg. & IT" ? "maintenance" : "general"}`,
+															children: [
+																person.department === "Qualidade & Produtos" ? "🧪" : person.department === "Pessoas" ? "👥" : person.department === "Serviço Cliente" ? "🎧" : person.department === "Manutenção Seg. & IT" ? "🛠️" : "★",
+																" ",
+																person.department
+															]
+														})
 													] })]
 												}, person.name))
 											})]

@@ -458,6 +458,12 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .team-org-card small { color: #438069; font-size: 7px; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
 .team-org-card strong { overflow: hidden; color: #263d34; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .team-org-card span:not(.team-org-avatar) { overflow: hidden; color: #7c8a84; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.team-department { width: fit-content; max-width: 100%; margin-top: 3px; padding: 3px 5px; border-radius: 999px; font-style: normal; font-size: 7px; font-weight: 800; line-height: 1.1; white-space: nowrap; }
+.team-department.quality { color: #39765f; background: #e8f4ee; }
+.team-department.people { color: #356e9a; background: #e8f2fb; }
+.team-department.service { color: #a66d23; background: #fff1db; }
+.team-department.maintenance { color: #745c92; background: #f0ebf8; }
+.team-department.general { color: #547269; background: #edf3f0; }
 .management-org-chart { margin-top: 21px; }
 .management-org-level-wrap { width: 100%; display: grid; justify-items: center; }
 .management-level { flex-wrap: wrap; }
