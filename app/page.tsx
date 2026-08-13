@@ -904,7 +904,7 @@ export default function Home() {
         </div>
         <nav className="nav-list">
           {navItems.map((item) => (
-            <button key={item.id} className={view === item.id ? "nav-item active" : "nav-item"} onClick={() => { setView(item.id); if (item.id === "areasglobais") setDepartment("global"); }}>
+            <button key={item.id} className={view === item.id ? "nav-item active" : "nav-item"} onClick={() => { setView(item.id); if (item.id === "areasglobais" || item.id === "objetivos") setDepartment("global"); }}>
               <span className="nav-glyph">{item.glyph}</span>{item.label}
               {item.id === "tarefas" && <span className="nav-count">{pending}</span>}
             </button>

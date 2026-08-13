@@ -1,0 +1,2 @@
+ALTER TABLE `cleaning_interventions` ADD `department` text DEFAULT 'qualidade' NOT NULL;--> statement-breakpoint
+CREATE INDEX `idx_cleaning_interventions_department_date` ON `cleaning_interventions` (`department`,`scheduled_date`);
