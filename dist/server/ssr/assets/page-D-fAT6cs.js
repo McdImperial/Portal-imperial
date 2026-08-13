@@ -15325,13 +15325,11 @@ function Home() {
 														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.level }),
 														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }),
 														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: person.role }),
-														person.department && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("em", {
+														person.department && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", {
+															title: person.department,
+															"aria-label": `Departamento: ${person.department}`,
 															className: `team-department ${person.department === "Qualidade & Produtos" ? "quality" : person.department === "Pessoas" ? "people" : person.department === "Serviço Cliente" ? "service" : person.department === "Manutenção Seg. & IT" ? "maintenance" : "general"}`,
-															children: [
-																person.department === "Qualidade & Produtos" ? "🧪" : person.department === "Pessoas" ? "👥" : person.department === "Serviço Cliente" ? "🎧" : person.department === "Manutenção Seg. & IT" ? "🛠️" : "★",
-																" ",
-																person.department
-															]
+															children: person.department === "Qualidade & Produtos" ? "🧪" : person.department === "Pessoas" ? "👥" : person.department === "Serviço Cliente" ? "🎧" : person.department === "Manutenção Seg. & IT" ? "🛠️" : "★"
 														})
 													] })]
 												}, person.name))
