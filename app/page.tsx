@@ -452,6 +452,17 @@ export default function Home() {
         if (!response.ok) throw new Error("load failed");
         const data = await response.json() as { tasks: Task[] };
         if (data.tasks.length) {
+          const qualitySourceTasks = initialTasks.filter((task) => task.department === "qualidade");
+          const savedQualityIds = new Set(data.tasks.filter((task) => task.department === "qualidade").map((task) => task.id));
+          const missingQualityTasks = qualitySourceTasks.filter((task) => !savedQualityIds.has(task.id));
+          if (missingQualityTasks.length && currentUser.role !== "consulta") {
+            const createdTasks = await Promise.all(missingQualityTasks.map(async ({ id: _id, ...task }) => {
+              const createResponse = await fetch("/api/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(task) });
+              const created = await createResponse.json() as { task?: Task };
+              return created.task;
+            }));
+            data.tasks.push(...createdTasks.filter((task): task is Task => Boolean(task)));
+          }
           const normalizedTasks = data.tasks.map((task) => {
             const normalized = { ...task, department: (task.department as string) === "segit" ? "manutencao" : task.department } as Task;
             const sourceTask = normalized.department === "qualidade" ? initialTasks.find((item) => item.id === normalized.id && item.department === "qualidade") : undefined;

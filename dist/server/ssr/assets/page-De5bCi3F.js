@@ -14082,6 +14082,19 @@ function Home() {
 				if (!response.ok) throw new Error("load failed");
 				const data = await response.json();
 				if (data.tasks.length) {
+					const qualitySourceTasks = initialTasks.filter((task) => task.department === "qualidade");
+					const savedQualityIds = new Set(data.tasks.filter((task) => task.department === "qualidade").map((task) => task.id));
+					const missingQualityTasks = qualitySourceTasks.filter((task) => !savedQualityIds.has(task.id));
+					if (missingQualityTasks.length && currentUser.role !== "consulta") {
+						const createdTasks = await Promise.all(missingQualityTasks.map(async ({ id: _id, ...task }) => {
+							return (await (await fetch("/api/tasks", {
+								method: "POST",
+								headers: { "Content-Type": "application/json" },
+								body: JSON.stringify(task)
+							})).json()).task;
+						}));
+						data.tasks.push(...createdTasks.filter((task) => Boolean(task)));
+					}
 					const normalizedTasks = data.tasks.map((task) => {
 						const normalized = {
 							...task,
