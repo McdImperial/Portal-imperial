@@ -1088,13 +1088,14 @@ export default function Home() {
               </section>
 
               <section className="team-org-section">
-                <div className="team-section-heading"><div><span className="eyebrow">Estrutura organizacional</span><h2>Organograma da equipa</h2><p>Estrutura de liderança apresentada por níveis de responsabilidade.</p></div></div>
+                <div className="team-section-heading"><div><span className="eyebrow">Estrutura organizacional</span><h2>Organograma da estrutura</h2><p>Estrutura de liderança apresentada por níveis de responsabilidade.</p></div></div>
                 <div className="team-org-chart">
                   {teamMilestonesData.organisation.leadershipLevels.map((level, levelIndex) => <div className="leadership-level-wrap" key={`leadership-${levelIndex}`}>
                     {levelIndex > 0 && <div className="team-org-connector" />}
                     <div className={`team-org-level leadership-level leadership-level-${levelIndex + 1}`}>{level.map((person) => <article className={levelIndex === 0 ? "team-org-card lead" : "team-org-card leadership"} key={person.name}><span className="team-org-avatar">{levelIndex === 0 ? "★" : levelIndex === 1 ? "◆" : levelIndex === 2 ? "◈" : "○"}</span><div><small>{person.label}</small><strong>{person.name}</strong><span>{person.role}</span></div></article>)}</div>
                   </div>)}
                 </div>
+                <div className="team-management-support"><span className="eyebrow">Apoio à gestão</span><div>{teamMilestonesData.organisation.managementSupport.map((person) => <article key={person.name}><span>◌</span><p><strong>{person.name}</strong><small>{person.role}</small></p></article>)}</div></div>
               </section>
 
               <section className="team-org-section management-section">
@@ -1105,7 +1106,6 @@ export default function Home() {
                     <div className={`team-org-level management-level level-${levelIndex + 1}`}>{level.map((person) => <article className={levelIndex === 0 ? "team-org-card lead" : "team-org-card management"} key={person.name}><span className="team-org-avatar">{levelIndex === 0 ? "♛" : "●"}</span><div><small>{person.level}</small><strong>{person.name}</strong><span>{person.role}</span></div></article>)}</div>
                   </div>)}
                 </div>
-                <div className="team-management-support"><span className="eyebrow">Apoio à gestão</span><div>{teamMilestonesData.organisation.managementSupport.map((person) => <article key={person.name}><span>◌</span><p><strong>{person.name}</strong><small>{person.role}</small></p></article>)}</div></div>
               </section>
 
               <section className="team-directory-grid">

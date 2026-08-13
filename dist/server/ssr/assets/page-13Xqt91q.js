@@ -12639,23 +12639,6 @@ var team_milestones_default = {
 					"role": "Supervisor",
 					"label": "Supervisão"
 				}
-			],
-			[
-				{
-					"name": "Cristina Pinto",
-					"role": "Assistente Direção",
-					"label": "Apoio à gestão"
-				},
-				{
-					"name": "Marlene Soutelo",
-					"role": "Administrativa",
-					"label": "Apoio à gestão"
-				},
-				{
-					"name": "Andreia Faria",
-					"role": "Administrativa",
-					"label": "Apoio à gestão"
-				}
 			]
 		],
 		"supervision": [
@@ -15240,73 +15223,37 @@ function Home() {
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 									className: "team-org-section",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "team-section-heading",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "eyebrow",
-												children: "Estrutura organizacional"
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Organograma da equipa" }),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Estrutura de liderança apresentada por níveis de responsabilidade." })
-										] })
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "team-org-chart",
-										children: teamMilestonesData.organisation.leadershipLevels.map((level, levelIndex) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "leadership-level-wrap",
-											children: [levelIndex > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "team-org-connector" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: `team-org-level leadership-level leadership-level-${levelIndex + 1}`,
-												children: level.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-													className: levelIndex === 0 ? "team-org-card lead" : "team-org-card leadership",
-													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-														className: "team-org-avatar",
-														children: levelIndex === 0 ? "★" : levelIndex === 1 ? "◆" : levelIndex === 2 ? "◈" : "○"
-													}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.label }),
-														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }),
-														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: person.role })
-													] })]
-												}, person.name))
-											})]
-										}, `leadership-${levelIndex}`))
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-									className: "team-org-section management-section",
 									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 											className: "team-section-heading",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 													className: "eyebrow",
-													children: "Equipa de gestão"
+													children: "Estrutura organizacional"
 												}),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Organograma de gestão" }),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Estrutura por níveis, seguindo o modelo utilizado no portal HACCP." })
-											] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-												className: "team-section-count",
-												children: [teamMilestonesData.organisation.managementLevels.flat().length, " elementos"]
-											})]
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Organograma da estrutura" }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Estrutura de liderança apresentada por níveis de responsabilidade." })
+											] })
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "management-org-chart",
-											children: teamMilestonesData.organisation.managementLevels.map((level, levelIndex) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "management-org-level-wrap",
+											className: "team-org-chart",
+											children: teamMilestonesData.organisation.leadershipLevels.map((level, levelIndex) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "leadership-level-wrap",
 												children: [levelIndex > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "team-org-connector" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-													className: `team-org-level management-level level-${levelIndex + 1}`,
+													className: `team-org-level leadership-level leadership-level-${levelIndex + 1}`,
 													children: level.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-														className: levelIndex === 0 ? "team-org-card lead" : "team-org-card management",
+														className: levelIndex === 0 ? "team-org-card lead" : "team-org-card leadership",
 														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 															className: "team-org-avatar",
-															children: levelIndex === 0 ? "♛" : "●"
+															children: levelIndex === 0 ? "★" : levelIndex === 1 ? "◆" : levelIndex === 2 ? "◈" : "○"
 														}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-															/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.level }),
+															/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.label }),
 															/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }),
 															/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: person.role })
 														] })]
 													}, person.name))
 												})]
-											}, `level-${levelIndex}`))
+											}, `leadership-${levelIndex}`))
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 											className: "team-management-support",
@@ -15316,6 +15263,42 @@ function Home() {
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: teamMilestonesData.organisation.managementSupport.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "◌" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.role })] })] }, person.name)) })]
 										})
 									]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+									className: "team-org-section management-section",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "team-section-heading",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "eyebrow",
+												children: "Equipa de gestão"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Organograma de gestão" }),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Estrutura por níveis, seguindo o modelo utilizado no portal HACCP." })
+										] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "team-section-count",
+											children: [teamMilestonesData.organisation.managementLevels.flat().length, " elementos"]
+										})]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "management-org-chart",
+										children: teamMilestonesData.organisation.managementLevels.map((level, levelIndex) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "management-org-level-wrap",
+											children: [levelIndex > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "team-org-connector" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: `team-org-level management-level level-${levelIndex + 1}`,
+												children: level.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+													className: levelIndex === 0 ? "team-org-card lead" : "team-org-card management",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+														className: "team-org-avatar",
+														children: levelIndex === 0 ? "♛" : "●"
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.level }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: person.role })
+													] })]
+												}, person.name))
+											})]
+										}, `level-${levelIndex}`))
+									})]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 									className: "team-directory-grid",

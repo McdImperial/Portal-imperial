@@ -30,11 +30,6 @@
         { "name": "António Aidos", "role": "Supervisor Operações", "label": "Supervisão" },
         { "name": "Marta Azevedo", "role": "Supervisor MKT/RH", "label": "Supervisão" },
         { "name": "Carlos Pinto", "role": "Supervisor", "label": "Supervisão" }
-      ],
-      [
-        { "name": "Cristina Pinto", "role": "Assistente Direção", "label": "Apoio à gestão" },
-        { "name": "Marlene Soutelo", "role": "Administrativa", "label": "Apoio à gestão" },
-        { "name": "Andreia Faria", "role": "Administrativa", "label": "Apoio à gestão" }
       ]
     ],
     "supervision": [
