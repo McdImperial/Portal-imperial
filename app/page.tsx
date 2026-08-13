@@ -1152,7 +1152,6 @@ export default function Home() {
 
           {view === "gerenteloja" && (
             <section className="manager-page" aria-label="Gerente Loja">
-              <div className="manager-page-heading"><div><span className="eyebrow">Gerente Loja</span><h2>Disponibilidades</h2><p>Consulta integrada das disponibilidades da equipa.</p></div><a href="https://analise-disponibilidades-equipa.tiagosoutelo.chatgpt.site/" target="_blank" rel="noreferrer">Abrir em nova página ↗</a></div>
               <div className="availability-frame"><iframe title="Análise de disponibilidades da equipa" src="https://analise-disponibilidades-equipa.tiagosoutelo.chatgpt.site/" /></div>
             </section>
           )}

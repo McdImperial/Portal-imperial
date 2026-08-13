@@ -15443,31 +15443,16 @@ function Home() {
 								})
 							]
 						}),
-						view === "gerenteloja" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+						view === "gerenteloja" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
 							className: "manager-page",
 							"aria-label": "Gerente Loja",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "manager-page-heading",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "eyebrow",
-										children: "Gerente Loja"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Disponibilidades" }),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Consulta integrada das disponibilidades da equipa." })
-								] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-									href: "https://analise-disponibilidades-equipa.tiagosoutelo.chatgpt.site/",
-									target: "_blank",
-									rel: "noreferrer",
-									children: "Abrir em nova página ↗"
-								})]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "availability-frame",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("iframe", {
 									title: "Análise de disponibilidades da equipa",
 									src: "https://analise-disponibilidades-equipa.tiagosoutelo.chatgpt.site/"
 								})
-							})]
+							})
 						}),
 						view === "tarefas" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 							className: canEdit ? "board-page" : "board-page read-only",
