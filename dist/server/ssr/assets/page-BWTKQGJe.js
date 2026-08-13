@@ -14009,6 +14009,7 @@ function TeamCalendar() {
 }
 function Home() {
 	const objectivesExportRef = (0, import_react.useRef)(null);
+	const [portalDate, setPortalDate] = (0, import_react.useState)("");
 	const [view, setView] = (0, import_react.useState)("resumo");
 	const [department, setDepartment] = (0, import_react.useState)("global");
 	const [tasks, setTasks] = (0, import_react.useState)(initialTasks);
@@ -14056,6 +14057,15 @@ function Home() {
 	const [evaluationBusy, setEvaluationBusy] = (0, import_react.useState)(false);
 	const [evaluationUpdatedAt, setEvaluationUpdatedAt] = (0, import_react.useState)(null);
 	const [collapsedEvaluationDepartments, setCollapsedEvaluationDepartments] = (0, import_react.useState)({});
+	(0, import_react.useEffect)(() => {
+		const formattedDate = new Intl.DateTimeFormat("pt-PT", {
+			weekday: "long",
+			day: "numeric",
+			month: "long",
+			timeZone: "Europe/Lisbon"
+		}).format(/* @__PURE__ */ new Date());
+		setPortalDate(formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1));
+	}, []);
 	(0, import_react.useEffect)(() => {
 		let active = true;
 		fetch("/api/auth/me/").then((response) => response.json()).then((data) => {
@@ -15025,7 +15035,8 @@ function Home() {
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 						className: "date-line",
 						children: [
-							"Sexta-feira · 31 de julho · ",
+							portalDate,
+							portalDate && " · ",
 							activeDepartment && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: `department-context-icon department-${activeDepartment.id}`,
 								role: "img",

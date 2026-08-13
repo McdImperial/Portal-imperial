@@ -384,6 +384,7 @@ function TeamCalendar() {
 
 export default function Home() {
   const objectivesExportRef = useRef<HTMLElement>(null);
+  const [portalDate, setPortalDate] = useState("");
   const [view, setView] = useState<View>("resumo");
   const [department, setDepartment] = useState<Department>("global");
   const [tasks, setTasks] = useState(initialTasks);
@@ -428,6 +429,16 @@ export default function Home() {
   const [evaluationBusy, setEvaluationBusy] = useState(false);
   const [evaluationUpdatedAt, setEvaluationUpdatedAt] = useState<string | null>(null);
   const [collapsedEvaluationDepartments, setCollapsedEvaluationDepartments] = useState<Partial<Record<EvaluationDepartment, boolean>>>({});
+
+  useEffect(() => {
+    const formattedDate = new Intl.DateTimeFormat("pt-PT", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      timeZone: "Europe/Lisbon",
+    }).format(new Date());
+    setPortalDate(formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1));
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -1037,7 +1048,7 @@ export default function Home() {
       <section className="workspace">
         <header className={view === "areasglobais" ? "topbar centered" : "topbar"}>
           <div>
-            <p className="date-line">Sexta-feira · 31 de julho · {activeDepartment && <span className={`department-context-icon department-${activeDepartment.id}`} role="img" aria-label={activeDepartment.label}>{activeDepartment.icon}</span>}{departmentLabel}</p>
+            <p className="date-line">{portalDate}{portalDate && " · "}{activeDepartment && <span className={`department-context-icon department-${activeDepartment.id}`} role="img" aria-label={activeDepartment.label}>{activeDepartment.icon}</span>}{departmentLabel}</p>
             <h1>{viewLabels[view]}</h1>
           </div>
         </header>
