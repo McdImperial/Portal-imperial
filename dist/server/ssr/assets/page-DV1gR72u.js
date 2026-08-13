@@ -13175,7 +13175,7 @@ function globalAreaRating(ratings) {
 var statusOptions = [
 	"Por fazer",
 	"Em curso",
-	"Bloqueado",
+	"Não realizada",
 	"Concluído"
 ];
 var ownerOptions = [
@@ -13188,8 +13188,8 @@ var ownerOptions = [
 		name: "Diogo Cabral"
 	},
 	{
-		initials: "SI",
-		name: "Silvia Tavares"
+		initials: "ST",
+		name: "Sílvia Tavares"
 	},
 	{
 		initials: "TS",
@@ -14207,6 +14207,15 @@ function Home() {
 		});
 		return [...tasks.filter((task) => task.department !== "qualidade" || !qualitySourceIds.has(task.id)), ...refreshedQualityTasks];
 	}, [tasks]).filter((task) => department === "global" || task.department === department);
+	const managerTaskSummary = (0, import_react.useMemo)(() => ownerOptions.map((owner) => {
+		const managerTasks = scopedTasks.filter((task) => task.assigneeName === owner.name);
+		return {
+			...owner,
+			completed: managerTasks.filter((task) => task.status === "Concluído" || task.done).length,
+			pending: managerTasks.filter((task) => (task.status ?? "Por fazer") !== "Concluído" && (task.status ?? "Por fazer") !== "Não realizada").length,
+			notDone: managerTasks.filter((task) => task.status === "Não realizada").length
+		};
+	}).filter((manager) => manager.completed + manager.pending + manager.notDone > 0), [scopedTasks]);
 	const pending = scopedTasks.filter((task) => !task.done).length;
 	const completed = scopedTasks.length - pending;
 	const completion = scopedTasks.length ? Math.round(completed / scopedTasks.length * 100) : 0;
@@ -15443,6 +15452,25 @@ function Home() {
 										rel: "noreferrer",
 										children: "Abrir folha fonte ↗"
 									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
+									className: "manager-task-summary",
+									"aria-label": "Resumo de tarefas por gerente",
+									children: managerTaskSummary.map((manager) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "avatar small",
+											children: manager.initials
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: manager.name }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: ["✓ ", manager.completed] }),
+											" Concluídas · ",
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: ["○ ", manager.pending] }),
+											" Por realizar · ",
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: ["! ", manager.notDone] }),
+											" Não realizadas"
+										] })
+									] }, manager.name))
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "monday-toolbar",

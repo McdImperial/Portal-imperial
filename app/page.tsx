@@ -11,7 +11,7 @@ type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equ
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
-type TaskStatus = "Por fazer" | "Em curso" | "Bloqueado" | "Concluído";
+type TaskStatus = "Por fazer" | "Em curso" | "Não realizada" | "Concluído";
 type AppRole = "admin" | "editor" | "consulta";
 type AppUser = { id: number; name: string; login: string; role: AppRole; department: UserDepartment; status: string };
 type ManagedUser = AppUser & { createdAt: string; approvedAt: string | null };
@@ -106,11 +106,11 @@ function globalAreaRating(ratings: AreaRating[]): AreaRating {
   return "Não aceitável";
 }
 
-const statusOptions: TaskStatus[] = ["Por fazer", "Em curso", "Bloqueado", "Concluído"];
+const statusOptions: TaskStatus[] = ["Por fazer", "Em curso", "Não realizada", "Concluído"];
 const ownerOptions = [
   { initials: "SU", name: "Susana Torres" },
   { initials: "DC", name: "Diogo Cabral" },
-  { initials: "SI", name: "Silvia Tavares" },
+  { initials: "ST", name: "Sílvia Tavares" },
   { initials: "TS", name: "Tiago Soutelo" },
 ];
 
@@ -539,6 +539,10 @@ export default function Home() {
     return [...tasks.filter((task) => task.department !== "qualidade" || !qualitySourceIds.has(task.id)), ...refreshedQualityTasks];
   }, [tasks]);
   const scopedTasks = displayTasks.filter((task) => department === "global" || task.department === department);
+  const managerTaskSummary = useMemo(() => ownerOptions.map((owner) => {
+    const managerTasks = scopedTasks.filter((task) => task.assigneeName === owner.name);
+    return { ...owner, completed: managerTasks.filter((task) => task.status === "Concluído" || task.done).length, pending: managerTasks.filter((task) => (task.status ?? "Por fazer") !== "Concluído" && (task.status ?? "Por fazer") !== "Não realizada").length, notDone: managerTasks.filter((task) => task.status === "Não realizada").length };
+  }).filter((manager) => manager.completed + manager.pending + manager.notDone > 0), [scopedTasks]);
   const pending = scopedTasks.filter((task) => !task.done).length;
   const completed = scopedTasks.length - pending;
   const completion = scopedTasks.length ? Math.round((completed / scopedTasks.length) * 100) : 0;
@@ -1150,6 +1154,9 @@ export default function Home() {
                 <div><span className="source-mark">QP</span><span><strong>Workflow tarefas · Qualidade &amp; Produtos</strong><small>15 tarefas importadas com responsável, periodicidade e dia programado.</small></span></div>
                 <a href={qualityTasksSourceUrl} target="_blank" rel="noreferrer">Abrir folha fonte ↗</a>
               </div>}
+              <section className="manager-task-summary" aria-label="Resumo de tarefas por gerente">
+                {managerTaskSummary.map((manager) => <article key={manager.name}><span className="avatar small">{manager.initials}</span><strong>{manager.name}</strong><small><b>✓ {manager.completed}</b> Concluídas · <b>○ {manager.pending}</b> Por realizar · <b>! {manager.notDone}</b> Não realizadas</small></article>)}
+              </section>
               <div className="monday-toolbar">
                 <label className="view-picker"><span>⌂</span><select value={boardMode} onChange={(event) => setBoardMode(event.target.value as "tabela" | "kanban")} aria-label="Escolher vista"><option value="tabela">Tabela principal</option><option value="kanban">Kanban</option></select></label>
                 <span className="toolbar-divider" />
