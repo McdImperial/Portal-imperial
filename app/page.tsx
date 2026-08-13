@@ -528,7 +528,17 @@ export default function Home() {
     return () => { active = false; };
   }, [currentUser, view, evaluationMonth]);
 
-  const scopedTasks = tasks.filter((task) => department === "global" || task.department === department);
+  const displayTasks = useMemo(() => {
+    const qualitySourceTasks = initialTasks.filter((task) => task.department === "qualidade");
+    const qualitySourceIds = new Set(qualitySourceTasks.map((task) => task.id));
+    const savedTasksById = new Map(tasks.map((task) => [task.id, task]));
+    const refreshedQualityTasks = qualitySourceTasks.map((task) => {
+      const saved = savedTasksById.get(task.id);
+      return saved ? { ...task, status: saved.status, done: saved.done, priority: saved.priority } : task;
+    });
+    return [...tasks.filter((task) => task.department !== "qualidade" || !qualitySourceIds.has(task.id)), ...refreshedQualityTasks];
+  }, [tasks]);
+  const scopedTasks = displayTasks.filter((task) => department === "global" || task.department === department);
   const pending = scopedTasks.filter((task) => !task.done).length;
   const completed = scopedTasks.length - pending;
   const completion = scopedTasks.length ? Math.round((completed / scopedTasks.length) * 100) : 0;
