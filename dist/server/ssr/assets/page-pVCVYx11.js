@@ -13847,65 +13847,101 @@ function RankingPodium({ ranking }) {
 	});
 }
 function TeamCalendar() {
-	const [year, month] = teamMilestonesData.month.split("-").map(Number);
+	const [initialYear, initialMonth] = teamMilestonesData.month.split("-").map(Number);
+	const [visibleMonth, setVisibleMonth] = (0, import_react.useState)(() => new Date(initialYear, initialMonth - 1, 1));
+	const year = visibleMonth.getFullYear();
+	const month = visibleMonth.getMonth() + 1;
+	const monthLabel = new Intl.DateTimeFormat("pt-PT", {
+		month: "long",
+		year: "numeric"
+	}).format(visibleMonth);
 	const firstWeekday = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
 	const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
 	const events = /* @__PURE__ */ new Map();
-	teamMilestonesData.birthdays.forEach((person) => events.set(person.day, [...events.get(person.day) ?? [], {
-		type: "birthday",
-		name: person.name,
-		role: person.role
-	}]));
-	teamMilestonesData.anniversaries.forEach((person) => events.set(person.day, [...events.get(person.day) ?? [], {
-		type: "tenure",
-		name: person.name,
-		role: person.role,
-		years: person.years
-	}]));
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "team-calendar",
-		"aria-label": `Calendário de ${teamMilestonesData.label}`,
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "team-calendar-weekdays",
+	if (year === initialYear && month === initialMonth) {
+		teamMilestonesData.birthdays.forEach((person) => events.set(person.day, [...events.get(person.day) ?? [], {
+			type: "birthday",
+			name: person.name,
+			role: person.role
+		}]));
+		teamMilestonesData.anniversaries.forEach((person) => events.set(person.day, [...events.get(person.day) ?? [], {
+			type: "tenure",
+			name: person.name,
+			role: person.role,
+			years: person.years
+		}]));
+	}
+	const navigateMonth = (direction) => setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() + direction, 1));
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "team-calendar-navigation",
 			children: [
-				"Seg",
-				"Ter",
-				"Qua",
-				"Qui",
-				"Sex",
-				"Sáb",
-				"Dom"
-			].map((day) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: day }, day))
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "team-calendar-grid",
-			children: [Array.from({ length: firstWeekday }).map((_, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "team-calendar-empty",
-				"aria-hidden": "true"
-			}, `empty-${index}`)), Array.from({ length: daysInMonth }, (_, index) => index + 1).map((day) => {
-				const dayEvents = events.get(day) ?? [];
-				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: dayEvents.length ? "team-calendar-day has-event" : "team-calendar-day",
-					tabIndex: dayEvents.length ? 0 : void 0,
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("time", { children: day }), dayEvents.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-						className: "team-calendar-dots",
-						"aria-label": `${dayEvents.length} evento${dayEvents.length > 1 ? "s" : ""}`,
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: dayEvents.some((event) => event.type === "birthday") ? "birthday-dot" : "" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: dayEvents.some((event) => event.type === "tenure") ? "tenure-dot" : "" })]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "team-calendar-tooltip",
-						role: "tooltip",
-						children: dayEvents.map((event) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: event.type === "birthday" ? "🎂" : "🏅" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: event.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: event.type === "birthday" ? `Aniversário · ${event.role}` : `${event.years} anos · ${event.role}` })] })] }, `${event.type}-${event.name}`))
-					})] })]
-				}, day);
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "button",
+					onClick: () => navigateMonth(-1),
+					"aria-label": "Mês anterior",
+					children: "‹"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: monthLabel }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "button",
+					onClick: () => navigateMonth(1),
+					"aria-label": "Mês seguinte",
+					children: "›"
+				})
+			]
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "team-calendar",
+			"aria-label": `Calendário de ${monthLabel}`,
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "team-calendar-weekdays",
+				children: [
+					"Seg",
+					"Ter",
+					"Qua",
+					"Qui",
+					"Sex",
+					"Sáb",
+					"Dom"
+				].map((day) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: day }, day))
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "team-calendar-grid",
+				children: [Array.from({ length: firstWeekday }).map((_, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "team-calendar-empty",
+					"aria-hidden": "true"
+				}, `empty-${index}`)), Array.from({ length: daysInMonth }, (_, index) => index + 1).map((day) => {
+					const dayEvents = events.get(day) ?? [];
+					const milestone = dayEvents.some((event) => event.type === "tenure" && event.years && event.years % 5 === 0);
+					return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: `${dayEvents.length ? "team-calendar-day has-event" : "team-calendar-day"}${milestone ? " milestone-tenure" : ""}`,
+						tabIndex: dayEvents.length ? 0 : void 0,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("time", { children: day }), dayEvents.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "team-calendar-icons",
+							"aria-label": `${dayEvents.length} evento${dayEvents.length > 1 ? "s" : ""}`,
+							children: dayEvents.map((event) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", {
+								className: event.type === "birthday" ? "birthday-icon" : event.years && event.years % 5 === 0 ? "milestone-icon" : "tenure-icon",
+								children: event.type === "birthday" ? "🎂" : event.years && event.years % 5 === 0 ? "🏆" : "🏅"
+							}, `${event.type}-${event.name}`))
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "team-calendar-tooltip",
+							role: "tooltip",
+							children: dayEvents.map((event) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: event.type === "birthday" ? "🎂" : event.years && event.years % 5 === 0 ? "🏆" : "🏅" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: event.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: event.type === "birthday" ? `Aniversário · ${event.role}` : `${event.years} anos · ${event.role}${event.years && event.years % 5 === 0 ? " · Marco de carreira" : ""}` })] })] }, `${event.type}-${event.name}`))
+						})] })]
+					}, day);
+				})]
 			})]
-		})]
-	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "team-calendar-footer",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "birthday-dot" }), " Aniversários"] }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "tenure-dot" }), " Antiguidade"] }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Passe o cursor sobre uma data assinalada para ver o detalhe." })
-		]
-	})] });
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "team-calendar-footer",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "🎂 Aniversários" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "🏅 Antiguidade" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "🏆 Marcos: 5, 10, 15, 20, 25 e 30 anos" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Passe o cursor sobre uma data assinalada para ver o detalhe." })
+			]
+		})
+	] });
 }
 function Home() {
 	const objectivesExportRef = (0, import_react.useRef)(null);
@@ -15143,7 +15179,7 @@ function Home() {
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 												className: "eyebrow",
-												children: teamMilestonesData.label
+												children: "Agenda da equipa"
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 												id: "team-page-calendar-title",

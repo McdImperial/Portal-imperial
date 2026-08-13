@@ -351,25 +351,34 @@ function RankingPodium({ ranking }: { ranking: ManagerRanking[] }) {
 }
 
 function TeamCalendar() {
-  const [year, month] = teamMilestonesData.month.split("-").map(Number);
+  const [initialYear, initialMonth] = teamMilestonesData.month.split("-").map(Number);
+  const [visibleMonth, setVisibleMonth] = useState(() => new Date(initialYear, initialMonth - 1, 1));
+  const year = visibleMonth.getFullYear();
+  const month = visibleMonth.getMonth() + 1;
+  const monthLabel = new Intl.DateTimeFormat("pt-PT", { month: "long", year: "numeric" }).format(visibleMonth);
   const firstWeekday = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
   const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
   const events = new Map<number, { type: "birthday" | "tenure"; name: string; role: string; years?: number }[]>();
-  teamMilestonesData.birthdays.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "birthday", name: person.name, role: person.role }]));
-  teamMilestonesData.anniversaries.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "tenure", name: person.name, role: person.role, years: person.years }]));
-  return <><div className="team-calendar" aria-label={`Calendário de ${teamMilestonesData.label}`}>
+  const isDataMonth = year === initialYear && month === initialMonth;
+  if (isDataMonth) {
+    teamMilestonesData.birthdays.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "birthday", name: person.name, role: person.role }]));
+    teamMilestonesData.anniversaries.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "tenure", name: person.name, role: person.role, years: person.years }]));
+  }
+  const navigateMonth = (direction: number) => setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() + direction, 1));
+  return <><div className="team-calendar-navigation"><button type="button" onClick={() => navigateMonth(-1)} aria-label="Mês anterior">‹</button><strong>{monthLabel}</strong><button type="button" onClick={() => navigateMonth(1)} aria-label="Mês seguinte">›</button></div><div className="team-calendar" aria-label={`Calendário de ${monthLabel}`}>
     <div className="team-calendar-weekdays">{["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((day) => <span key={day}>{day}</span>)}</div>
     <div className="team-calendar-grid">
       {Array.from({ length: firstWeekday }).map((_, index) => <span className="team-calendar-empty" key={`empty-${index}`} aria-hidden="true" />)}
       {Array.from({ length: daysInMonth }, (_, index) => index + 1).map((day) => {
         const dayEvents = events.get(day) ?? [];
-        return <div className={dayEvents.length ? "team-calendar-day has-event" : "team-calendar-day"} key={day} tabIndex={dayEvents.length ? 0 : undefined}>
+        const milestone = dayEvents.some((event) => event.type === "tenure" && event.years && event.years % 5 === 0);
+        return <div className={`${dayEvents.length ? "team-calendar-day has-event" : "team-calendar-day"}${milestone ? " milestone-tenure" : ""}`} key={day} tabIndex={dayEvents.length ? 0 : undefined}>
           <time>{day}</time>
-          {dayEvents.length > 0 && <><span className="team-calendar-dots" aria-label={`${dayEvents.length} evento${dayEvents.length > 1 ? "s" : ""}`}><i className={dayEvents.some((event) => event.type === "birthday") ? "birthday-dot" : ""} /><i className={dayEvents.some((event) => event.type === "tenure") ? "tenure-dot" : ""} /></span><div className="team-calendar-tooltip" role="tooltip">{dayEvents.map((event) => <p key={`${event.type}-${event.name}`}><b>{event.type === "birthday" ? "🎂" : "🏅"}</b><span><strong>{event.name}</strong><small>{event.type === "birthday" ? `Aniversário · ${event.role}` : `${event.years} anos · ${event.role}`}</small></span></p>)}</div></>}
+          {dayEvents.length > 0 && <><span className="team-calendar-icons" aria-label={`${dayEvents.length} evento${dayEvents.length > 1 ? "s" : ""}`}>{dayEvents.map((event) => <i key={`${event.type}-${event.name}`} className={event.type === "birthday" ? "birthday-icon" : event.years && event.years % 5 === 0 ? "milestone-icon" : "tenure-icon"}>{event.type === "birthday" ? "🎂" : event.years && event.years % 5 === 0 ? "🏆" : "🏅"}</i>)}</span><div className="team-calendar-tooltip" role="tooltip">{dayEvents.map((event) => <p key={`${event.type}-${event.name}`}><b>{event.type === "birthday" ? "🎂" : event.years && event.years % 5 === 0 ? "🏆" : "🏅"}</b><span><strong>{event.name}</strong><small>{event.type === "birthday" ? `Aniversário · ${event.role}` : `${event.years} anos · ${event.role}${event.years && event.years % 5 === 0 ? " · Marco de carreira" : ""}`}</small></span></p>)}</div></>}
         </div>;
       })}
     </div>
-  </div><div className="team-calendar-footer"><span><i className="birthday-dot" /> Aniversários</span><span><i className="tenure-dot" /> Antiguidade</span><small>Passe o cursor sobre uma data assinalada para ver o detalhe.</small></div></>;
+  </div><div className="team-calendar-footer"><span>🎂 Aniversários</span><span>🏅 Antiguidade</span><span>🏆 Marcos: 5, 10, 15, 20, 25 e 30 anos</span><small>Passe o cursor sobre uma data assinalada para ver o detalhe.</small></div></>;
 }
 
 export default function Home() {
@@ -1074,7 +1083,7 @@ export default function Home() {
               </div>
 
               <section className="team-milestones team-page-calendar" aria-labelledby="team-page-calendar-title">
-                <div className="team-milestones-heading"><div><span className="eyebrow">{teamMilestonesData.label}</span><h2 id="team-page-calendar-title">Aniversários e antiguidade</h2><p>Datas assinaladas com detalhe disponível no cursor.</p></div><div className="team-calendar-counts"><span>🎂 {teamMilestonesData.birthdays.length}</span><span>🏅 {teamMilestonesData.anniversaries.length}</span></div></div>
+                <div className="team-milestones-heading"><div><span className="eyebrow">Agenda da equipa</span><h2 id="team-page-calendar-title">Aniversários e antiguidade</h2><p>Datas assinaladas com detalhe disponível no cursor.</p></div><div className="team-calendar-counts"><span>🎂 {teamMilestonesData.birthdays.length}</span><span>🏅 {teamMilestonesData.anniversaries.length}</span></div></div>
                 <TeamCalendar />
               </section>
 
