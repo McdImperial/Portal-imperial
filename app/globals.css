@@ -349,6 +349,8 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .panel { border-radius: 16px; overflow: hidden; }
 .panel-heading, .section-title { display: flex; align-items: center; justify-content: space-between; }
 .panel-heading { padding: 21px 24px 17px; }
+.summary-panel-copy { margin: 6px 0 0; color: var(--muted); font-size: 10px; }
+.week-task-count { padding: 7px 10px; border-radius: 999px; color: #2d7258; background: #e7f3ed; font-size: 10px; font-weight: 800; white-space: nowrap; }
 .segmented { padding: 3px; display: flex; gap: 2px; background: #f0f3f1; border-radius: 9px; }
 .segmented button { border: 0; background: transparent; color: #77817d; padding: 7px 10px; border-radius: 7px; font-size: 11px; cursor: pointer; }
 .segmented button.selected { background: white; color: var(--forest); font-weight: 700; box-shadow: 0 1px 4px rgba(21,62,52,.09); }
@@ -373,6 +375,19 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .text-button { border: 0; background: transparent; color: #39765f; padding: 15px 24px; font-size: 11px; font-weight: 800; cursor: pointer; }
 .text-button span { margin-left: 4px; }
 .text-button.compact { padding: 8px 0; }
+
+.team-milestones { padding: 22px 24px; display: grid; gap: 18px; border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: 0 3px 12px rgba(22,54,44,.035); }
+.team-milestones-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.team-milestones-heading h2 { margin-top: 5px; }
+.team-milestones-heading p { margin: 6px 0 0; color: var(--muted); font-size: 10px; }
+.team-milestones-icon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 14px; background: #fbf0d9; font-size: 23px; }
+.team-milestones-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.milestone-card { min-height: 104px; padding: 17px; display: flex; align-items: center; gap: 14px; border: 1px solid #dfe8e3; border-radius: 13px; }
+.milestone-card.birthdays { background: #fff8ea; border-color: #f1dfb8; }
+.milestone-card.tenure { background: #edf5f1; border-color: #d5e8de; }
+.milestone-icon { width: 41px; height: 41px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 12px; background: rgba(255,255,255,.78); font-size: 19px; }
+.milestone-card h3 { margin: 5px 0 0; color: #233a31; font-size: 13px; }
+.milestone-card p { margin: 6px 0 0; color: #75837d; font-size: 9px; line-height: 1.5; }
 
 .objectives-section { display: grid; gap: 14px; }
 .objective-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
@@ -985,6 +1000,8 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .cost-selector { min-height: 125px; }
   .metric-card { min-height: 112px; }
   .panel-heading { align-items: flex-start; gap: 14px; flex-direction: column; }
+  .team-milestones-heading { align-items: flex-start; }
+  .team-milestones-grid { grid-template-columns: 1fr; }
   .segmented { width: 100%; }
   .segmented button { flex: 1; }
   .task-row { grid-template-columns: 28px 1fr 36px; gap: 10px; padding: 13px 15px; }

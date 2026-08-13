@@ -591,6 +591,11 @@ export default function Home() {
     return scopedTasks;
   }, [filter, scopedTasks]);
 
+  const currentWeekTasks = useMemo(() => scopedTasks.filter((task) => {
+    const status = task.status ?? (task.done ? "Concluído" : "Por fazer");
+    return !task.done && status !== "Concluído" && /^(Semanal|Hoje|Amanhã)/.test(task.due);
+  }), [scopedTasks]);
+
   const boardTasks = useMemo(() => scopedTasks.filter((task) => {
     const status = task.status ?? (task.done ? "Concluído" : "Por fazer");
     const matchesStatus = statusFilter === "Todos" || status === statusFilter;
@@ -1012,13 +1017,11 @@ export default function Home() {
           {view === "resumo" && (
             <section className="panel tasks-panel">
               <div className="panel-heading">
-                <div><span className="eyebrow">Plano de trabalho</span><h2>{view === "resumo" ? "Tarefas prioritárias" : "Lista de tarefas"}</h2></div>
-                <div className="segmented" aria-label="Filtrar tarefas">
-                  {(["pendentes", "concluidas", "todas"] as const).map((item) => <button key={item} className={filter === item ? "selected" : ""} onClick={() => setFilter(item)}>{item === "concluidas" ? "Concluídas" : item[0].toUpperCase() + item.slice(1)}</button>)}
-                </div>
+                <div><span className="eyebrow">Plano de trabalho</span><h2>Tarefas em curso esta semana</h2><p className="summary-panel-copy">Acompanhamento das tarefas semanais, de hoje e de amanhã.</p></div>
+                <span className="week-task-count">{currentWeekTasks.length} em curso</span>
               </div>
               <div className="task-list">
-                {(view === "resumo" ? visibleTasks.slice(0, 5) : visibleTasks).map((task) => (
+                {currentWeekTasks.slice(0, 6).map((task) => (
                   <article className={task.done ? "task-row done" : "task-row"} key={task.id}>
                     <button className="check" disabled={!canEdit} aria-label={`${task.done ? "Reabrir" : "Concluir"} ${task.title}`} onClick={() => toggleTask(task.id)}>{task.done ? "✓" : ""}</button>
                     <div className="task-main"><strong>{task.title}</strong><span>{task.area}</span></div>
@@ -1028,9 +1031,28 @@ export default function Home() {
                     <button className="row-more" aria-label={`Mais opções para ${task.title}`}>•••</button>
                   </article>
                 ))}
-                {visibleTasks.length === 0 && <div className="empty-state">Sem tarefas nesta categoria.</div>}
+                {currentWeekTasks.length === 0 && <div className="empty-state">Sem tarefas em curso para esta semana.</div>}
               </div>
-              {view === "resumo" && <button className="text-button" onClick={() => setView("tarefas")}>Ver todas as tarefas <span>→</span></button>}
+              <button className="text-button" onClick={() => setView("tarefas")}>Ver todas as tarefas <span>→</span></button>
+            </section>
+          )}
+
+          {view === "resumo" && department === "global" && (
+            <section className="team-milestones" aria-labelledby="team-milestones-title">
+              <div className="team-milestones-heading">
+                <div><span className="eyebrow">Equipa</span><h2 id="team-milestones-title">Aniversários e antiguidade</h2><p>Reconhecimento das datas importantes da equipa Imperial.</p></div>
+                <span className="team-milestones-icon" aria-hidden="true">🎉</span>
+              </div>
+              <div className="team-milestones-grid">
+                <article className="milestone-card birthdays">
+                  <span className="milestone-icon" aria-hidden="true">🎂</span>
+                  <div><span className="eyebrow">Aniversários</span><h3>Próximas celebrações</h3><p>A informação será apresentada aqui assim que receber o ficheiro da equipa.</p></div>
+                </article>
+                <article className="milestone-card tenure">
+                  <span className="milestone-icon" aria-hidden="true">🏅</span>
+                  <div><span className="eyebrow">Antiguidade</span><h3>Marcos de permanência</h3><p>Os anos de casa e as próximas datas de reconhecimento serão organizados neste espaço.</p></div>
+                </article>
+              </div>
             </section>
           )}
 

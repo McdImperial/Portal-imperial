@@ -13886,11 +13886,15 @@ function Home() {
 			priorityNames: unmet.sort((a, b) => (b.possiblePoints ?? 0) - (a.possiblePoints ?? 0)).map((item) => item.theme)
 		};
 	}, [selectedObjectives, objectiveStats]);
-	const visibleTasks = (0, import_react.useMemo)(() => {
+	(0, import_react.useMemo)(() => {
 		if (filter === "pendentes") return scopedTasks.filter((task) => !task.done);
 		if (filter === "concluidas") return scopedTasks.filter((task) => task.done);
 		return scopedTasks;
 	}, [filter, scopedTasks]);
+	const currentWeekTasks = (0, import_react.useMemo)(() => scopedTasks.filter((task) => {
+		const status = task.status ?? (task.done ? "Concluído" : "Por fazer");
+		return !task.done && status !== "Concluído" && /^(Semanal|Hoje|Amanhã)/.test(task.due);
+	}), [scopedTasks]);
 	const boardTasks = (0, import_react.useMemo)(() => scopedTasks.filter((task) => {
 		const status = task.status ?? (task.done ? "Concluído" : "Por fazer");
 		const matchesStatus = statusFilter === "Todos" || status === statusFilter;
@@ -14720,26 +14724,24 @@ function Home() {
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "panel-heading",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "eyebrow",
-										children: "Plano de trabalho"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: view === "resumo" ? "Tarefas prioritárias" : "Lista de tarefas" })] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "segmented",
-										"aria-label": "Filtrar tarefas",
-										children: [
-											"pendentes",
-											"concluidas",
-											"todas"
-										].map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-											className: filter === item ? "selected" : "",
-											onClick: () => setFilter(item),
-											children: item === "concluidas" ? "Concluídas" : item[0].toUpperCase() + item.slice(1)
-										}, item))
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "eyebrow",
+											children: "Plano de trabalho"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Tarefas em curso esta semana" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+											className: "summary-panel-copy",
+											children: "Acompanhamento das tarefas semanais, de hoje e de amanhã."
+										})
+									] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+										className: "week-task-count",
+										children: [currentWeekTasks.length, " em curso"]
 									})]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "task-list",
-									children: [(view === "resumo" ? visibleTasks.slice(0, 5) : visibleTasks).map((task) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+									children: [currentWeekTasks.slice(0, 6).map((task) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
 										className: task.done ? "task-row done" : "task-row",
 										children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -14775,17 +14777,70 @@ function Home() {
 												children: "•••"
 											})
 										]
-									}, task.id)), visibleTasks.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									}, task.id)), currentWeekTasks.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 										className: "empty-state",
-										children: "Sem tarefas nesta categoria."
+										children: "Sem tarefas em curso para esta semana."
 									})]
 								}),
-								view === "resumo" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 									className: "text-button",
 									onClick: () => setView("tarefas"),
 									children: ["Ver todas as tarefas ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "→" })]
 								})
 							]
+						}),
+						view === "resumo" && department === "global" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+							className: "team-milestones",
+							"aria-labelledby": "team-milestones-title",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "team-milestones-heading",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "eyebrow",
+										children: "Equipa"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+										id: "team-milestones-title",
+										children: "Aniversários e antiguidade"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Reconhecimento das datas importantes da equipa Imperial." })
+								] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "team-milestones-icon",
+									"aria-hidden": "true",
+									children: "🎉"
+								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "team-milestones-grid",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+									className: "milestone-card birthdays",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "milestone-icon",
+										"aria-hidden": "true",
+										children: "🎂"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "eyebrow",
+											children: "Aniversários"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Próximas celebrações" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "A informação será apresentada aqui assim que receber o ficheiro da equipa." })
+									] })]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+									className: "milestone-card tenure",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "milestone-icon",
+										"aria-hidden": "true",
+										children: "🏅"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "eyebrow",
+											children: "Antiguidade"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Marcos de permanência" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Os anos de casa e as próximas datas de reconhecimento serão organizados neste espaço." })
+									] })]
+								})]
+							})]
 						}),
 						view === "tarefas" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 							className: canEdit ? "board-page" : "board-page read-only",
