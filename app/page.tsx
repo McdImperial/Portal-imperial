@@ -1088,11 +1088,12 @@ export default function Home() {
               </section>
 
               <section className="team-org-section">
-                <div className="team-section-heading"><div><span className="eyebrow">Estrutura organizacional</span><h2>Organograma da equipa</h2><p>A organização é apresentada por níveis de responsabilidade.</p></div></div>
+                <div className="team-section-heading"><div><span className="eyebrow">Estrutura organizacional</span><h2>Organograma da equipa</h2><p>Estrutura de liderança apresentada por níveis de responsabilidade.</p></div></div>
                 <div className="team-org-chart">
-                  <div className="team-org-level franchisee-level">{teamMilestonesData.organisation.franchisee.map((person) => <article className="team-org-card lead" key={person.name}><span className="team-org-avatar">★</span><div><small>Franqueado</small><strong>{person.name}</strong><span>{person.role}</span></div></article>)}</div>
-                  <div className="team-org-connector" />
-                  <div className="team-org-level supervision-level">{teamMilestonesData.organisation.supervision.map((person) => <article className="team-org-card supervision" key={person.name}><span className="team-org-avatar">◈</span><div><small>Supervisão</small><strong>{person.name}</strong><span>{person.role}</span></div></article>)}</div>
+                  {teamMilestonesData.organisation.leadershipLevels.map((level, levelIndex) => <div className="leadership-level-wrap" key={`leadership-${levelIndex}`}>
+                    {levelIndex > 0 && <div className="team-org-connector" />}
+                    <div className={`team-org-level leadership-level leadership-level-${levelIndex + 1}`}>{level.map((person) => <article className={levelIndex === 0 ? "team-org-card lead" : "team-org-card leadership"} key={person.name}><span className="team-org-avatar">{levelIndex === 0 ? "★" : levelIndex === 1 ? "◆" : levelIndex === 2 ? "◈" : "○"}</span><div><small>{person.label}</small><strong>{person.name}</strong><span>{person.role}</span></div></article>)}</div>
+                  </div>)}
                 </div>
               </section>
 

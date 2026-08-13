@@ -441,11 +441,14 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .team-page-calendar { box-shadow: none; }
 .team-org-section, .team-directory-card { padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: 0 3px 12px rgba(22,54,44,.035); }
 .team-org-chart, .management-org-chart { margin-top: 20px; display: grid; justify-items: center; }
+.leadership-level-wrap { width: 100%; display: grid; justify-items: center; }
 .team-org-level { width: 100%; display: flex; justify-content: center; gap: 12px; }
 .team-org-connector { width: 1px; height: 26px; background: #b8cec4; }
 .team-org-card { min-width: 214px; padding: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid #dce6e1; border-radius: 11px; background: #fff; box-shadow: 0 5px 16px rgba(36,78,60,.04); }
 .team-org-card.lead { min-width: 275px; border-color: #a9d8c4; background: #f4fbf8; }
 .team-org-card.supervision { width: min(250px, 31%); }
+.team-org-card.leadership { width: min(260px, 31%); }
+.leadership-level-2 .team-org-card { width: 280px; }
 .team-org-card.management { width: min(245px, 24%); }
 .team-org-avatar { width: 37px; height: 37px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 10px; color: #1f7054; background: #e9f4ef; font-size: 15px; }
 .team-org-card.lead .team-org-avatar { color: #fff; background: #267257; }

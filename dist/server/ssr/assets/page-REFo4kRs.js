@@ -12612,6 +12612,52 @@ var team_milestones_default = {
 			"name": "Jorge Azevedo",
 			"role": "Franqueado"
 		}],
+		"leadershipLevels": [
+			[{
+				"name": "Jorge Azevedo",
+				"role": "Franqueado",
+				"label": "Franqueado"
+			}],
+			[{
+				"name": "Nuno Correia",
+				"role": "Supervisor Geral",
+				"label": "Supervisão"
+			}],
+			[
+				{
+					"name": "António Aidos",
+					"role": "Supervisor Operações",
+					"label": "Supervisão"
+				},
+				{
+					"name": "Marta Azevedo",
+					"role": "Supervisor MKT/RH",
+					"label": "Supervisão"
+				},
+				{
+					"name": "Carlos Pinto",
+					"role": "Supervisor",
+					"label": "Supervisão"
+				}
+			],
+			[
+				{
+					"name": "Cristina Pinto",
+					"role": "Assistente Direção",
+					"label": "Apoio à gestão"
+				},
+				{
+					"name": "Marlene Soutelo",
+					"role": "Administrativa",
+					"label": "Apoio à gestão"
+				},
+				{
+					"name": "Andreia Faria",
+					"role": "Administrativa",
+					"label": "Apoio à gestão"
+				}
+			]
+		],
 		"supervision": [
 			{
 				"name": "Nuno Correia",
@@ -15202,41 +15248,27 @@ function Home() {
 												children: "Estrutura organizacional"
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Organograma da equipa" }),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "A organização é apresentada por níveis de responsabilidade." })
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Estrutura de liderança apresentada por níveis de responsabilidade." })
 										] })
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 										className: "team-org-chart",
-										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: "team-org-level franchisee-level",
-												children: teamMilestonesData.organisation.franchisee.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-													className: "team-org-card lead",
+										children: teamMilestonesData.organisation.leadershipLevels.map((level, levelIndex) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "leadership-level-wrap",
+											children: [levelIndex > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "team-org-connector" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: `team-org-level leadership-level leadership-level-${levelIndex + 1}`,
+												children: level.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+													className: levelIndex === 0 ? "team-org-card lead" : "team-org-card leadership",
 													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 														className: "team-org-avatar",
-														children: "★"
+														children: levelIndex === 0 ? "★" : levelIndex === 1 ? "◆" : levelIndex === 2 ? "◈" : "○"
 													}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Franqueado" }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.label }),
 														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }),
 														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: person.role })
 													] })]
 												}, person.name))
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "team-org-connector" }),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: "team-org-level supervision-level",
-												children: teamMilestonesData.organisation.supervision.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-													className: "team-org-card supervision",
-													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-														className: "team-org-avatar",
-														children: "◈"
-													}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Supervisão" }),
-														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }),
-														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: person.role })
-													] })]
-												}, person.name))
-											})
-										]
+											})]
+										}, `leadership-${levelIndex}`))
 									})]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
