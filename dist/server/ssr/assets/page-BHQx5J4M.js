@@ -15316,23 +15316,22 @@ function Home() {
 											className: "management-org-level-wrap",
 											children: [levelIndex > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "team-org-connector" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 												className: `team-org-level management-level level-${levelIndex + 1}`,
-												children: level.map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-													className: levelIndex === 0 ? "team-org-card lead" : "team-org-card management",
-													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-														className: "team-org-avatar",
-														children: levelIndex === 0 ? "♛" : "●"
-													}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.level }),
-														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }),
-														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: person.role }),
-														person.department && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", {
+												children: level.map((person) => {
+													const departmentIcon = person.department === "Qualidade & Produtos" ? "🧪" : person.department === "Pessoas" ? "👥" : person.department === "Serviço Cliente" ? "🎧" : person.department === "Manutenção Seg. & IT" ? "🛠️" : person.department ? "★" : void 0;
+													return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+														className: levelIndex === 0 ? "team-org-card lead" : "team-org-card management",
+														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+															className: "team-org-avatar",
 															title: person.department,
-															"aria-label": `Departamento: ${person.department}`,
-															className: `team-department ${person.department === "Qualidade & Produtos" ? "quality" : person.department === "Pessoas" ? "people" : person.department === "Serviço Cliente" ? "service" : person.department === "Manutenção Seg. & IT" ? "maintenance" : "general"}`,
-															children: person.department === "Qualidade & Produtos" ? "🧪" : person.department === "Pessoas" ? "👥" : person.department === "Serviço Cliente" ? "🎧" : person.department === "Manutenção Seg. & IT" ? "🛠️" : "★"
-														})
-													] })]
-												}, person.name))
+															"aria-label": person.department ? `Departamento: ${person.department}` : void 0,
+															children: departmentIcon ?? (levelIndex === 0 ? "♛" : "●")
+														}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+															/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.level }),
+															/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }),
+															/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: person.role })
+														] })]
+													}, person.name);
+												})
 											})]
 										}, `level-${levelIndex}`))
 									})]
