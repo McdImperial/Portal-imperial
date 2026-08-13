@@ -1017,17 +1017,6 @@ export default function Home() {
             </section>
           )}
 
-          {view === "resumo" && department === "global" && (
-            <section className="team-milestones" aria-labelledby="team-milestones-title">
-              <div className="team-milestones-heading">
-                <div><span className="eyebrow">Equipa · {teamMilestonesData.label}</span><h2 id="team-milestones-title">Aniversários e antiguidade</h2><p>Próximas celebrações e marcos de permanência da equipa Imperial.</p></div>
-                <div className="team-calendar-counts"><span>🎂 {teamMilestonesData.birthdays.length}</span><span>🏅 {teamMilestonesData.anniversaries.length}</span></div>
-              </div>
-              <TeamCalendar />
-              <a className="team-source-link" href={teamMilestonesData.sourceUrl} target="_blank" rel="noreferrer">Consultar ficheiro da equipa ↗</a>
-            </section>
-          )}
-
           {view === "resumo" && department === "qualidade" && (
             <section className="quality-shortcuts" aria-labelledby="quality-shortcuts-title">
               <div className="shortcut-heading">

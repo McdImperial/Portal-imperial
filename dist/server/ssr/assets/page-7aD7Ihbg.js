@@ -14972,37 +14972,6 @@ function Home() {
 								})
 							]
 						}),
-						view === "resumo" && department === "global" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-							className: "team-milestones",
-							"aria-labelledby": "team-milestones-title",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "team-milestones-heading",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-											className: "eyebrow",
-											children: ["Equipa · ", teamMilestonesData.label]
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-											id: "team-milestones-title",
-											children: "Aniversários e antiguidade"
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Próximas celebrações e marcos de permanência da equipa Imperial." })
-									] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "team-calendar-counts",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["🎂 ", teamMilestonesData.birthdays.length] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["🏅 ", teamMilestonesData.anniversaries.length] })]
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TeamCalendar, {}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-									className: "team-source-link",
-									href: teamMilestonesData.sourceUrl,
-									target: "_blank",
-									rel: "noreferrer",
-									children: "Consultar ficheiro da equipa ↗"
-								})
-							]
-						}),
 						view === "resumo" && department === "qualidade" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 							className: "quality-shortcuts",
 							"aria-labelledby": "quality-shortcuts-title",
