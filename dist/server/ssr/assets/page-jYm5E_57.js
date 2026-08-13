@@ -12785,6 +12785,10 @@ var team_milestones_default = {
 			{
 				"name": "Ivo Costa",
 				"role": "Treinador"
+			},
+			{
+				"name": "Nuno Ribeiro",
+				"role": "Treinador"
 			}
 		],
 		"publicRelations": [
@@ -12801,7 +12805,7 @@ var team_milestones_default = {
 				"role": "Relações Públicas"
 			}
 		],
-		"employees": 70
+		"employees": 69
 	}
 };
 //#endregion
