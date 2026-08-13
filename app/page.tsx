@@ -600,6 +600,16 @@ export default function Home() {
     return !task.done && status !== "Concluído" && /^(Semanal|Hoje|Amanhã)/.test(task.due);
   }), [scopedTasks]);
 
+  const teamCalendar = useMemo(() => {
+    const [year, month] = teamMilestonesData.month.split("-").map(Number);
+    const firstWeekday = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
+    const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    const events = new Map<number, { type: "birthday" | "tenure"; name: string; role: string; years?: number }[]>();
+    teamMilestonesData.birthdays.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "birthday", name: person.name, role: person.role }]));
+    teamMilestonesData.anniversaries.forEach((person) => events.set(person.day, [...(events.get(person.day) ?? []), { type: "tenure", name: person.name, role: person.role, years: person.years }]));
+    return { firstWeekday, daysInMonth, events };
+  }, []);
+
   const boardTasks = useMemo(() => scopedTasks.filter((task) => {
     const status = task.status ?? (task.done ? "Concluído" : "Por fazer");
     const matchesStatus = statusFilter === "Todos" || status === statusFilter;
@@ -996,18 +1006,22 @@ export default function Home() {
             <section className="team-milestones" aria-labelledby="team-milestones-title">
               <div className="team-milestones-heading">
                 <div><span className="eyebrow">Equipa · {teamMilestonesData.label}</span><h2 id="team-milestones-title">Aniversários e antiguidade</h2><p>Próximas celebrações e marcos de permanência da equipa Imperial.</p></div>
-                <span className="team-milestones-icon" aria-hidden="true">🎉</span>
+                <div className="team-calendar-counts"><span>🎂 {teamMilestonesData.birthdays.length}</span><span>🏅 {teamMilestonesData.anniversaries.length}</span></div>
               </div>
-              <div className="team-milestones-grid">
-                <article className="milestone-card birthdays">
-                  <span className="milestone-icon" aria-hidden="true">🎂</span>
-                  <div className="milestone-content"><span className="eyebrow">Aniversários</span><h3>{teamMilestonesData.birthdays.length} celebrações em agosto</h3><div className="milestone-list">{teamMilestonesData.birthdays.slice(0, 4).map((person) => <div key={person.name}><time>{String(person.day).padStart(2, "0")} Ago</time><span><strong>{person.name}</strong><small>{person.role}</small></span></div>)}</div></div>
-                </article>
-                <article className="milestone-card tenure">
-                  <span className="milestone-icon" aria-hidden="true">🏅</span>
-                  <div className="milestone-content"><span className="eyebrow">Antiguidade</span><h3>{teamMilestonesData.anniversaries.length} marcos em agosto</h3><div className="milestone-list">{teamMilestonesData.anniversaries.slice(0, 4).map((person) => <div key={person.name}><time>{String(person.day).padStart(2, "0")} Ago</time><span><strong>{person.name}</strong><small>{person.role}</small></span><b>{person.years} anos</b></div>)}</div></div>
-                </article>
+              <div className="team-calendar" aria-label={`Calendário de ${teamMilestonesData.label}`}>
+                <div className="team-calendar-weekdays">{["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((day) => <span key={day}>{day}</span>)}</div>
+                <div className="team-calendar-grid">
+                  {Array.from({ length: teamCalendar.firstWeekday }).map((_, index) => <span className="team-calendar-empty" key={`empty-${index}`} aria-hidden="true" />)}
+                  {Array.from({ length: teamCalendar.daysInMonth }, (_, index) => index + 1).map((day) => {
+                    const events = teamCalendar.events.get(day) ?? [];
+                    return <div className={events.length ? "team-calendar-day has-event" : "team-calendar-day"} key={day} tabIndex={events.length ? 0 : undefined}>
+                      <time>{day}</time>
+                      {events.length > 0 && <><span className="team-calendar-dots" aria-label={`${events.length} evento${events.length > 1 ? "s" : ""}`}><i className={events.some((event) => event.type === "birthday") ? "birthday-dot" : ""} /><i className={events.some((event) => event.type === "tenure") ? "tenure-dot" : ""} /></span><div className="team-calendar-tooltip" role="tooltip">{events.map((event) => <p key={`${event.type}-${event.name}`}><b>{event.type === "birthday" ? "🎂" : "🏅"}</b><span><strong>{event.name}</strong><small>{event.type === "birthday" ? `Aniversário · ${event.role}` : `${event.years} anos · ${event.role}`}</small></span></p>)}</div></>}
+                    </div>;
+                  })}
+                </div>
               </div>
+              <div className="team-calendar-footer"><span><i className="birthday-dot" /> Aniversários</span><span><i className="tenure-dot" /> Antiguidade</span><small>Passe o cursor sobre uma data assinalada para ver o detalhe.</small></div>
               <a className="team-source-link" href={teamMilestonesData.sourceUrl} target="_blank" rel="noreferrer">Consultar ficheiro da equipa ↗</a>
             </section>
           )}

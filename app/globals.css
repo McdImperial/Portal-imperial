@@ -381,6 +381,35 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
 .team-milestones-heading h2 { margin-top: 5px; }
 .team-milestones-heading p { margin: 6px 0 0; color: var(--muted); font-size: 10px; }
 .team-milestones-icon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 14px; background: #fbf0d9; font-size: 23px; }
+.team-calendar-counts { display: flex; align-items: center; gap: 7px; }
+.team-calendar-counts span { padding: 8px 10px; border-radius: 999px; color: #5b6963; background: #f4f7f5; font-size: 10px; font-weight: 800; }
+.team-calendar { overflow: visible; border: 1px solid #e2eae6; border-radius: 13px; background: #fbfcfb; }
+.team-calendar-weekdays, .team-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.team-calendar-weekdays { border-bottom: 1px solid #e2eae6; }
+.team-calendar-weekdays span { padding: 9px 0; color: #8b9791; text-align: center; font-size: 8px; font-weight: 850; text-transform: uppercase; }
+.team-calendar-grid { padding: 6px; gap: 3px; }
+.team-calendar-empty, .team-calendar-day { min-height: 53px; border-radius: 9px; }
+.team-calendar-day { position: relative; padding: 7px; display: flex; align-items: flex-start; justify-content: space-between; color: #596861; outline: none; }
+.team-calendar-day.has-event { color: #234c3e; background: #f0f7f3; cursor: help; }
+.team-calendar-day.has-event:hover, .team-calendar-day.has-event:focus { z-index: 3; background: #e1f0e8; box-shadow: 0 0 0 2px #b9daca; }
+.team-calendar-day time { font-size: 9px; font-weight: 800; }
+.team-calendar-dots { display: flex; gap: 3px; padding-top: 2px; }
+.team-calendar-dots i, .team-calendar-footer i { width: 7px; height: 7px; display: block; border-radius: 50%; }
+.team-calendar-dots i:not(.birthday-dot):not(.tenure-dot) { display: none; }
+.birthday-dot { background: #de9a38; }
+.tenure-dot { background: #4b9a74; }
+.team-calendar-tooltip { width: 210px; padding: 11px; display: none; position: absolute; z-index: 6; top: calc(100% + 7px); left: 50%; border: 1px solid #ccdcd4; border-radius: 10px; color: #31463d; background: white; box-shadow: 0 12px 26px rgba(25,62,48,.18); transform: translateX(-50%); }
+.team-calendar-day:nth-child(7n) .team-calendar-tooltip { left: auto; right: 0; transform: none; }
+.team-calendar-day:nth-child(7n + 1) .team-calendar-tooltip { left: 0; transform: none; }
+.team-calendar-day.has-event:hover .team-calendar-tooltip, .team-calendar-day.has-event:focus .team-calendar-tooltip { display: grid; gap: 8px; }
+.team-calendar-tooltip p { margin: 0; display: flex; align-items: center; gap: 8px; }
+.team-calendar-tooltip b { width: 23px; height: 23px; display: grid; place-items: center; border-radius: 7px; background: #f7f8f7; font-size: 11px; }
+.team-calendar-tooltip span { min-width: 0; display: grid; gap: 2px; }
+.team-calendar-tooltip strong { overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.team-calendar-tooltip small { color: #78867f; font-size: 7px; }
+.team-calendar-footer { display: flex; align-items: center; gap: 13px; color: #6d7b75; font-size: 8px; }
+.team-calendar-footer span { display: inline-flex; align-items: center; gap: 5px; font-weight: 750; }
+.team-calendar-footer small { margin-left: auto; color: #8a9791; font-size: 8px; }
 .team-milestones-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .milestone-card { min-height: 168px; padding: 17px; display: flex; align-items: flex-start; gap: 14px; border: 1px solid #dfe8e3; border-radius: 13px; }
 .milestone-card.birthdays { background: #fff8ea; border-color: #f1dfb8; }
@@ -1013,6 +1042,12 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .panel-heading { align-items: flex-start; gap: 14px; flex-direction: column; }
   .team-milestones-heading { align-items: flex-start; }
   .team-milestones-grid { grid-template-columns: 1fr; }
+  .team-calendar-counts { width: 100%; }
+  .team-calendar-counts span { flex: 1; text-align: center; }
+  .team-calendar-empty, .team-calendar-day { min-height: 43px; }
+  .team-calendar-day { padding: 6px; }
+  .team-calendar-footer { align-items: flex-start; flex-wrap: wrap; }
+  .team-calendar-footer small { width: 100%; margin-left: 0; }
   .segmented { width: 100%; }
   .segmented button { flex: 1; }
   .task-row { grid-template-columns: 28px 1fr 36px; gap: 10px; padding: 13px 15px; }

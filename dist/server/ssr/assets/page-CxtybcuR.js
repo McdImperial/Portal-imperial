@@ -13986,6 +13986,28 @@ function Home() {
 		const status = task.status ?? (task.done ? "Concluído" : "Por fazer");
 		return !task.done && status !== "Concluído" && /^(Semanal|Hoje|Amanhã)/.test(task.due);
 	}), [scopedTasks]);
+	const teamCalendar = (0, import_react.useMemo)(() => {
+		const [year, month] = teamMilestonesData.month.split("-").map(Number);
+		const firstWeekday = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
+		const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+		const events = /* @__PURE__ */ new Map();
+		teamMilestonesData.birthdays.forEach((person) => events.set(person.day, [...events.get(person.day) ?? [], {
+			type: "birthday",
+			name: person.name,
+			role: person.role
+		}]));
+		teamMilestonesData.anniversaries.forEach((person) => events.set(person.day, [...events.get(person.day) ?? [], {
+			type: "tenure",
+			name: person.name,
+			role: person.role,
+			years: person.years
+		}]));
+		return {
+			firstWeekday,
+			daysInMonth,
+			events
+		};
+	}, []);
 	const boardTasks = (0, import_react.useMemo)(() => scopedTasks.filter((task) => {
 		const status = task.status ?? (task.done ? "Concluído" : "Por fazer");
 		const matchesStatus = statusFilter === "Todos" || status === statusFilter;
@@ -14754,59 +14776,55 @@ function Home() {
 											children: "Aniversários e antiguidade"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Próximas celebrações e marcos de permanência da equipa Imperial." })
-									] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "team-milestones-icon",
-										"aria-hidden": "true",
-										children: "🎉"
+									] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "team-calendar-counts",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["🎂 ", teamMilestonesData.birthdays.length] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["🏅 ", teamMilestonesData.anniversaries.length] })]
 									})]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "team-milestones-grid",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-										className: "milestone-card birthdays",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "milestone-icon",
-											"aria-hidden": "true",
-											children: "🎂"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "milestone-content",
-											children: [
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-													className: "eyebrow",
-													children: "Aniversários"
-												}),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [teamMilestonesData.birthdays.length, " celebrações em agosto"] }),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-													className: "milestone-list",
-													children: teamMilestonesData.birthdays.slice(0, 4).map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("time", { children: [String(person.day).padStart(2, "0"), " Ago"] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.role })] })] }, person.name))
-												})
-											]
-										})]
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-										className: "milestone-card tenure",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "milestone-icon",
-											"aria-hidden": "true",
-											children: "🏅"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "milestone-content",
-											children: [
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-													className: "eyebrow",
-													children: "Antiguidade"
-												}),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [teamMilestonesData.anniversaries.length, " marcos em agosto"] }),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-													className: "milestone-list",
-													children: teamMilestonesData.anniversaries.slice(0, 4).map((person) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-														/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("time", { children: [String(person.day).padStart(2, "0"), " Ago"] }),
-														/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: person.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: person.role })] }),
-														/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [person.years, " anos"] })
-													] }, person.name))
-												})
-											]
+									className: "team-calendar",
+									"aria-label": `Calendário de ${teamMilestonesData.label}`,
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "team-calendar-weekdays",
+										children: [
+											"Seg",
+											"Ter",
+											"Qua",
+											"Qui",
+											"Sex",
+											"Sáb",
+											"Dom"
+										].map((day) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: day }, day))
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "team-calendar-grid",
+										children: [Array.from({ length: teamCalendar.firstWeekday }).map((_, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "team-calendar-empty",
+											"aria-hidden": "true"
+										}, `empty-${index}`)), Array.from({ length: teamCalendar.daysInMonth }, (_, index) => index + 1).map((day) => {
+											const events = teamCalendar.events.get(day) ?? [];
+											return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: events.length ? "team-calendar-day has-event" : "team-calendar-day",
+												tabIndex: events.length ? 0 : void 0,
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("time", { children: day }), events.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+													className: "team-calendar-dots",
+													"aria-label": `${events.length} evento${events.length > 1 ? "s" : ""}`,
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: events.some((event) => event.type === "birthday") ? "birthday-dot" : "" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: events.some((event) => event.type === "tenure") ? "tenure-dot" : "" })]
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+													className: "team-calendar-tooltip",
+													role: "tooltip",
+													children: events.map((event) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: event.type === "birthday" ? "🎂" : "🏅" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: event.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: event.type === "birthday" ? `Aniversário · ${event.role}` : `${event.years} anos · ${event.role}` })] })] }, `${event.type}-${event.name}`))
+												})] })]
+											}, day);
 										})]
 									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "team-calendar-footer",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "birthday-dot" }), " Aniversários"] }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "tenure-dot" }), " Antiguidade"] }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Passe o cursor sobre uma data assinalada para ver o detalhe." })
+									]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
 									className: "team-source-link",

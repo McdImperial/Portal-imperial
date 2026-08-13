@@ -1,18 +1,18 @@
 export default {
-  "bootstrapScriptContent": "import(\"/assets/index-Cp3XkhiR.js\")",
+  "bootstrapScriptContent": "import(\"/assets/index-C7CIyWrw.js\")",
   "clientReferenceDeps": {
     "6efdf509a785": {
       "js": [
-        "/assets/page-BMT_uPaP.js",
+        "/assets/page-DN7S4Vgz.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
-        "/assets/index-Cp3XkhiR.js",
+        "/assets/index-C7CIyWrw.js",
         "/assets/framework-CXnKph_e.js"
       ],
       "css": []
     },
     "a706f558ce72": {
       "js": [
-        "/assets/index-Cp3XkhiR.js",
+        "/assets/index-C7CIyWrw.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js"
       ],
@@ -20,16 +20,16 @@ export default {
     },
     "ac148d091f0a": {
       "js": [
-        "/assets/layout-segment-context-BRwegUWN.js",
+        "/assets/layout-segment-context-BJrBnhHI.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
-        "/assets/index-Cp3XkhiR.js",
+        "/assets/index-C7CIyWrw.js",
         "/assets/framework-CXnKph_e.js"
       ],
       "css": []
     },
     "6d0635d915dc": {
       "js": [
-        "/assets/index-Cp3XkhiR.js",
+        "/assets/index-C7CIyWrw.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js"
       ],
@@ -40,7 +40,7 @@ export default {
     "app/layout.tsx": {
       "js": [],
       "css": [
-        "/assets/index-P8wet_OM.css"
+        "/assets/index-C8Pg2u89.css"
       ]
     }
   }
