@@ -452,7 +452,11 @@ export default function Home() {
         if (!response.ok) throw new Error("load failed");
         const data = await response.json() as { tasks: Task[] };
         if (data.tasks.length) {
-          const normalizedTasks = data.tasks.map((task) => ({ ...task, department: (task.department as string) === "segit" ? "manutencao" : task.department } as Task));
+          const normalizedTasks = data.tasks.map((task) => {
+            const normalized = { ...task, department: (task.department as string) === "segit" ? "manutencao" : task.department } as Task;
+            const sourceTask = normalized.department === "qualidade" ? initialTasks.find((item) => item.id === normalized.id && item.department === "qualidade") : undefined;
+            return sourceTask ? { ...normalized, title: sourceTask.title, area: sourceTask.area, due: sourceTask.due, assignee: sourceTask.assignee, assigneeName: sourceTask.assigneeName } : normalized;
+          });
           if (active) setTasks(normalizedTasks);
         } else {
           const seedResponse = await fetch("/api/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tasks: initialTasks }) });

@@ -14082,10 +14082,21 @@ function Home() {
 				if (!response.ok) throw new Error("load failed");
 				const data = await response.json();
 				if (data.tasks.length) {
-					const normalizedTasks = data.tasks.map((task) => ({
-						...task,
-						department: task.department === "segit" ? "manutencao" : task.department
-					}));
+					const normalizedTasks = data.tasks.map((task) => {
+						const normalized = {
+							...task,
+							department: task.department === "segit" ? "manutencao" : task.department
+						};
+						const sourceTask = normalized.department === "qualidade" ? initialTasks.find((item) => item.id === normalized.id && item.department === "qualidade") : void 0;
+						return sourceTask ? {
+							...normalized,
+							title: sourceTask.title,
+							area: sourceTask.area,
+							due: sourceTask.due,
+							assignee: sourceTask.assignee,
+							assigneeName: sourceTask.assigneeName
+						} : normalized;
+					});
 					if (active) setTasks(normalizedTasks);
 				} else {
 					const seeded = await (await fetch("/api/tasks", {
