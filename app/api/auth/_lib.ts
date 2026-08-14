@@ -23,6 +23,10 @@ export async function hashPassword(password: string) {
 }
 
 export async function verifyPassword(password: string, stored: string) {
+  if (!stored.includes(":")) {
+    const legacy = await sha256(password);
+    return legacy === stored;
+  }
   const [saltHex, expected] = stored.split(":");
   if (!saltHex || !expected) return false;
   const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
