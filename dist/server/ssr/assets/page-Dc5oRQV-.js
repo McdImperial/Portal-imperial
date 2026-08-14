@@ -13519,6 +13519,7 @@ var viewLabels = {
 	custos: "Custo, Comida, Papel e OPS",
 	r2p: "Tempos de serviço · R2P",
 	tellarches: "Tell The Arches",
+	talento: "Gestão Talento",
 	gerenteloja: "Gerente Loja",
 	configuracoes: "Configurações"
 };
@@ -14057,6 +14058,8 @@ function Home() {
 	const [evaluationBusy, setEvaluationBusy] = (0, import_react.useState)(false);
 	const [evaluationUpdatedAt, setEvaluationUpdatedAt] = (0, import_react.useState)(null);
 	const [collapsedEvaluationDepartments, setCollapsedEvaluationDepartments] = (0, import_react.useState)({});
+	const [talentCandidates, setTalentCandidates] = (0, import_react.useState)([]);
+	const [talentLoading, setTalentLoading] = (0, import_react.useState)(false);
 	(0, import_react.useEffect)(() => {
 		const formattedDate = new Intl.DateTimeFormat("pt-PT", {
 			weekday: "long",
@@ -14176,6 +14179,23 @@ function Home() {
 		if (view !== "configuracoes" || currentUser?.role !== "admin") return;
 		fetch("/api/auth/users/").then((response) => response.ok ? response.json() : Promise.reject()).then((data) => setManagedUsers(data.users)).catch(() => setNotice("Não foi possível carregar os utilizadores."));
 	}, [view, currentUser]);
+	(0, import_react.useEffect)(() => {
+		if (view !== "talento" || department !== "pessoas" || !currentUser || !(currentUser.role === "admin" || currentUser.role === "editor" && currentUser.department === "pessoas")) return;
+		let active = true;
+		setTalentLoading(true);
+		fetch("/api/candidaturas").then((response) => response.ok ? response.json() : Promise.reject()).then((data) => {
+			if (active) setTalentCandidates(data.candidates);
+		}).catch(() => setNotice("Não foi possível carregar as candidaturas.")).finally(() => {
+			if (active) setTalentLoading(false);
+		});
+		return () => {
+			active = false;
+		};
+	}, [
+		view,
+		department,
+		currentUser
+	]);
 	(0, import_react.useEffect)(() => {
 		if (!currentUser || view !== "areasglobais") return;
 		let active = true;
@@ -14482,7 +14502,7 @@ function Home() {
 	async function exportObjectives() {
 		if (!selectedObjectives.length || !objectivesExportRef.current) return;
 		try {
-			const html2canvas = (await import("./html2canvas.esm-DYsDkGOO.js")).default;
+			const html2canvas = (await import("./html2canvas.esm-CtqEZ0Hz.js")).default;
 			const exportArea = objectivesExportRef.current;
 			await document.fonts.ready;
 			const canvas = await html2canvas(exportArea, {
@@ -14764,6 +14784,23 @@ function Home() {
 			setEvaluationBusy(false);
 		}
 	}
+	async function updateTalentCandidate(candidate, status) {
+		const response = await fetch("/api/candidaturas", {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				id: candidate.id,
+				status
+			})
+		});
+		const data = await response.json();
+		if (!response.ok || !data.candidate) {
+			setNotice(data.error || "Não foi possível atualizar a candidatura.");
+			return;
+		}
+		setTalentCandidates((current) => current.map((item) => item.id === candidate.id ? data.candidate : item));
+		setNotice("Estado da candidatura atualizado.");
+	}
 	const roleLabel = (role) => role === "admin" ? "Administrador" : role === "editor" ? "Editor" : "Consulta";
 	const canEdit = currentUser?.role === "admin" || currentUser?.role === "editor";
 	const navItems = [
@@ -14985,6 +15022,11 @@ function Home() {
 										className: view === "areas" ? "department-subtab active" : "department-subtab",
 										onClick: () => setView("areas"),
 										children: ["⌂ ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Áreas de limpeza" })]
+									}),
+									item.id === "pessoas" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										className: view === "talento" ? "department-subtab active" : "department-subtab",
+										onClick: () => setView("talento"),
+										children: ["✦ ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Gestão Talento" })]
 									}),
 									item.id === "qualidade" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										className: view === "custos" ? "department-subtab active" : "department-subtab",
@@ -15464,6 +15506,119 @@ function Home() {
 									src: "https://analise-disponibilidades-equipa.tiagosoutelo.chatgpt.site/"
 								})
 							})
+						}),
+						view === "talento" && department === "pessoas" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+							className: "talent-page",
+							"aria-labelledby": "talent-title",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "talent-heading",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "eyebrow",
+										children: "Pessoas · Recrutamento"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+										id: "talent-title",
+										children: "Gestão Talento"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Acompanhe os candidatos e mantenha cada processo atualizado." })
+								] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+									className: "talent-application-link",
+									href: "/candidatura",
+									target: "_blank",
+									rel: "noreferrer",
+									children: "＋ Partilhar candidatura ↗"
+								})]
+							}), currentUser?.role === "admin" || currentUser?.role === "editor" && currentUser.department === "pessoas" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "talent-summary",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "◌" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Total" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: talentCandidates.length })] })] }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+										className: "received",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "↓" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Recebidas" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: talentCandidates.filter((candidate) => candidate.status === "Recebida").length })] })]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+										className: "review",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "⌕" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Em análise" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: talentCandidates.filter((candidate) => candidate.status === "Em análise").length })] })]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+										className: "interview",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "◈" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Entrevistas" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: talentCandidates.filter((candidate) => candidate.status === "Entrevista").length })] })]
+									})
+								]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "talent-board",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "talent-board-heading",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "eyebrow",
+										children: "Candidaturas"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Ponto de situação" })] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: talentLoading ? "A carregar…" : `${talentCandidates.length} candidaturas` })]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "talent-table",
+									role: "table",
+									"aria-label": "Ponto de situação dos candidatos",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "talent-row header",
+											role: "row",
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Candidato" }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Contacto" }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Data de admissão" }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Documentos" }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Estado" })
+											]
+										}),
+										talentCandidates.map((candidate) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "talent-row",
+											role: "row",
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: candidate.name }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: ["Recebida em ", new Date(candidate.createdAt).toLocaleDateString("pt-PT")] })] }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+													href: `mailto:${candidate.email}`,
+													children: candidate.email
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: candidate.contact })] }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: (/* @__PURE__ */ new Date(`${candidate.admissionDate}T00:00:00`)).toLocaleDateString("pt-PT") }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "candidate-documents",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+														href: `/api/candidaturas/document?id=${candidate.id}&type=cv`,
+														target: "_blank",
+														rel: "noreferrer",
+														children: "CV ↗"
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+														href: `/api/candidaturas/document?id=${candidate.id}&type=cover`,
+														target: "_blank",
+														rel: "noreferrer",
+														children: "Carta ↗"
+													})]
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
+													className: `candidate-status ${candidate.status.toLowerCase().replaceAll(" ", "-").replace("á", "a").replace("ã", "a").replace("ç", "c")}`,
+													value: candidate.status,
+													onChange: (event) => updateTalentCandidate(candidate, event.target.value),
+													"aria-label": `Estado de ${candidate.name}`,
+													children: [
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: "Recebida" }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: "Em análise" }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: "Entrevista" }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: "Admitido" }),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: "Não selecionado" })
+													]
+												})
+											]
+										}, candidate.id)),
+										!talentLoading && talentCandidates.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "talent-empty",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "✦" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Ainda não existem candidaturas" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Use “Partilhar candidatura” para disponibilizar o formulário aos candidatos." })] })]
+										})
+									]
+								})]
+							})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "talent-empty restricted",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "◌" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Acesso reservado à equipa de Pessoas" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "O formulário de candidatura permanece disponível através do botão acima." })] })]
+							})]
 						}),
 						view === "tarefas" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 							className: canEdit ? "board-page" : "board-page read-only",

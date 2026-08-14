@@ -7,7 +7,7 @@ import r2pDataJson from "./data/r2p-data.json";
 import tellTheArchesDataJson from "./data/tell-the-arches.json";
 import teamMilestonesDataJson from "./data/team-milestones.json";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "r2p" | "tellarches" | "gerenteloja" | "configuracoes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "r2p" | "tellarches" | "talento" | "gerenteloja" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -156,6 +156,7 @@ const viewLabels: Record<View, string> = {
   custos: "Custo, Comida, Papel e OPS",
   r2p: "Tempos de serviço · R2P",
   tellarches: "Tell The Arches",
+  talento: "Gestão Talento",
   gerenteloja: "Gerente Loja",
   configuracoes: "Configurações",
 };
@@ -275,6 +276,8 @@ type TeamMilestone = { name: string; role: string; day: number; years?: number }
 type TeamPerson = { name: string; role: string; level?: string; label?: string; department?: string };
 type TeamMilestonesData = { month: string; label: string; sourceUrl: string; birthdays: TeamMilestone[]; anniversaries: TeamMilestone[]; calendarByMonth: Record<string, { birthdays: TeamMilestone[]; anniversaries: TeamMilestone[] }>; organisation: { franchisee: TeamPerson[]; supervision: TeamPerson[]; leadershipLevels: TeamPerson[][]; managementLevels: TeamPerson[][]; managementSupport: TeamPerson[]; trainers: TeamPerson[]; publicRelations: TeamPerson[]; employees: number } };
 type SharedFolder = { id: string; name: string; description: string; url: string; fileCount: number; updatedAt: string };
+type TalentCandidateStatus = "Recebida" | "Em análise" | "Entrevista" | "Admitido" | "Não selecionado";
+type TalentCandidate = { id: number; name: string; email: string; contact: string; admissionDate: string; status: TalentCandidateStatus; cvName: string; coverLetterName: string; createdAt: string; updatedAt: string };
 
 const inventoryProducts = inventoryProductsData as InventoryProduct[];
 const inventoryCategoryLabels: Record<InventoryCategory, string> = { food: "Comida", paper: "Papel", ops: "OPS" };
@@ -429,6 +432,8 @@ export default function Home() {
   const [evaluationBusy, setEvaluationBusy] = useState(false);
   const [evaluationUpdatedAt, setEvaluationUpdatedAt] = useState<string | null>(null);
   const [collapsedEvaluationDepartments, setCollapsedEvaluationDepartments] = useState<Partial<Record<EvaluationDepartment, boolean>>>({});
+  const [talentCandidates, setTalentCandidates] = useState<TalentCandidate[]>([]);
+  const [talentLoading, setTalentLoading] = useState(false);
 
   useEffect(() => {
     const formattedDate = new Intl.DateTimeFormat("pt-PT", {
@@ -525,6 +530,16 @@ export default function Home() {
     if (view !== "configuracoes" || currentUser?.role !== "admin") return;
     fetch("/api/auth/users/").then((response) => response.ok ? response.json() : Promise.reject()).then((data: { users: ManagedUser[] }) => setManagedUsers(data.users)).catch(() => setNotice("Não foi possível carregar os utilizadores."));
   }, [view, currentUser]);
+
+  useEffect(() => {
+    if (view !== "talento" || department !== "pessoas" || !currentUser || !(currentUser.role === "admin" || currentUser.role === "editor" && currentUser.department === "pessoas")) return;
+    let active = true;
+    setTalentLoading(true);
+    fetch("/api/candidaturas").then((response) => response.ok ? response.json() : Promise.reject()).then((data: { candidates: TalentCandidate[] }) => {
+      if (active) setTalentCandidates(data.candidates);
+    }).catch(() => setNotice("Não foi possível carregar as candidaturas.")).finally(() => { if (active) setTalentLoading(false); });
+    return () => { active = false; };
+  }, [view, department, currentUser]);
 
   useEffect(() => {
     if (!currentUser || view !== "areasglobais") return;
@@ -947,6 +962,14 @@ export default function Home() {
     }
   }
 
+  async function updateTalentCandidate(candidate: TalentCandidate, status: TalentCandidateStatus) {
+    const response = await fetch("/api/candidaturas", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: candidate.id, status }) });
+    const data = await response.json() as { candidate?: TalentCandidate; error?: string };
+    if (!response.ok || !data.candidate) { setNotice(data.error || "Não foi possível atualizar a candidatura."); return; }
+    setTalentCandidates((current) => current.map((item) => item.id === candidate.id ? data.candidate! : item));
+    setNotice("Estado da candidatura atualizado.");
+  }
+
   const roleLabel = (role: AppRole) => role === "admin" ? "Administrador" : role === "editor" ? "Editor" : "Consulta";
   const canEdit = currentUser?.role === "admin" || currentUser?.role === "editor";
 
@@ -1021,6 +1044,9 @@ export default function Home() {
                     <button className={view === "areas" ? "department-subtab active" : "department-subtab"} onClick={() => setView("areas")}>
                       ⌂ <span>Áreas de limpeza</span>
                     </button>
+                    {item.id === "pessoas" && <button className={view === "talento" ? "department-subtab active" : "department-subtab"} onClick={() => setView("talento")}>
+                      ✦ <span>Gestão Talento</span>
+                    </button>}
                     {item.id === "qualidade" && <button className={view === "custos" ? "department-subtab active" : "department-subtab"} onClick={() => setView("custos")}>
                       ◫ <span>Custo, Comida, Papel &amp; OPS</span>
                     </button>}
@@ -1164,6 +1190,37 @@ export default function Home() {
           {view === "gerenteloja" && (
             <section className="manager-page" aria-label="Gerente Loja">
               <div className="availability-frame"><iframe title="Análise de disponibilidades da equipa" src="https://analise-disponibilidades-equipa.tiagosoutelo.chatgpt.site/" /></div>
+            </section>
+          )}
+
+          {view === "talento" && department === "pessoas" && (
+            <section className="talent-page" aria-labelledby="talent-title">
+              <div className="talent-heading">
+                <div><span className="eyebrow">Pessoas · Recrutamento</span><h2 id="talent-title">Gestão Talento</h2><p>Acompanhe os candidatos e mantenha cada processo atualizado.</p></div>
+                <a className="talent-application-link" href="/candidatura" target="_blank" rel="noreferrer">＋ Partilhar candidatura ↗</a>
+              </div>
+              {currentUser?.role === "admin" || currentUser?.role === "editor" && currentUser.department === "pessoas" ? <>
+                <div className="talent-summary">
+                  <article><span>◌</span><div><small>Total</small><strong>{talentCandidates.length}</strong></div></article>
+                  <article className="received"><span>↓</span><div><small>Recebidas</small><strong>{talentCandidates.filter((candidate) => candidate.status === "Recebida").length}</strong></div></article>
+                  <article className="review"><span>⌕</span><div><small>Em análise</small><strong>{talentCandidates.filter((candidate) => candidate.status === "Em análise").length}</strong></div></article>
+                  <article className="interview"><span>◈</span><div><small>Entrevistas</small><strong>{talentCandidates.filter((candidate) => candidate.status === "Entrevista").length}</strong></div></article>
+                </div>
+                <div className="talent-board">
+                  <div className="talent-board-heading"><div><span className="eyebrow">Candidaturas</span><h3>Ponto de situação</h3></div><span>{talentLoading ? "A carregar…" : `${talentCandidates.length} candidaturas`}</span></div>
+                  <div className="talent-table" role="table" aria-label="Ponto de situação dos candidatos">
+                    <div className="talent-row header" role="row"><span>Candidato</span><span>Contacto</span><span>Data de admissão</span><span>Documentos</span><span>Estado</span></div>
+                    {talentCandidates.map((candidate) => <div className="talent-row" role="row" key={candidate.id}>
+                      <div><strong>{candidate.name}</strong><small>Recebida em {new Date(candidate.createdAt).toLocaleDateString("pt-PT")}</small></div>
+                      <div><a href={`mailto:${candidate.email}`}>{candidate.email}</a><small>{candidate.contact}</small></div>
+                      <span>{new Date(`${candidate.admissionDate}T00:00:00`).toLocaleDateString("pt-PT")}</span>
+                      <div className="candidate-documents"><a href={`/api/candidaturas/document?id=${candidate.id}&type=cv`} target="_blank" rel="noreferrer">CV ↗</a><a href={`/api/candidaturas/document?id=${candidate.id}&type=cover`} target="_blank" rel="noreferrer">Carta ↗</a></div>
+                      <select className={`candidate-status ${candidate.status.toLowerCase().replaceAll(" ", "-").replace("á", "a").replace("ã", "a").replace("ç", "c")}`} value={candidate.status} onChange={(event) => updateTalentCandidate(candidate, event.target.value as TalentCandidateStatus)} aria-label={`Estado de ${candidate.name}`}><option>Recebida</option><option>Em análise</option><option>Entrevista</option><option>Admitido</option><option>Não selecionado</option></select>
+                    </div>)}
+                    {!talentLoading && talentCandidates.length === 0 && <div className="talent-empty"><span>✦</span><div><strong>Ainda não existem candidaturas</strong><small>Use “Partilhar candidatura” para disponibilizar o formulário aos candidatos.</small></div></div>}
+                  </div>
+                </div>
+              </> : <div className="talent-empty restricted"><span>◌</span><div><strong>Acesso reservado à equipa de Pessoas</strong><small>O formulário de candidatura permanece disponível através do botão acima.</small></div></div>}
             </section>
           )}
 

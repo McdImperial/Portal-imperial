@@ -76,3 +76,20 @@ export const areaEvaluations = sqliteTable("area_evaluations", {
 }, (table) => [
   uniqueIndex("uidx_area_evaluations_month_department_area").on(table.month, table.department, table.area),
 ]);
+
+export const talentCandidates = sqliteTable("talent_candidates", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  contact: text("contact").notNull(),
+  admissionDate: text("admission_date").notNull(),
+  status: text("status").notNull().default("Recebida"),
+  cvKey: text("cv_key").notNull(),
+  cvName: text("cv_name").notNull(),
+  coverLetterKey: text("cover_letter_key").notNull(),
+  coverLetterName: text("cover_letter_name").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_talent_candidates_status_created").on(table.status, table.createdAt),
+]);
