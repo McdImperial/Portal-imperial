@@ -1197,7 +1197,7 @@ export default function Home() {
             <section className="talent-page" aria-labelledby="talent-title">
               <div className="talent-heading">
                 <div><span className="eyebrow">Pessoas · Recrutamento</span><h2 id="talent-title">Gestão Talento</h2><p>Acompanhe os candidatos e mantenha cada processo atualizado.</p></div>
-                <a className="talent-application-link" href="/candidatura" target="_blank" rel="noreferrer">＋ Partilhar candidatura ↗</a>
+                <a className="talent-application-link" href="https://candidaturas-imperial.tiagosoutelo.chatgpt.site" target="_blank" rel="noreferrer">＋ Partilhar candidatura ↗</a>
               </div>
               {currentUser?.role === "admin" || currentUser?.role === "editor" && currentUser.department === "pessoas" ? <>
                 <div className="talent-summary">
