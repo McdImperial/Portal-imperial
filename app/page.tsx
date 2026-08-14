@@ -7,7 +7,7 @@ import r2pDataJson from "./data/r2p-data.json";
 import tellTheArchesDataJson from "./data/tell-the-arches.json";
 import teamMilestonesDataJson from "./data/team-milestones.json";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "r2p" | "tellarches" | "talento" | "gerenteloja" | "configuracoes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -1050,6 +1050,9 @@ export default function Home() {
                     {item.id === "qualidade" && <button className={view === "custos" ? "department-subtab active" : "department-subtab"} onClick={() => setView("custos")}>
                       ◫ <span>Custo, Comida, Papel &amp; OPS</span>
                     </button>}
+                    {item.id === "qualidade" && <button className={view === "haccp" ? "department-subtab active" : "department-subtab"} onClick={() => setView("haccp")}>
+                      ◈ <span>Portal HACCP</span>
+                    </button>}
                     {item.id === "cliente" && <>
                     <button className={view === "r2p" ? "department-subtab active" : "department-subtab"} onClick={() => setView("r2p")}>
                       ◷ <span>Tempos de serviço · R2P</span>
@@ -1190,6 +1193,16 @@ export default function Home() {
           {view === "gerenteloja" && (
             <section className="manager-page" aria-label="Gerente Loja">
               <div className="availability-frame"><iframe title="Análise de disponibilidades da equipa" src="https://analise-disponibilidades-equipa.tiagosoutelo.chatgpt.site/" /></div>
+            </section>
+          )}
+
+          {view === "haccp" && department === "qualidade" && (
+            <section className="haccp-page" aria-label="Portal HACCP">
+              <div className="haccp-heading">
+                <div><span className="eyebrow">Qualidade &amp; Produtos</span><h2>Portal HACCP</h2><p>Monitorização integrada da segurança alimentar e dos controlos operacionais.</p></div>
+                <a className="talent-application-link" href="https://haccp-monitor-equipa.tiagosoutelo.chatgpt.site/?v=87" target="_blank" rel="noreferrer">Abrir Portal HACCP ↗</a>
+              </div>
+              <div className="haccp-frame"><iframe title="Portal HACCP" src="https://haccp-monitor-equipa.tiagosoutelo.chatgpt.site/?v=87" /></div>
             </section>
           )}
 
