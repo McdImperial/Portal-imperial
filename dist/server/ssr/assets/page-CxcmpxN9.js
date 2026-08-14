@@ -83,6 +83,14 @@ function CandidaturaPage() {
 							type: "date",
 							required: true
 						})] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: ["Cargo a que se candidata", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							name: "jobTitle",
+							type: "text",
+							minLength: 2,
+							maxLength: 100,
+							required: true,
+							placeholder: "ex.: Funcionário, Treinador ou Relações Públicas"
+						})] }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
 							"CV ",
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "PDF · máximo 8 MB" }),

@@ -11629,7 +11629,7 @@ function createFromReadableStream(stream, options = {}) {
 //#region \0virtual:vite-rsc/client-references
 var client_references_default = {
 	"3dd901d9dc77": async () => {
-		const m = await import("./assets/page-bG1Jw5SD.js");
+		const m = await import("./assets/page-CxcmpxN9.js");
 		return { get "default"() {
 			return m["default"];
 		} };
@@ -11649,7 +11649,7 @@ var client_references_default = {
 		};
 	},
 	"6efdf509a785": async () => {
-		const m = await import("./assets/page-Dc5oRQV-.js");
+		const m = await import("./assets/page-CRg2rfFt.js");
 		return { get "default"() {
 			return m["default"];
 		} };

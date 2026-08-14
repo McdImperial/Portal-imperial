@@ -1,0 +1,1 @@
+ALTER TABLE `talent_candidates` ADD `job_title` text DEFAULT '' NOT NULL;

@@ -277,7 +277,7 @@ type TeamPerson = { name: string; role: string; level?: string; label?: string; 
 type TeamMilestonesData = { month: string; label: string; sourceUrl: string; birthdays: TeamMilestone[]; anniversaries: TeamMilestone[]; calendarByMonth: Record<string, { birthdays: TeamMilestone[]; anniversaries: TeamMilestone[] }>; organisation: { franchisee: TeamPerson[]; supervision: TeamPerson[]; leadershipLevels: TeamPerson[][]; managementLevels: TeamPerson[][]; managementSupport: TeamPerson[]; trainers: TeamPerson[]; publicRelations: TeamPerson[]; employees: number } };
 type SharedFolder = { id: string; name: string; description: string; url: string; fileCount: number; updatedAt: string };
 type TalentCandidateStatus = "Recebida" | "Em análise" | "Entrevista" | "Admitido" | "Não selecionado";
-type TalentCandidate = { id: number; name: string; email: string; contact: string; admissionDate: string; status: TalentCandidateStatus; cvName: string; coverLetterName: string; createdAt: string; updatedAt: string };
+type TalentCandidate = { id: number; name: string; email: string; contact: string; admissionDate: string; jobTitle: string; status: TalentCandidateStatus; cvName: string; coverLetterName: string; createdAt: string; updatedAt: string };
 
 const inventoryProducts = inventoryProductsData as InventoryProduct[];
 const inventoryCategoryLabels: Record<InventoryCategory, string> = { food: "Comida", paper: "Papel", ops: "OPS" };
@@ -1209,11 +1209,11 @@ export default function Home() {
                 <div className="talent-board">
                   <div className="talent-board-heading"><div><span className="eyebrow">Candidaturas</span><h3>Ponto de situação</h3></div><span>{talentLoading ? "A carregar…" : `${talentCandidates.length} candidaturas`}</span></div>
                   <div className="talent-table" role="table" aria-label="Ponto de situação dos candidatos">
-                    <div className="talent-row header" role="row"><span>Candidato</span><span>Contacto</span><span>Data de admissão</span><span>Documentos</span><span>Estado</span></div>
+                    <div className="talent-row header" role="row"><span>Candidato</span><span>Contacto</span><span>Admissão / Cargo</span><span>Documentos</span><span>Estado</span></div>
                     {talentCandidates.map((candidate) => <div className="talent-row" role="row" key={candidate.id}>
                       <div><strong>{candidate.name}</strong><small>Recebida em {new Date(candidate.createdAt).toLocaleDateString("pt-PT")}</small></div>
                       <div><a href={`mailto:${candidate.email}`}>{candidate.email}</a><small>{candidate.contact}</small></div>
-                      <span>{new Date(`${candidate.admissionDate}T00:00:00`).toLocaleDateString("pt-PT")}</span>
+                      <div><strong>{new Date(`${candidate.admissionDate}T00:00:00`).toLocaleDateString("pt-PT")}</strong><small>{candidate.jobTitle}</small></div>
                       <div className="candidate-documents"><a href={`/api/candidaturas/document?id=${candidate.id}&type=cv`} target="_blank" rel="noreferrer">CV ↗</a><a href={`/api/candidaturas/document?id=${candidate.id}&type=cover`} target="_blank" rel="noreferrer">Carta ↗</a></div>
                       <select className={`candidate-status ${candidate.status.toLowerCase().replaceAll(" ", "-").replace("á", "a").replace("ã", "a").replace("ç", "c")}`} value={candidate.status} onChange={(event) => updateTalentCandidate(candidate, event.target.value as TalentCandidateStatus)} aria-label={`Estado de ${candidate.name}`}><option>Recebida</option><option>Em análise</option><option>Entrevista</option><option>Admitido</option><option>Não selecionado</option></select>
                     </div>)}

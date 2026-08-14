@@ -44,16 +44,18 @@ export async function POST(request: Request) {
     const email = String(form.get("email") || "").trim().toLowerCase();
     const contact = String(form.get("contact") || "").trim();
     const admissionDate = String(form.get("admissionDate") || "").trim();
+    const jobTitle = String(form.get("jobTitle") || "").trim();
     if (name.length < 2 || name.length > 100) throw new Error("Indique o nome completo.");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 160) throw new Error("Indique um email válido.");
     if (contact.length < 6 || contact.length > 30) throw new Error("Indique um contacto válido.");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(admissionDate)) throw new Error("Indique a data de admissão.");
+    if (jobTitle.length < 2 || jobTitle.length > 100) throw new Error("Indique o cargo a que se candidata.");
     const cv = validatePdf(form.get("cv"), "CV");
     const coverLetter = validatePdf(form.get("coverLetter"), "carta de apresentação");
     const stamp = Date.now();
     const placeholder = `pending/${stamp}`;
     const [candidate] = await getDb().insert(talentCandidates).values({
-      name, email, contact, admissionDate,
+      name, email, contact, admissionDate, jobTitle,
       cvKey: placeholder,
       cvName: cv.name,
       coverLetterKey: placeholder,

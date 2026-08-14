@@ -32,6 +32,7 @@ export default function CandidaturaPage() {
         <label>Nome completo<input name="name" type="text" autoComplete="name" minLength={2} maxLength={100} required /></label>
         <div className="application-form-row"><label>Email<input name="email" type="email" autoComplete="email" maxLength={160} required /></label><label>Contacto<input name="contact" type="tel" autoComplete="tel" minLength={6} maxLength={30} required /></label></div>
         <label>Data de admissão<input name="admissionDate" type="date" required /></label>
+        <label>Cargo a que se candidata<input name="jobTitle" type="text" minLength={2} maxLength={100} required placeholder="ex.: Funcionário, Treinador ou Relações Públicas" /></label>
         <label>CV <small>PDF · máximo 8 MB</small><input name="cv" type="file" accept="application/pdf,.pdf" required /></label>
         <label>Carta de apresentação <small>PDF · máximo 8 MB</small><input name="coverLetter" type="file" accept="application/pdf,.pdf" required /></label>
         {message && <p className={message === "Candidatura recebida com sucesso." ? "application-message success" : "application-message"} role="status">{message}</p>}

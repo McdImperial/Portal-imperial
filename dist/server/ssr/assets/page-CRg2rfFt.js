@@ -15565,7 +15565,7 @@ function Home() {
 											children: [
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Candidato" }),
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Contacto" }),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Data de admissão" }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Admissão / Cargo" }),
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Documentos" }),
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Estado" })
 											]
@@ -15579,7 +15579,7 @@ function Home() {
 													href: `mailto:${candidate.email}`,
 													children: candidate.email
 												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: candidate.contact })] }),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: (/* @__PURE__ */ new Date(`${candidate.admissionDate}T00:00:00`)).toLocaleDateString("pt-PT") }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: (/* @__PURE__ */ new Date(`${candidate.admissionDate}T00:00:00`)).toLocaleDateString("pt-PT") }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: candidate.jobTitle })] }),
 												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 													className: "candidate-documents",
 													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
