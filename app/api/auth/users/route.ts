@@ -27,14 +27,7 @@ async function loadPublicRequests() {
 export async function GET(request: Request) {
   const auth = await requireUser(request, ["admin"]);
   if (auth.error) return auth.error;
-  const localUsers = await getDb().select(safeFields).from(users).orderBy(asc(users.createdAt));
-  try {
-    const existing = new Set(localUsers.map((user) => user.login));
-    const publicUsers = (await loadPublicRequests()).filter((entry) => entry.status === "pendente" && !existing.has(entry.email)).map((entry) => ({ id: -entry.id, name: entry.name, login: entry.email, role: entry.role || "consulta", department: entry.department || "", status: "pendente", createdAt: entry.createdAt, approvedAt: null }));
-    return Response.json({ users: [...localUsers, ...publicUsers] });
-  } catch {
-    return Response.json({ users: localUsers });
-  }
+  return Response.json({ users: await getDb().select(safeFields).from(users).orderBy(asc(users.createdAt)) });
 }
 
 export async function PATCH(request: Request) {
