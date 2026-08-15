@@ -5,7 +5,7 @@ import { talentCandidates } from "../../../db/schema";
 import { requireUser } from "../auth/_lib";
 
 const statuses = ["Recebida", "Em análise", "Entrevista", "Admitido", "Não selecionado"] as const;
-const profiles = ["Curto prazo", "Médio prazo", "Longo prazo", "Sem perfil"] as const;
+const profiles = ["Classificar", "Curto prazo", "Médio prazo", "Longo prazo", "Sem perfil"] as const;
 const maxFileSize = 8 * 1024 * 1024;
 
 function canManageTalent(user: { role: string; department: string }) {

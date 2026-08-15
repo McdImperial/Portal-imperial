@@ -277,7 +277,7 @@ type TeamPerson = { name: string; role: string; level?: string; label?: string; 
 type TeamMilestonesData = { month: string; label: string; sourceUrl: string; birthdays: TeamMilestone[]; anniversaries: TeamMilestone[]; calendarByMonth: Record<string, { birthdays: TeamMilestone[]; anniversaries: TeamMilestone[] }>; organisation: { franchisee: TeamPerson[]; supervision: TeamPerson[]; leadershipLevels: TeamPerson[][]; managementLevels: TeamPerson[][]; managementSupport: TeamPerson[]; trainers: TeamPerson[]; publicRelations: TeamPerson[]; employees: number } };
 type SharedFolder = { id: string; name: string; description: string; url: string; fileCount: number; updatedAt: string };
 type TalentCandidateStatus = "Recebida" | "Em análise" | "Entrevista" | "Admitido" | "Não selecionado";
-type TalentCandidateProfile = "Curto prazo" | "Médio prazo" | "Longo prazo" | "Sem perfil";
+type TalentCandidateProfile = "Classificar" | "Curto prazo" | "Médio prazo" | "Longo prazo" | "Sem perfil";
 type TalentCandidate = { id: number; name: string; email: string; contact: string; admissionDate: string; jobTitle: string; profile: TalentCandidateProfile; status: TalentCandidateStatus; cvName: string; coverLetterName: string; createdAt: string; updatedAt: string };
 
 const inventoryProducts = inventoryProductsData as InventoryProduct[];
@@ -1237,7 +1237,7 @@ export default function Home() {
                           <div><a href={`mailto:${candidate.email}`}>{candidate.email}</a><small>{candidate.contact}</small></div>
                           <div><strong>{new Date(`${candidate.admissionDate}T00:00:00`).toLocaleDateString("pt-PT")}</strong><small>{candidate.jobTitle}</small></div>
                           <div className="candidate-documents"><a href={`/api/candidaturas/document?id=${candidate.id}&type=cv`} target="_blank" rel="noreferrer">CV ↗</a><a href={`/api/candidaturas/document?id=${candidate.id}&type=cover`} target="_blank" rel="noreferrer">Carta ↗</a></div>
-                          <select className={`candidate-profile ${candidate.profile.toLowerCase().replaceAll(" ", "-")}`} value={candidate.profile} onChange={(event) => updateTalentProfile(candidate, event.target.value as TalentCandidateProfile)} aria-label={`Perfil de ${candidate.name}`}><option>Curto prazo</option><option>Médio prazo</option><option>Longo prazo</option><option>Sem perfil</option></select>
+                          <select className={`candidate-profile ${candidate.profile.toLowerCase().replaceAll(" ", "-")}`} value={candidate.profile} onChange={(event) => updateTalentProfile(candidate, event.target.value as TalentCandidateProfile)} aria-label={`Perfil de ${candidate.name}`}><option>Classificar</option><option>Curto prazo</option><option>Médio prazo</option><option>Longo prazo</option><option>Sem perfil</option></select>
                           <select className={`candidate-status ${candidate.status.toLowerCase().replaceAll(" ", "-").replace("á", "a").replace("ã", "a").replace("ç", "c")}`} value={candidate.status} onChange={(event) => updateTalentCandidate(candidate, event.target.value as TalentCandidateStatus)} aria-label={`Estado de ${candidate.name}`}><option>Recebida</option><option>Em análise</option><option>Entrevista</option><option>Admitido</option><option>Não selecionado</option></select>
                         </div>)}
                         {!talentLoading && candidates.length === 0 && <div className="talent-empty"><span>✦</span><div><strong>Ainda não existem candidaturas</strong></div></div>}
