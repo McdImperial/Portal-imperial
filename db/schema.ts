@@ -84,6 +84,7 @@ export const talentCandidates = sqliteTable("talent_candidates", {
   contact: text("contact").notNull(),
   admissionDate: text("admission_date").notNull(),
   jobTitle: text("job_title").notNull().default(""),
+  profile: text("profile").notNull().default("Sem perfil"),
   status: text("status").notNull().default("Recebida"),
   cvKey: text("cv_key").notNull(),
   cvName: text("cv_name").notNull(),

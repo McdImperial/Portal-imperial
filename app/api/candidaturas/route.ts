@@ -5,6 +5,7 @@ import { talentCandidates } from "../../../db/schema";
 import { requireUser } from "../auth/_lib";
 
 const statuses = ["Recebida", "Em análise", "Entrevista", "Admitido", "Não selecionado"] as const;
+const profiles = ["Curto prazo", "Médio prazo", "Longo prazo", "Sem perfil"] as const;
 const maxFileSize = 8 * 1024 * 1024;
 
 function canManageTalent(user: { role: string; department: string }) {
@@ -78,9 +79,9 @@ export async function PATCH(request: Request) {
   const auth = await requireUser(request);
   if (auth.error) return auth.error;
   if (!canManageTalent(auth.user)) return Response.json({ error: "Não tem permissão para atualizar candidaturas." }, { status: 403 });
-  const payload = await request.json() as { id?: number; status?: string };
-  if (!payload.id || !statuses.includes(payload.status as typeof statuses[number])) return Response.json({ error: "Estado de candidatura inválido." }, { status: 400 });
-  const [candidate] = await getDb().update(talentCandidates).set({ status: payload.status, updatedAt: new Date().toISOString() }).where(eq(talentCandidates.id, payload.id)).returning();
+  const payload = await request.json() as { id?: number; status?: string; profile?: string };
+  if (!payload.id || !payload.status || !statuses.includes(payload.status as typeof statuses[number]) || !payload.profile || !profiles.includes(payload.profile as typeof profiles[number])) return Response.json({ error: "Dados de candidatura inválidos." }, { status: 400 });
+  const [candidate] = await getDb().update(talentCandidates).set({ status: payload.status, profile: payload.profile, updatedAt: new Date().toISOString() }).where(eq(talentCandidates.id, payload.id)).returning();
   if (!candidate) return Response.json({ error: "Candidatura não encontrada." }, { status: 404 });
   return Response.json({ candidate });
 }

@@ -277,7 +277,8 @@ type TeamPerson = { name: string; role: string; level?: string; label?: string; 
 type TeamMilestonesData = { month: string; label: string; sourceUrl: string; birthdays: TeamMilestone[]; anniversaries: TeamMilestone[]; calendarByMonth: Record<string, { birthdays: TeamMilestone[]; anniversaries: TeamMilestone[] }>; organisation: { franchisee: TeamPerson[]; supervision: TeamPerson[]; leadershipLevels: TeamPerson[][]; managementLevels: TeamPerson[][]; managementSupport: TeamPerson[]; trainers: TeamPerson[]; publicRelations: TeamPerson[]; employees: number } };
 type SharedFolder = { id: string; name: string; description: string; url: string; fileCount: number; updatedAt: string };
 type TalentCandidateStatus = "Recebida" | "Em análise" | "Entrevista" | "Admitido" | "Não selecionado";
-type TalentCandidate = { id: number; name: string; email: string; contact: string; admissionDate: string; jobTitle: string; status: TalentCandidateStatus; cvName: string; coverLetterName: string; createdAt: string; updatedAt: string };
+type TalentCandidateProfile = "Curto prazo" | "Médio prazo" | "Longo prazo" | "Sem perfil";
+type TalentCandidate = { id: number; name: string; email: string; contact: string; admissionDate: string; jobTitle: string; profile: TalentCandidateProfile; status: TalentCandidateStatus; cvName: string; coverLetterName: string; createdAt: string; updatedAt: string };
 
 const inventoryProducts = inventoryProductsData as InventoryProduct[];
 const inventoryCategoryLabels: Record<InventoryCategory, string> = { food: "Comida", paper: "Papel", ops: "OPS" };
@@ -963,11 +964,19 @@ export default function Home() {
   }
 
   async function updateTalentCandidate(candidate: TalentCandidate, status: TalentCandidateStatus) {
-    const response = await fetch("/api/candidaturas", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: candidate.id, status }) });
+    const response = await fetch("/api/candidaturas", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: candidate.id, status, profile: candidate.profile }) });
     const data = await response.json() as { candidate?: TalentCandidate; error?: string };
     if (!response.ok || !data.candidate) { setNotice(data.error || "Não foi possível atualizar a candidatura."); return; }
     setTalentCandidates((current) => current.map((item) => item.id === candidate.id ? data.candidate! : item));
     setNotice("Estado da candidatura atualizado.");
+  }
+
+  async function updateTalentProfile(candidate: TalentCandidate, profile: TalentCandidateProfile) {
+    const response = await fetch("/api/candidaturas", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: candidate.id, status: candidate.status, profile }) });
+    const data = await response.json() as { candidate?: TalentCandidate; error?: string };
+    if (!response.ok || !data.candidate) { setNotice(data.error || "Não foi possível atualizar o perfil."); return; }
+    setTalentCandidates((current) => current.map((item) => item.id === candidate.id ? data.candidate! : item));
+    setNotice("Perfil da candidatura atualizado.");
   }
 
   const roleLabel = (role: AppRole) => role === "admin" ? "Administrador" : role === "editor" ? "Editor" : "Consulta";
@@ -1213,26 +1222,30 @@ export default function Home() {
                 <a className="talent-application-link" href="https://candidaturas-imperial.tiagosoutelo.chatgpt.site" target="_blank" rel="noreferrer">＋ Partilhar candidatura ↗</a>
               </div>
               {currentUser?.role === "admin" || currentUser?.role === "editor" && currentUser.department === "pessoas" ? <>
-                <div className="talent-summary">
-                  <article><span>◌</span><div><small>Total</small><strong>{talentCandidates.length}</strong></div></article>
-                  <article className="received"><span>↓</span><div><small>Recebidas</small><strong>{talentCandidates.filter((candidate) => candidate.status === "Recebida").length}</strong></div></article>
-                  <article className="review"><span>⌕</span><div><small>Em análise</small><strong>{talentCandidates.filter((candidate) => candidate.status === "Em análise").length}</strong></div></article>
-                  <article className="interview"><span>◈</span><div><small>Entrevistas</small><strong>{talentCandidates.filter((candidate) => candidate.status === "Entrevista").length}</strong></div></article>
-                </div>
-                <div className="talent-board">
-                  <div className="talent-board-heading"><div><span className="eyebrow">Candidaturas</span><h3>Ponto de situação</h3></div><span>{talentLoading ? "A carregar…" : `${talentCandidates.length} candidaturas`}</span></div>
-                  <div className="talent-table" role="table" aria-label="Ponto de situação dos candidatos">
-                    <div className="talent-row header" role="row"><span>Candidato</span><span>Contacto</span><span>Admissão / Cargo</span><span>Documentos</span><span>Estado</span></div>
-                    {talentCandidates.map((candidate) => <div className="talent-row" role="row" key={candidate.id}>
-                      <div><strong>{candidate.name}</strong><small>Recebida em {new Date(candidate.createdAt).toLocaleDateString("pt-PT")}</small></div>
-                      <div><a href={`mailto:${candidate.email}`}>{candidate.email}</a><small>{candidate.contact}</small></div>
-                      <div><strong>{new Date(`${candidate.admissionDate}T00:00:00`).toLocaleDateString("pt-PT")}</strong><small>{candidate.jobTitle}</small></div>
-                      <div className="candidate-documents"><a href={`/api/candidaturas/document?id=${candidate.id}&type=cv`} target="_blank" rel="noreferrer">CV ↗</a><a href={`/api/candidaturas/document?id=${candidate.id}&type=cover`} target="_blank" rel="noreferrer">Carta ↗</a></div>
-                      <select className={`candidate-status ${candidate.status.toLowerCase().replaceAll(" ", "-").replace("á", "a").replace("ã", "a").replace("ç", "c")}`} value={candidate.status} onChange={(event) => updateTalentCandidate(candidate, event.target.value as TalentCandidateStatus)} aria-label={`Estado de ${candidate.name}`}><option>Recebida</option><option>Em análise</option><option>Entrevista</option><option>Admitido</option><option>Não selecionado</option></select>
-                    </div>)}
-                    {!talentLoading && talentCandidates.length === 0 && <div className="talent-empty"><span>✦</span><div><strong>Ainda não existem candidaturas</strong><small>Use “Partilhar candidatura” para disponibilizar o formulário aos candidatos.</small></div></div>}
-                  </div>
-                </div>
+                {(() => {
+                  const uniqueCandidates = Array.from(new Map(talentCandidates.map((candidate) => [candidate.email.trim().toLowerCase(), candidate])).values());
+                  const jobs = ["Relações Públicas", "Treinadores"] as const;
+                  const count = (job: string, profile: TalentCandidateProfile) => uniqueCandidates.filter((candidate) => candidate.jobTitle === job && candidate.profile === profile).length;
+                  const table = (job: typeof jobs[number]) => {
+                    const candidates = uniqueCandidates.filter((candidate) => candidate.jobTitle === job);
+                    return <div className="talent-board" key={job}>
+                      <div className="talent-board-heading"><div><span className="eyebrow">Candidaturas</span><h3>{job}</h3></div><span>{talentLoading ? "A carregar…" : `${candidates.length} candidaturas`}</span></div>
+                      <div className="talent-table" role="table" aria-label={`Candidaturas ${job}`}>
+                        <div className="talent-row header" role="row"><span>Candidato</span><span>Contacto</span><span>Admissão</span><span>Documentos</span><span>Perfil</span><span>Estado</span></div>
+                        {candidates.map((candidate) => <div className="talent-row" role="row" key={candidate.id}>
+                          <div><strong>{candidate.name}</strong><small>Recebida em {new Date(candidate.createdAt).toLocaleDateString("pt-PT")}</small></div>
+                          <div><a href={`mailto:${candidate.email}`}>{candidate.email}</a><small>{candidate.contact}</small></div>
+                          <div><strong>{new Date(`${candidate.admissionDate}T00:00:00`).toLocaleDateString("pt-PT")}</strong><small>{candidate.jobTitle}</small></div>
+                          <div className="candidate-documents"><a href={`/api/candidaturas/document?id=${candidate.id}&type=cv`} target="_blank" rel="noreferrer">CV ↗</a><a href={`/api/candidaturas/document?id=${candidate.id}&type=cover`} target="_blank" rel="noreferrer">Carta ↗</a></div>
+                          <select className={`candidate-profile ${candidate.profile.toLowerCase().replaceAll(" ", "-")}`} value={candidate.profile} onChange={(event) => updateTalentProfile(candidate, event.target.value as TalentCandidateProfile)} aria-label={`Perfil de ${candidate.name}`}><option>Curto prazo</option><option>Médio prazo</option><option>Longo prazo</option><option>Sem perfil</option></select>
+                          <select className={`candidate-status ${candidate.status.toLowerCase().replaceAll(" ", "-").replace("á", "a").replace("ã", "a").replace("ç", "c")}`} value={candidate.status} onChange={(event) => updateTalentCandidate(candidate, event.target.value as TalentCandidateStatus)} aria-label={`Estado de ${candidate.name}`}><option>Recebida</option><option>Em análise</option><option>Entrevista</option><option>Admitido</option><option>Não selecionado</option></select>
+                        </div>)}
+                        {!talentLoading && candidates.length === 0 && <div className="talent-empty"><span>✦</span><div><strong>Ainda não existem candidaturas</strong></div></div>}
+                      </div>
+                    </div>;
+                  };
+                  return <><div className="talent-summary grouped">{jobs.map((job) => <article key={job}><div><small>{job}</small><strong>{uniqueCandidates.filter((candidate) => candidate.jobTitle === job).length}<em> candidaturas</em></strong></div><div className="talent-metrics"><span className="short">Curto <b>{count(job, "Curto prazo")}</b></span><span className="medium">Médio <b>{count(job, "Médio prazo")}</b></span><span className="long">Longo <b>{count(job, "Longo prazo")}</b></span><span className="none">Sem perfil <b>{count(job, "Sem perfil")}</b></span></div></article>)}</div>{jobs.map(table)}</>;
+                })()}
               </> : <div className="talent-empty restricted"><span>◌</span><div><strong>Acesso reservado à equipa de Pessoas</strong><small>O formulário de candidatura permanece disponível através do botão acima.</small></div></div>}
             </section>
           )}

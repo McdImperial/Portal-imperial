@@ -71,6 +71,13 @@
       "when": 1786700388613,
       "tag": "0009_cute_punisher",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1786796199672,
+      "tag": "0010_fixed_kang",
+      "breakpoints": true
     }
   ]
 }

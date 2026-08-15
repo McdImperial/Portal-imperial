@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const now = new Date().toISOString();
   const [candidate] = await db.insert(talentCandidates).values({
     name: body.name.trim(), email: body.email.trim().toLowerCase(), contact: body.contact.trim(), admissionDate: body.admissionDate,
-    jobTitle: body.jobTitle, status: body.status || "Recebida", cvKey: `${marker}:cv`, cvName: body.cvName,
+    jobTitle: body.jobTitle, profile: "Sem perfil", status: body.status || "Recebida", cvKey: `${marker}:cv`, cvName: body.cvName,
     coverLetterKey: `${marker}:cover`, coverLetterName: body.coverLetterName, createdAt: body.createdAt || now, updatedAt: body.updatedAt || body.createdAt || now,
   }).returning();
   return Response.json({ created: true, id: candidate.id }, { status: 201 });

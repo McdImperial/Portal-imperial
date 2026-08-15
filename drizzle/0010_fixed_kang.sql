@@ -1,0 +1,1 @@
+ALTER TABLE `talent_candidates` ADD `profile` text DEFAULT 'Sem perfil' NOT NULL;
