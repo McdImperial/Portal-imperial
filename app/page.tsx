@@ -476,6 +476,12 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (!notice.startsWith("Descarga validada")) return;
+    setBillingCalculated(true);
+    setNotice("Cálculo da descarga concluído. Os resultados serão preenchidos após a leitura dos ficheiros.");
+  }, [notice]);
+
+  useEffect(() => {
     if (!currentUser) return;
     if (!selectedInvoiceDelivery) { setBillingDocuments([]); return; }
     const deliveryDate = selectedInvoiceDelivery;
