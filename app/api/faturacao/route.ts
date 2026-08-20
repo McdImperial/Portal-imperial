@@ -38,3 +38,14 @@ export async function POST(request: Request) {
     return Response.json({ documents: created }, { status: 201 });
   } catch (error) { return Response.json({ error: error instanceof Error ? error.message : "Não foi possível carregar os documentos." }, { status: 400 }); }
 }
+
+export async function DELETE(request: Request) {
+  const auth = await requireUser(request); if (auth.error) return auth.error;
+  if (!canUpload(auth.user)) return Response.json({ error: "Não tem permissão para eliminar descargas." }, { status: 403 });
+  const deliveryDate = new URL(request.url).searchParams.get("deliveryDate");
+  if (!deliveryDate || !/^\d{4}-\d{2}-\d{2}$/.test(deliveryDate)) return Response.json({ error: "Data de entrega inválida." }, { status: 400 });
+  const documents = await getDb().select().from(billingDocuments).where(eq(billingDocuments.deliveryDate, deliveryDate));
+  for (const document of documents) await storage().delete(document.fileKey);
+  await getDb().delete(billingDocuments).where(eq(billingDocuments.deliveryDate, deliveryDate));
+  return Response.json({ deleted: documents.length });
+}

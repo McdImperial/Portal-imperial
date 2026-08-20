@@ -11,6 +11,7 @@
   --coral: #ee856e;
   --blue: #77a9c5;
 }
+.billing-delete{justify-self:end;border:1px solid #e4c5ba;border-radius:8px;background:#fff8f6;color:#a54a2b;padding:8px 10px;font:inherit;font-size:9px;font-weight:800;cursor:pointer}
 button.billing-validate{font-size:0!important}button.billing-validate:after{content:"Calcular descarga";font-size:10px}
 .billing-validate{font-size:0}.billing-validate:after{content:"Calcular descarga";font-size:10px}
 
