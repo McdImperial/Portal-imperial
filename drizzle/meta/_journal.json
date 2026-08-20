@@ -85,6 +85,13 @@
       "when": 1786797760544,
       "tag": "0011_plain_purple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1787252888511,
+      "tag": "0012_strange_skaar",
+      "breakpoints": true
     }
   ]
 }

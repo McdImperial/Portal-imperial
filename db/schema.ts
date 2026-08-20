@@ -95,3 +95,18 @@ export const talentCandidates = sqliteTable("talent_candidates", {
 }, (table) => [
   index("idx_talent_candidates_status_created").on(table.status, table.createdAt),
 ]);
+
+export const billingDocuments = sqliteTable("billing_documents", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  deliveryDate: text("delivery_date").notNull(),
+  documentType: text("document_type").notNull(),
+  fileKey: text("file_key").notNull().unique(),
+  fileName: text("file_name").notNull(),
+  contentType: text("content_type").notNull(),
+  fileSize: integer("file_size").notNull(),
+  uploadedBy: integer("uploaded_by").notNull(),
+  uploadedByName: text("uploaded_by_name").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_billing_documents_delivery_type").on(table.deliveryDate, table.documentType),
+]);

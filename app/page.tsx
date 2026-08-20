@@ -13,6 +13,7 @@ type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
 type TaskStatus = "Por fazer" | "Em curso" | "Não realizada" | "Concluído";
 type AppRole = "admin" | "editor" | "consulta";
+type BillingDocument = { id: number; deliveryDate: string; documentType: "havi" | "mystore"; fileName: string; fileSize: number };
 type AppUser = { id: number; name: string; login: string; role: AppRole; department: UserDepartment; status: string };
 type ManagedUser = AppUser & { createdAt: string; approvedAt: string | null };
 type CleaningIntervention = {
@@ -73,6 +74,7 @@ const initialTasks: Task[] = [
   { id: 22, title: "Rever acessos de novos colaboradores", area: "IT", due: "Hoje, 15:00", assignee: "TS", priority: "Alta", done: false, department: "manutencao" },
   { id: 23, title: "Teste mensal de emergência", area: "Segurança", due: "Concluída às 10:20", assignee: "JS", priority: "Média", done: true, department: "manutencao" },
 ];
+const billingDeliveryDates = ["2026-08-19", "2026-08-17", "2026-08-14", "2026-08-21"];
 
 const departments: { id: Department; label: string; short: string; icon: string }[] = [
   { id: "qualidade", label: "Qualidade & Produtos", short: "QP", icon: "🧪" },
@@ -402,8 +404,10 @@ export default function Home() {
   const [hideCompleted, setHideCompleted] = useState(false);
   const [selectedInventoryCategory, setSelectedInventoryCategory] = useState<InventoryCategory>("food");
   const [selectedInvoiceDelivery, setSelectedInvoiceDelivery] = useState(0);
-  const [haviImported, setHaviImported] = useState(true);
-  const [myStoreImported, setMyStoreImported] = useState(false);
+  const [billingDocuments, setBillingDocuments] = useState<BillingDocument[]>([]);
+  const [billingUploadBusy, setBillingUploadBusy] = useState<"havi" | "mystore" | null>(null);
+  const haviInputRef = useRef<HTMLInputElement>(null);
+  const myStoreInputRef = useRef<HTMLInputElement>(null);
   const [inventorySearch, setInventorySearch] = useState("");
   const [inventoryStatus, setInventoryStatus] = useState<InventoryStatus>("Todos");
   const [productSort, setProductSort] = useState<{ key: ProductSortKey; direction: "asc" | "desc" }>({ key: "description", direction: "asc" });
@@ -449,6 +453,29 @@ export default function Home() {
     }).format(new Date());
     setPortalDate(formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1));
   }, []);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const deliveryDate = billingDeliveryDates[selectedInvoiceDelivery];
+    fetch(`/api/faturacao?deliveryDate=${deliveryDate}`).then((response) => response.json()).then((data: { documents?: BillingDocument[] }) => setBillingDocuments(data.documents || [])).catch(() => setBillingDocuments([]));
+  }, [currentUser, selectedInvoiceDelivery]);
+
+  async function uploadBillingDocuments(type: "havi" | "mystore", files: FileList | null) {
+    if (!files?.length) return;
+    setBillingUploadBusy(type);
+    try {
+      const form = new FormData();
+      form.append("deliveryDate", billingDeliveryDates[selectedInvoiceDelivery]);
+      form.append("documentType", type);
+      Array.from(files).forEach((file) => form.append("documents", file));
+      const response = await fetch("/api/faturacao", { method: "POST", body: form });
+      const data = await response.json() as { documents?: BillingDocument[]; error?: string };
+      if (!response.ok) throw new Error(data.error || "Não foi possível carregar os documentos.");
+      setBillingDocuments((current) => [...(data.documents || []), ...current]);
+      setNotice(type === "havi" ? "Fatura HAVI carregada com sucesso." : "Documento(s) My Store carregado(s) com sucesso.");
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Não foi possível carregar os documentos."); }
+    finally { setBillingUploadBusy(null); if (type === "havi" && haviInputRef.current) haviInputRef.current.value = ""; if (type === "mystore" && myStoreInputRef.current) myStoreInputRef.current.value = ""; }
+  }
 
   useEffect(() => {
     let active = true;
@@ -1405,11 +1432,13 @@ export default function Home() {
               { date: "21 Ago", day: "Sexta-feira · prevista", invoice: "—", myStore: "Em falta", total: "—", difference: "—", status: "Por importar" },
             ];
             const selected = deliveries[selectedInvoiceDelivery];
+            const haviFiles = billingDocuments.filter((document) => document.documentType === "havi");
+            const myStoreFiles = billingDocuments.filter((document) => document.documentType === "mystore");
             return <section className="billing-section" aria-labelledby="billing-title">
               <div className="billing-heading"><div><span className="eyebrow">Qualidade &amp; Produtos · ambiente de testes</span><h2 id="billing-title">Controlo de faturação</h2><p>Reúna a fatura HAVI e o relatório My Store em cada descarga para identificar divergências.</p></div><button className="billing-primary" onClick={() => setNotice("Nova descarga criada para teste.")}>＋ Registar descarga</button></div>
               <div className="billing-metrics"><article><span>Descargas previstas</span><strong>14</strong><small>Dom., ter. e qui.</small></article><article className="billing-good"><span>Validadas</span><strong>9</strong><small>Sem diferenças</small></article><article className="billing-warn"><span>Com divergências</span><strong>3</strong><small>A aguardar análise</small></article><article><span>Por importar</span><strong>2</strong><small>Fatura ou My Store em falta</small></article></div>
               <div className="billing-layout"><section className="billing-list"><div className="billing-list-heading"><div><h3>Descargas do mês</h3><p>Selecione uma descarga para importar ou validar os documentos.</p></div><span>Agosto 2026</span></div><div className="billing-table" role="table"><div className="billing-row billing-header" role="row"><span>Data</span><span>Documentos</span><span>Valor HAVI</span><span>Diferença</span><span>Estado</span></div>{deliveries.map((delivery,index)=><button type="button" key={delivery.date} className={selectedInvoiceDelivery===index?"billing-row selected":"billing-row"} onClick={()=>{setSelectedInvoiceDelivery(index);setNotice("");}}><span><b>{delivery.date}</b><small>{delivery.day}</small></span><span><b>{delivery.invoice === "—" ? "Aguardam ficheiros" : `Fatura ${delivery.invoice}`}</b><small>My Store: {delivery.myStore}</small></span><span>{delivery.total}</span><span className={delivery.status === "Rever" ? "billing-difference" : ""}>{delivery.difference}</span><span><i className={`billing-status ${delivery.status === "Validada" ? "valid" : delivery.status === "Rever" ? "review" : "waiting"}`}>{delivery.status}</i></span></button>)}</div></section>
-                <aside className="billing-side"><section className="billing-import"><div><h3>Descarga selecionada</h3><p>{selected.date} · {selected.day.replace(" · prevista", "")}</p></div><button type="button" className={haviImported?"billing-upload loaded":"billing-upload"} onClick={()=>{setHaviImported(true);setNotice("Fatura HAVI adicionada à descarga.");}}><b>{haviImported?"✓":"+"}</b><span><strong>Fatura HAVI</strong><small>{haviImported?"7131341972.pdf · 7 páginas":"Adicionar PDF da fatura"}</small></span><em>{haviImported?"Alterar":"Adicionar"}</em></button><button type="button" className={myStoreImported?"billing-upload loaded":"billing-upload"} onClick={()=>{setMyStoreImported(true);setNotice("Relatório My Store adicionado à descarga.");}}><b>{myStoreImported?"✓":"+"}</b><span><strong>Relatório My Store</strong><small>{myStoreImported?"Relatório carregado para teste":"Adicionar Excel ou CSV"}</small></span><em>{myStoreImported?"Alterar":"Adicionar"}</em></button><button className="billing-validate" disabled={!haviImported || !myStoreImported} onClick={()=>setNotice("Descarga validada. O histórico ficará guardado nesta linha.")}>Validar descarga</button></section><section className="billing-process"><h3>Processo automático</h3><ol><li className={haviImported?"done":""}><b>Extrair a fatura</b><small>Artigos, quantidades e preços</small></li><li className={myStoreImported?"done":""}><b>Importar My Store</b><small>Registos da mesma descarga</small></li><li className={haviImported&&myStoreImported?"done":""}><b>Cruzar e sinalizar</b><small>Preço, quantidade e artigos em falta</small></li><li><b>Validar ou justificar</b><small>Responsável e histórico guardados</small></li></ol></section></aside></div>
+                <aside className="billing-side"><section className="billing-import"><div><h3>Descarga selecionada</h3><p>{selected.date} · {selected.day.replace(" · prevista", "")}</p></div><input ref={haviInputRef} className="billing-file-input" type="file" accept="application/pdf,.pdf" onChange={(event) => uploadBillingDocuments("havi", event.target.files)} /><button type="button" className={haviFiles.length?"billing-upload loaded":"billing-upload"} onClick={()=>haviInputRef.current?.click()} disabled={billingUploadBusy !== null}><b>{haviFiles.length?"✓":"+"}</b><span><strong>Fatura HAVI</strong><small>{haviFiles.length ? haviFiles.map((file) => file.fileName).join(" · ") : "Carregar PDF da fatura"}</small></span><em>{billingUploadBusy === "havi" ? "A carregar…" : haviFiles.length ? "Substituir" : "Carregar"}</em></button><input ref={myStoreInputRef} className="billing-file-input" type="file" multiple accept="application/pdf,.pdf,.xlsx,.xls,.csv" onChange={(event) => uploadBillingDocuments("mystore", event.target.files)} /><button type="button" className={myStoreFiles.length?"billing-upload loaded":"billing-upload"} onClick={()=>myStoreInputRef.current?.click()} disabled={billingUploadBusy !== null}><b>{myStoreFiles.length?"✓":"+"}</b><span><strong>Documentos My Store</strong><small>{myStoreFiles.length ? `${myStoreFiles.length} documento(s) carregado(s)` : "Carregar PDFs, Excel ou CSV"}</small></span><em>{billingUploadBusy === "mystore" ? "A carregar…" : myStoreFiles.length ? "Adicionar" : "Carregar"}</em></button><button className="billing-validate" disabled={!haviFiles.length || !myStoreFiles.length} onClick={()=>setNotice("Descarga validada. O histórico ficará guardado nesta linha.")}>Validar descarga</button></section><section className="billing-process"><h3>Processo automático</h3><ol><li className={haviFiles.length?"done":""}><b>Extrair a fatura</b><small>Artigos, quantidades e preços</small></li><li className={myStoreFiles.length?"done":""}><b>Importar My Store</b><small>Registos da mesma descarga</small></li><li className={haviFiles.length&&myStoreFiles.length?"done":""}><b>Cruzar e sinalizar</b><small>Preço, quantidade e artigos em falta</small></li><li><b>Validar ou justificar</b><small>Responsável e histórico guardados</small></li></ol></section></aside></div>
             </section>;
           })()}
 
