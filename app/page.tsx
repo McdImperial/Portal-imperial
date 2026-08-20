@@ -7,7 +7,7 @@ import r2pDataJson from "./data/r2p-data.json";
 import tellTheArchesDataJson from "./data/tell-the-arches.json";
 import teamMilestonesDataJson from "./data/team-milestones.json";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "configuracoes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -154,6 +154,7 @@ const viewLabels: Record<View, string> = {
   areasglobais: "Áreas",
   equipa: "Equipa",
   custos: "Custo, Comida, Papel e OPS",
+  faturacao: "Controlo de faturação",
   r2p: "Tempos de serviço · R2P",
   tellarches: "Tell The Arches",
   talento: "Gestão Talento",
@@ -400,6 +401,9 @@ export default function Home() {
   const [sortAsc, setSortAsc] = useState(true);
   const [hideCompleted, setHideCompleted] = useState(false);
   const [selectedInventoryCategory, setSelectedInventoryCategory] = useState<InventoryCategory>("food");
+  const [selectedInvoiceDelivery, setSelectedInvoiceDelivery] = useState(0);
+  const [haviImported, setHaviImported] = useState(true);
+  const [myStoreImported, setMyStoreImported] = useState(false);
   const [inventorySearch, setInventorySearch] = useState("");
   const [inventoryStatus, setInventoryStatus] = useState<InventoryStatus>("Todos");
   const [productSort, setProductSort] = useState<{ key: ProductSortKey; direction: "asc" | "desc" }>({ key: "description", direction: "asc" });
@@ -1059,6 +1063,9 @@ export default function Home() {
                     {item.id === "qualidade" && <button className={view === "custos" ? "department-subtab active" : "department-subtab"} onClick={() => setView("custos")}>
                       ◫ <span>Custo, Comida, Papel &amp; OPS</span>
                     </button>}
+                    {item.id === "qualidade" && <button className={view === "faturacao" ? "department-subtab active" : "department-subtab"} onClick={() => setView("faturacao")}>
+                      € <span>Controlo de faturação</span>
+                    </button>}
                     {item.id === "qualidade" && <button className={view === "haccp" ? "department-subtab active" : "department-subtab"} onClick={() => setView("haccp")}>
                       ◈ <span>Portal HACCP</span>
                     </button>}
@@ -1389,6 +1396,22 @@ export default function Home() {
               </div>
             </section>
           )}
+
+          {view === "faturacao" && department === "qualidade" && (() => {
+            const deliveries = [
+              { date: "19 Ago", day: "Quarta-feira", invoice: "7131341972", myStore: "Importado", total: "21 288,95 €", difference: "0,69 €", status: "Rever" },
+              { date: "17 Ago", day: "Segunda-feira", invoice: "7131341961", myStore: "Importado", total: "18 140,32 €", difference: "0,00 €", status: "Validada" },
+              { date: "14 Ago", day: "Sexta-feira", invoice: "7131341942", myStore: "Importado", total: "19 404,75 €", difference: "-4,71 €", status: "Rever" },
+              { date: "21 Ago", day: "Sexta-feira · prevista", invoice: "—", myStore: "Em falta", total: "—", difference: "—", status: "Por importar" },
+            ];
+            const selected = deliveries[selectedInvoiceDelivery];
+            return <section className="billing-section" aria-labelledby="billing-title">
+              <div className="billing-heading"><div><span className="eyebrow">Qualidade &amp; Produtos · ambiente de testes</span><h2 id="billing-title">Controlo de faturação</h2><p>Reúna a fatura HAVI e o relatório My Store em cada descarga para identificar divergências.</p></div><button className="billing-primary" onClick={() => setNotice("Nova descarga criada para teste.")}>＋ Registar descarga</button></div>
+              <div className="billing-metrics"><article><span>Descargas previstas</span><strong>14</strong><small>Dom., ter. e qui.</small></article><article className="billing-good"><span>Validadas</span><strong>9</strong><small>Sem diferenças</small></article><article className="billing-warn"><span>Com divergências</span><strong>3</strong><small>A aguardar análise</small></article><article><span>Por importar</span><strong>2</strong><small>Fatura ou My Store em falta</small></article></div>
+              <div className="billing-layout"><section className="billing-list"><div className="billing-list-heading"><div><h3>Descargas do mês</h3><p>Selecione uma descarga para importar ou validar os documentos.</p></div><span>Agosto 2026</span></div><div className="billing-table" role="table"><div className="billing-row billing-header" role="row"><span>Data</span><span>Documentos</span><span>Valor HAVI</span><span>Diferença</span><span>Estado</span></div>{deliveries.map((delivery,index)=><button type="button" key={delivery.date} className={selectedInvoiceDelivery===index?"billing-row selected":"billing-row"} onClick={()=>{setSelectedInvoiceDelivery(index);setNotice("");}}><span><b>{delivery.date}</b><small>{delivery.day}</small></span><span><b>{delivery.invoice === "—" ? "Aguardam ficheiros" : `Fatura ${delivery.invoice}`}</b><small>My Store: {delivery.myStore}</small></span><span>{delivery.total}</span><span className={delivery.status === "Rever" ? "billing-difference" : ""}>{delivery.difference}</span><span><i className={`billing-status ${delivery.status === "Validada" ? "valid" : delivery.status === "Rever" ? "review" : "waiting"}`}>{delivery.status}</i></span></button>)}</div></section>
+                <aside className="billing-side"><section className="billing-import"><div><h3>Descarga selecionada</h3><p>{selected.date} · {selected.day.replace(" · prevista", "")}</p></div><button type="button" className={haviImported?"billing-upload loaded":"billing-upload"} onClick={()=>{setHaviImported(true);setNotice("Fatura HAVI adicionada à descarga.");}}><b>{haviImported?"✓":"+"}</b><span><strong>Fatura HAVI</strong><small>{haviImported?"7131341972.pdf · 7 páginas":"Adicionar PDF da fatura"}</small></span><em>{haviImported?"Alterar":"Adicionar"}</em></button><button type="button" className={myStoreImported?"billing-upload loaded":"billing-upload"} onClick={()=>{setMyStoreImported(true);setNotice("Relatório My Store adicionado à descarga.");}}><b>{myStoreImported?"✓":"+"}</b><span><strong>Relatório My Store</strong><small>{myStoreImported?"Relatório carregado para teste":"Adicionar Excel ou CSV"}</small></span><em>{myStoreImported?"Alterar":"Adicionar"}</em></button><button className="billing-validate" disabled={!haviImported || !myStoreImported} onClick={()=>setNotice("Descarga validada. O histórico ficará guardado nesta linha.")}>Validar descarga</button></section><section className="billing-process"><h3>Processo automático</h3><ol><li className={haviImported?"done":""}><b>Extrair a fatura</b><small>Artigos, quantidades e preços</small></li><li className={myStoreImported?"done":""}><b>Importar My Store</b><small>Registos da mesma descarga</small></li><li className={haviImported&&myStoreImported?"done":""}><b>Cruzar e sinalizar</b><small>Preço, quantidade e artigos em falta</small></li><li><b>Validar ou justificar</b><small>Responsável e histórico guardados</small></li></ol></section></aside></div>
+            </section>;
+          })()}
 
           {view === "r2p" && department === "cliente" && (
             <section className="r2p-section" aria-labelledby="r2p-title">
