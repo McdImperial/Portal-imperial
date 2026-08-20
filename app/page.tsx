@@ -14,6 +14,7 @@ type UserDepartment = Exclude<Department, "global"> | "";
 type TaskStatus = "Por fazer" | "Em curso" | "Não realizada" | "Concluído";
 type AppRole = "admin" | "editor" | "consulta";
 type BillingDocument = { id: number; deliveryDate: string; documentType: "havi" | "mystore"; fileName: string; fileSize: number };
+type BillingDelivery = { date: string; label: string };
 type AppUser = { id: number; name: string; login: string; role: AppRole; department: UserDepartment; status: string };
 type ManagedUser = AppUser & { createdAt: string; approvedAt: string | null };
 type CleaningIntervention = {
@@ -74,7 +75,6 @@ const initialTasks: Task[] = [
   { id: 22, title: "Rever acessos de novos colaboradores", area: "IT", due: "Hoje, 15:00", assignee: "TS", priority: "Alta", done: false, department: "manutencao" },
   { id: 23, title: "Teste mensal de emergência", area: "Segurança", due: "Concluída às 10:20", assignee: "JS", priority: "Média", done: true, department: "manutencao" },
 ];
-const billingDeliveryDates = ["2026-08-19", "2026-08-17", "2026-08-14", "2026-08-21"];
 
 const departments: { id: Department; label: string; short: string; icon: string }[] = [
   { id: "qualidade", label: "Qualidade & Produtos", short: "QP", icon: "🧪" },
@@ -403,7 +403,9 @@ export default function Home() {
   const [sortAsc, setSortAsc] = useState(true);
   const [hideCompleted, setHideCompleted] = useState(false);
   const [selectedInventoryCategory, setSelectedInventoryCategory] = useState<InventoryCategory>("food");
-  const [selectedInvoiceDelivery, setSelectedInvoiceDelivery] = useState(0);
+  const [selectedInvoiceDelivery, setSelectedInvoiceDelivery] = useState<string | null>(null);
+  const [billingDeliveries, setBillingDeliveries] = useState<BillingDelivery[]>([]);
+  const [billingTab, setBillingTab] = useState<"summary" | "delivery">("summary");
   const [billingMonth, setBillingMonth] = useState("Agosto 2026");
   const [showNewBillingDelivery, setShowNewBillingDelivery] = useState(false);
   const [newBillingDate, setNewBillingDate] = useState("");
@@ -459,7 +461,8 @@ export default function Home() {
 
   useEffect(() => {
     if (!currentUser) return;
-    const deliveryDate = billingDeliveryDates[selectedInvoiceDelivery];
+    if (!selectedInvoiceDelivery) { setBillingDocuments([]); return; }
+    const deliveryDate = selectedInvoiceDelivery;
     fetch(`/api/faturacao?deliveryDate=${deliveryDate}`).then((response) => response.json()).then((data: { documents?: BillingDocument[] }) => setBillingDocuments(data.documents || [])).catch(() => setBillingDocuments([]));
   }, [currentUser, selectedInvoiceDelivery]);
 
@@ -468,7 +471,8 @@ export default function Home() {
     setBillingUploadBusy(type);
     try {
       const form = new FormData();
-      form.append("deliveryDate", billingDeliveryDates[selectedInvoiceDelivery]);
+      if (!selectedInvoiceDelivery) throw new Error("Selecione uma descarga antes de carregar documentos.");
+      form.append("deliveryDate", selectedInvoiceDelivery);
       form.append("documentType", type);
       Array.from(files).forEach((file) => form.append("documents", file));
       const response = await fetch("/api/faturacao", { method: "POST", body: form });
@@ -1425,7 +1429,14 @@ export default function Home() {
             </section>
           )}
 
-          {view === "faturacao" && (() => {
+          {view === "faturacao" && <section className="billing-section" aria-labelledby="billing-title">
+            <div className="billing-heading"><div><span className="eyebrow">Controlo de faturação</span><h2 id="billing-title">{billingMonth}</h2><p>Consulte o resumo mensal ou abra uma descarga para gerir os respetivos documentos.</p></div><div className="billing-heading-actions"><button type="button" className="billing-month-button" onClick={() => setBillingMonth((month) => month === "Agosto 2026" ? "Julho 2026" : "Agosto 2026")}>◀ {billingMonth} ▶</button><button type="button" className="billing-primary" onClick={() => setShowNewBillingDelivery(true)}>＋ Adicionar descarga</button></div></div>
+            {showNewBillingDelivery && <section className="billing-new-delivery"><div><span className="eyebrow">Nova descarga</span><h3>Passo 1 · Selecionar a data</h3><p>Depois de criar a descarga, carregue a fatura HAVI e os documentos My Store.</p></div><label>Data da descarga<input type="date" value={newBillingDate} onChange={(event) => setNewBillingDate(event.target.value)} /></label><button type="button" className="billing-primary" disabled={!newBillingDate} onClick={() => { const label = new Intl.DateTimeFormat("pt-PT", { day: "2-digit", month: "short" }).format(new Date(`${newBillingDate}T12:00:00`)).replace(".", ""); setBillingDeliveries((items) => items.some((item) => item.date === newBillingDate) ? items : [...items, { date: newBillingDate, label }]); setSelectedInvoiceDelivery(newBillingDate); setBillingTab("delivery"); setShowNewBillingDelivery(false); setNotice("Descarga criada. Carregue agora os documentos necessários."); }}>Criar descarga</button></section>}
+            <nav className="billing-delivery-tabs billing-main-tabs" aria-label="Navegação do controlo de faturação"><div><button type="button" className={billingTab === "summary" ? "active" : ""} onClick={() => { setBillingTab("summary"); setSelectedInvoiceDelivery(null); }}><strong>Resumo mensal</strong><small>{billingMonth}</small></button>{billingDeliveries.map((delivery) => <button type="button" key={delivery.date} className={billingTab === "delivery" && selectedInvoiceDelivery === delivery.date ? "active" : ""} onClick={() => { setSelectedInvoiceDelivery(delivery.date); setBillingTab("delivery"); setNotice(""); }}><strong>Descarga {delivery.label}</strong><small>Consulta</small></button>)}</div></nav>
+            {billingTab === "summary" ? <><div className="billing-metrics"><article><span>Descargas registadas</span><strong>{billingDeliveries.length}</strong><small>No mês selecionado</small></article><article className="billing-good"><span>Validadas</span><strong>0</strong><small>Sem diferenças</small></article><article className="billing-warn"><span>Com divergências</span><strong>0</strong><small>A aguardar análise</small></article><article><span>Por concluir</span><strong>{billingDeliveries.length}</strong><small>Ficheiros ou validação em falta</small></article></div><section className="billing-empty"><h3>Resumo mensal</h3><p>{billingDeliveries.length ? "Selecione uma aba de descarga para consultar e concluir o respetivo registo." : "Ainda não existem descargas registadas neste mês. Utilize “Adicionar descarga” para começar."}</p></section></> : selectedInvoiceDelivery && <div className="billing-layout"><section className="billing-list"><div className="billing-list-heading"><div><h3>Descarga {billingDeliveries.find((delivery) => delivery.date === selectedInvoiceDelivery)?.label}</h3><p>Registo em preparação</p></div><span>Por concluir</span></div><div className="billing-steps"><article className="done"><b>1</b><span><strong>Selecionar data</strong><small>{selectedInvoiceDelivery.split("-").reverse().join("/")}</small></span></article><article className={billingDocuments.some((document) => document.documentType === "havi") ? "done" : ""}><b>2</b><span><strong>Carregar fatura HAVI</strong><small>PDF da fatura do fornecedor</small></span></article><article className={billingDocuments.some((document) => document.documentType === "mystore") ? "done" : ""}><b>3</b><span><strong>Carregar ficheiro My Store</strong><small>PDF, Excel ou CSV</small></span></article><article><b>4</b><span><strong>Rever e validar</strong><small>Confirmar as diferenças encontradas</small></span></article></div></section><aside className="billing-side"><section className="billing-import"><div><h3>Documentos da descarga</h3><p>{selectedInvoiceDelivery.split("-").reverse().join("/")}</p></div><input ref={haviInputRef} className="billing-file-input" type="file" accept="application/pdf,.pdf" onChange={(event) => uploadBillingDocuments("havi", event.target.files)} /><button type="button" className={billingDocuments.some((document) => document.documentType === "havi") ? "billing-upload loaded" : "billing-upload"} onClick={() => haviInputRef.current?.click()} disabled={billingUploadBusy !== null}><b>{billingDocuments.some((document) => document.documentType === "havi") ? "✓" : "+"}</b><span><strong>Fatura HAVI</strong><small>{billingDocuments.filter((document) => document.documentType === "havi").map((document) => document.fileName).join(" · ") || "Carregar PDF da fatura"}</small></span><em>Carregar</em></button><input ref={myStoreInputRef} className="billing-file-input" type="file" multiple accept="application/pdf,.pdf,.xlsx,.xls,.csv" onChange={(event) => uploadBillingDocuments("mystore", event.target.files)} /><button type="button" className={billingDocuments.some((document) => document.documentType === "mystore") ? "billing-upload loaded" : "billing-upload"} onClick={() => myStoreInputRef.current?.click()} disabled={billingUploadBusy !== null}><b>{billingDocuments.some((document) => document.documentType === "mystore") ? "✓" : "+"}</b><span><strong>Documentos My Store</strong><small>{billingDocuments.filter((document) => document.documentType === "mystore").length ? `${billingDocuments.filter((document) => document.documentType === "mystore").length} documento(s) carregado(s)` : "Carregar PDFs, Excel ou CSV"}</small></span><em>Carregar</em></button><button type="button" className="billing-validate" disabled={!billingDocuments.some((document) => document.documentType === "havi") || !billingDocuments.some((document) => document.documentType === "mystore")} onClick={() => setNotice("Descarga validada. O histórico ficará guardado nesta descarga.")}>Validar descarga</button></section></aside></div>}
+          </section>}
+
+          {false && view === "faturacao" && (() => {
             const deliveries = [
               { date: "19 Ago", day: "Quarta-feira", invoice: "7131341972", myStore: "Importado", total: "21 230,51 €", difference: "-58,44 €", status: "Rever" },
               { date: "17 Ago", day: "Segunda-feira", invoice: "7131341961", myStore: "Importado", total: "18 140,32 €", difference: "0,00 €", status: "Validada" },
