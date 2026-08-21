@@ -63,10 +63,31 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .deposit-table input:focus, .deposit-table select:focus { border-color: #79ad9a; outline: none; }
 .deposit-add { margin-top: 12px; }
 .deposit-observations { margin-top: 16px; }
+.absence-tabs { display: flex; gap: 8px; margin: 22px 0 14px; padding: 5px; width: fit-content; border-radius: 12px; background: #eff4f2; }
+.absence-tabs button { border: 0; border-radius: 9px; padding: 10px 14px; background: transparent; color: #617269; font-weight: 800; cursor: pointer; }
+.absence-tabs button.active { background: #fff; color: #174f40; box-shadow: 0 3px 12px rgba(30,60,50,.1); }
+.absence-filters, .absence-profile-picker { display: flex; align-items: end; gap: 12px; margin-bottom: 14px; }
+.absence-filters label, .absence-profile-picker label { display: grid; gap: 6px; color: #6c7b75; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.absence-filters select, .absence-profile-picker select { min-width: 160px; border: 1px solid #d8e3de; border-radius: 9px; padding: 10px 12px; background: #fff; color: #29483d; }
+.absence-filters > span { margin-left: auto; color: #85918d; font-size: 12px; }
+.absence-table-wrap { overflow: auto; border: 1px solid #dfe8e4; border-radius: 14px; }
+.absence-table { width: 100%; min-width: 1050px; border-collapse: collapse; }
+.absence-table th { padding: 12px 14px; background: #f2f6f4; color: #687a72; font-size: 11px; text-align: left; text-transform: uppercase; letter-spacing: .04em; }
+.absence-table td { padding: 12px 14px; border-top: 1px solid #e6ece9; color: #51635b; font-size: 13px; }
+.absence-table td button { border: 0; padding: 0; background: none; color: #205f4c; font-weight: 800; text-align: left; cursor: pointer; }
+.absence-table td:nth-child(3) strong { display: inline-grid; place-items: center; min-width: 30px; padding: 5px 8px; border-radius: 999px; background: #fde4e5; color: #bb3f49; }
+.absence-assessment { padding: 6px 9px; border-radius: 999px; background: #edf3f0; color: #456258; white-space: nowrap; }
+.absence-profile-picker select { min-width: 320px; }
+.absence-profile-summary { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.absence-profile-summary article { padding: 18px; border-radius: 14px; background: #f2f6f4; }
+.absence-profile-summary small, .absence-profile-summary span { display: block; color: #7d8a85; }
+.absence-profile-summary strong { display: block; margin: 6px 0; color: #193c30; font-size: 20px; }
+.absence-empty { padding: 30px; border: 1px dashed #ccd9d4; border-radius: 14px; color: #74827c; text-align: center; }
 
 @media (max-width: 900px) {
   .vault-count-grid { grid-template-columns: 1fr; }
   .vault-extras, .deposit-responsibles { grid-template-columns: 1fr 1fr; }
+  .absence-profile-summary { grid-template-columns: 1fr; }
 }
 @media (max-width: 620px) {
   .development-page-heading, .development-module-heading, .development-toolbar { align-items: stretch; flex-direction: column; }
@@ -77,6 +98,11 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
   .denomination-grid { grid-template-columns: 1fr; }
   .vault-handover { grid-template-columns: 1fr; }
   .vault-handover > span { display: none; }
+  .absence-tabs { width: 100%; overflow-x: auto; }
+  .absence-tabs button { white-space: nowrap; }
+  .absence-filters { align-items: stretch; flex-direction: column; }
+  .absence-filters > span { margin-left: 0; }
+  .absence-profile-picker select { min-width: 0; width: 100%; }
 }
 
 * { box-sizing: border-box; }

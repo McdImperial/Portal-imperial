@@ -1,0 +1,23 @@
+{
+  "sourceFile": "exemplo.xlsx",
+  "updatedAt": "2026-01-01T00:00:00.000Z",
+  "years": [2026],
+  "records": [
+    {
+      "year": 2026,
+      "month": 1,
+      "monthLabel": "Janeiro",
+      "employeeNumber": "0001",
+      "name": "Colaborador Exemplo",
+      "unjustifiedAbsences": 1,
+      "unjustifiedHours": 1.5,
+      "justifiedAbsences": 0,
+      "justifiedHours": 0,
+      "medicalLeave": 0,
+      "workHours": 160,
+      "assessment": "Bom",
+      "role": "Função Exemplo",
+      "admissionDate": "2025-01-01"
+    }
+  ]
+}

@@ -403,7 +403,7 @@ function MonthlyBillingControl({ values, onChange }: { values: Record<string, st
   return <section className="monthly-control"><div className="monthly-control-heading"><div><span className="eyebrow">Resumo do mês</span><h3>Custos, inventário e consumo</h3><p>Introduza os campos em branco. Compras, consumos e percentagens são calculados automaticamente.</p></div></div><div className="monthly-control-grid"><section className="monthly-purchases">{field("sales", "Vendas mês")}<p><span>Compras Comida</span><b>{euro(purchaseFood)}</b></p><p><span>Compras Papel</span><b>{euro(purchasePaper)}</b></p><p><span>Compras Total OPS</span><b>{euro(purchaseOps)}</b></p><p><span>Consumo Comida</span><b>{euro(food)}</b></p><p><span>Consumo Papel</span><b>{euro(paper)}</b></p><p><span>Consumo OPS</span><b>{euro(ops)}</b></p></section><section className="monthly-inputs">{field("openingFood", "Inv. inicial comida")}{field("openingOps", "Inv. inicial OPS")}{field("lossesFood", "Perdas comida")}{field("mealsFood", "Refeições comida")}{field("promoFood", "Promo comida")}{field("closingFood", "Inv. final comida")}</section><section className="monthly-inputs">{field("openingPaper", "Inv. inicial papel")}{field("lossesPaper", "Perdas papel")}{field("mealsPaper", "Refeições papel")}{field("promoPaper", "Promo papel")}{field("closingPaper", "Inv. final papel")}{field("closingOps", "Inv. final OPS")}<p><span>% custo comida</span><b>{percent(food)}</b></p><p><span>% custo papel</span><b>{percent(paper)}</b></p><p><span>% custo OPS</span><b>{percent(ops)}</b></p></section></div></section>;
 }
 
-type DevelopmentSection = "cofre" | "deposito";
+type DevelopmentSection = "cofre" | "deposito" | "faltas";
 type VaultShift = "Manhã" | "Tarde" | "Madrugada";
 type DepositShift = "Abertura" | "Transição" | "Fecho" | "Delivery";
 type DepositRow = { id: number; shift: DepositShift; register: string; employee: string; employeeNumber: string; time: string; rapport: string; withdrawal: string; card: string; cash: string; ticket: string; cheques: string; uber: string; glovo: string; bolt: string };
@@ -433,6 +433,9 @@ function VaultControlPrototype() {
 const newDepositRow = (id: number, shift: DepositShift): DepositRow => ({ id, shift, register: "", employee: "", employeeNumber: "", time: "", rapport: "", withdrawal: "", card: "", cash: "", ticket: "", cheques: "", uber: "", glovo: "", bolt: "" });
 const depositMoneyFields: (keyof DepositRow)[] = ["rapport", "withdrawal", "card", "cash", "ticket", "cheques", "uber", "glovo", "bolt"];
 
+type AbsenceRecord = { year: number; month: number; monthLabel: string; employeeNumber: string; name: string; unjustifiedAbsences: number; unjustifiedHours: number; justifiedAbsences: number; justifiedHours: number; medicalLeave: number; workHours: number; assessment: string; role: string; admissionDate: string };
+type AbsenceData = { sourceFile: string; updatedAt: string; years: number[]; records: AbsenceRecord[] };
+
 function DepositSheetPrototype() {
   const [rows, setRows] = useState<DepositRow[]>([newDepositRow(1, "Abertura"), newDepositRow(2, "Transição"), newDepositRow(3, "Fecho"), newDepositRow(4, "Delivery")]);
   const [responsibles, setResponsibles] = useState<Record<string, string>>({ Abertura: "", Transição: "", Fecho: "" });
@@ -447,6 +450,34 @@ function DepositSheetPrototype() {
     <div className="deposit-responsibles">{(["Abertura", "Transição", "Fecho"] as const).map((item) => <label key={item}>Responsável pelo depósito · {item}<input value={responsibles[item]} onChange={(event) => setResponsibles({ ...responsibles, [item]: event.target.value })} placeholder="Nome" /></label>)}</div>
     <label className="deposit-observations">Observações<textarea rows={3} placeholder="Registe ocorrências ou justificações relevantes." /></label>
     <div className="development-actions"><button type="button" onClick={() => setRows([newDepositRow(1, "Abertura"), newDepositRow(2, "Transição"), newDepositRow(3, "Fecho"), newDepositRow(4, "Delivery")])}>Limpar rascunho</button><button type="button" className="primary" disabled>Guardar folha · brevemente</button></div>
+  </section>;
+}
+
+function AbsencesPrototype() {
+  const [data, setData] = useState<AbsenceData | null>(null);
+  const [mode, setMode] = useState<"annual" | "monthly" | "profile">("annual");
+  const [year, setYear] = useState(2026);
+  const [month, setMonth] = useState(8);
+  const [employee, setEmployee] = useState("");
+  useEffect(() => { fetch("/api/absences", { cache: "no-store" }).then((response) => response.ok ? response.json() : Promise.reject()).then((payload: AbsenceData) => { setData(payload); setYear(payload.years.at(-1) || 2026); }).catch(() => setData(null)); }, []);
+  const annual = useMemo(() => {
+    const map = new Map<string, AbsenceRecord>();
+    (data?.records || []).filter((row) => row.year === year).forEach((row) => { const current = map.get(row.employeeNumber); if (!current) map.set(row.employeeNumber, { ...row }); else map.set(row.employeeNumber, { ...current, unjustifiedAbsences: current.unjustifiedAbsences + row.unjustifiedAbsences, unjustifiedHours: current.unjustifiedHours + row.unjustifiedHours, justifiedAbsences: current.justifiedAbsences + row.justifiedAbsences, justifiedHours: current.justifiedHours + row.justifiedHours, medicalLeave: current.medicalLeave + row.medicalLeave, workHours: current.workHours + row.workHours }); });
+    return [...map.values()].sort((a, b) => b.unjustifiedAbsences - a.unjustifiedAbsences || b.unjustifiedHours - a.unjustifiedHours || a.name.localeCompare(b.name));
+  }, [data, year]);
+  const monthly = useMemo(() => (data?.records || []).filter((row) => row.year === year && row.month === month).sort((a, b) => b.unjustifiedAbsences - a.unjustifiedAbsences || b.unjustifiedHours - a.unjustifiedHours || a.name.localeCompare(b.name)), [data, year, month]);
+  const selectedRecords = useMemo(() => (data?.records || []).filter((row) => row.employeeNumber === employee).sort((a, b) => a.year - b.year || a.month - b.month), [data, employee]);
+  const selectedPerson = annual.find((row) => row.employeeNumber === employee) || selectedRecords[0];
+  const renderTable = (rows: AbsenceRecord[]) => <div className="absence-table-wrap"><table className="absence-table"><thead><tr><th>Funcionário</th><th>N.º</th><th>Faltas injust.</th><th>Horas injust.</th><th>Faltas justific.</th><th>Horas justific.</th><th>Baixas/licenças</th><th>Horas trabalho</th><th>Avaliação</th></tr></thead><tbody>{rows.map((row) => <tr key={`${row.employeeNumber}-${row.year}-${row.month}`}><td><button type="button" onClick={() => { setEmployee(row.employeeNumber); setMode("profile"); }}>{row.name}</button></td><td>{row.employeeNumber}</td><td><strong>{row.unjustifiedAbsences.toLocaleString("pt-PT", { maximumFractionDigits: 2 })}</strong></td><td>{row.unjustifiedHours.toLocaleString("pt-PT", { maximumFractionDigits: 2 })}</td><td>{row.justifiedAbsences.toLocaleString("pt-PT", { maximumFractionDigits: 2 })}</td><td>{row.justifiedHours.toLocaleString("pt-PT", { maximumFractionDigits: 2 })}</td><td>{row.medicalLeave.toLocaleString("pt-PT", { maximumFractionDigits: 2 })}</td><td>{row.workHours.toLocaleString("pt-PT", { maximumFractionDigits: 2 })}</td><td><span className="absence-assessment">{row.assessment}</span></td></tr>)}</tbody></table></div>;
+  return <section className="development-module absence-module" aria-labelledby="absences-title">
+    <div className="development-module-heading"><div><span className="eyebrow">Atualização mensal</span><h2 id="absences-title">Faltas &amp; Atrasos</h2><p>Visão anual, detalhe mensal e cadastro individual. Ordenação automática pelo número de faltas injustificadas.</p></div><span className="development-status">Em construção</span></div>
+    <nav className="absence-tabs" aria-label="Vistas de faltas e atrasos"><button className={mode === "annual" ? "active" : ""} onClick={() => setMode("annual")}>Acumulado anual</button><button className={mode === "monthly" ? "active" : ""} onClick={() => setMode("monthly")}>Por mês</button><button className={mode === "profile" ? "active" : ""} onClick={() => setMode("profile")}>Cadastro do funcionário</button></nav>
+    {!data ? <div className="absence-empty">Não foi possível carregar a informação do ficheiro mensal.</div> : <>
+      {mode !== "profile" && <div className="absence-filters"><label>Ano<select value={year} onChange={(event) => setYear(Number(event.target.value))}>{data.years.map((item) => <option key={item}>{item}</option>)}</select></label>{mode === "monthly" && <label>Mês<select value={month} onChange={(event) => setMonth(Number(event.target.value))}>{["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"].map((label, index) => <option value={index + 1} key={label}>{label}</option>)}</select></label>}<span>Atualizado em {new Date(data.updatedAt).toLocaleDateString("pt-PT")}</span></div>}
+      {mode === "annual" && renderTable(annual)}
+      {mode === "monthly" && renderTable(monthly)}
+      {mode === "profile" && <><div className="absence-profile-picker"><label>Funcionário<select value={employee} onChange={(event) => setEmployee(event.target.value)}><option value="">Selecionar funcionário</option>{annual.map((row) => <option value={row.employeeNumber} key={row.employeeNumber}>{row.name}</option>)}</select></label></div>{selectedPerson ? <><div className="absence-profile-summary"><article><small>Funcionário</small><strong>{selectedPerson.name}</strong><span>{selectedPerson.role || "Cargo não indicado"}</span></article><article><small>Admissão</small><strong>{selectedPerson.admissionDate ? new Date(`${selectedPerson.admissionDate}T00:00:00`).toLocaleDateString("pt-PT") : "Não indicada"}</strong><span>N.º {selectedPerson.employeeNumber}</span></article><article><small>Faltas injustificadas</small><strong>{selectedPerson.unjustifiedAbsences.toLocaleString("pt-PT", { maximumFractionDigits: 2 })}</strong><span>Acumulado de {year}</span></article></div>{renderTable(selectedRecords)}</> : <div className="absence-empty">Selecione um funcionário para consultar o cadastro.</div>}</>}
+    </>}
   </section>;
 }
 
@@ -1658,8 +1689,8 @@ export default function Home() {
           {view === "desenvolvimento" && currentUser.role === "admin" && (
             <section className="development-page" aria-labelledby="development-title">
               <div className="development-page-heading"><div><span className="eyebrow">Área reservada</span><h2 id="development-title">Em desenvolvimento</h2><p>Protótipos em construção, disponíveis apenas para o administrador.</p></div><span className="development-private-badge">◆ Administrador</span></div>
-              <nav className="development-subnav" aria-label="Módulos em desenvolvimento"><button type="button" className={developmentSection === "cofre" ? "active" : ""} onClick={() => setDevelopmentSection("cofre")}><span>▣</span>Controlo Cofre</button><button type="button" className={developmentSection === "deposito" ? "active" : ""} onClick={() => setDevelopmentSection("deposito")}><span>▤</span>Folha Depósito</button></nav>
-              {developmentSection === "cofre" ? <VaultControlPrototype /> : <DepositSheetPrototype />}
+              <nav className="development-subnav" aria-label="Módulos em desenvolvimento"><button type="button" className={developmentSection === "cofre" ? "active" : ""} onClick={() => setDevelopmentSection("cofre")}><span>▣</span>Controlo Cofre</button><button type="button" className={developmentSection === "deposito" ? "active" : ""} onClick={() => setDevelopmentSection("deposito")}><span>▤</span>Folha Depósito</button><button type="button" className={developmentSection === "faltas" ? "active" : ""} onClick={() => setDevelopmentSection("faltas")}><span>◷</span>Faltas &amp; Atrasos</button></nav>
+              {developmentSection === "cofre" ? <VaultControlPrototype /> : developmentSection === "deposito" ? <DepositSheetPrototype /> : <AbsencesPrototype />}
             </section>
           )}
 
