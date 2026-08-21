@@ -10,6 +10,7 @@
       "employeeNumber": "0001",
       "name": "Colaborador Exemplo",
       "unjustifiedAbsences": 1,
+      "lateArrivals": 2,
       "unjustifiedHours": 1.5,
       "justifiedAbsences": 0,
       "justifiedHours": 0,
