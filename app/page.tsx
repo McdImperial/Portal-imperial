@@ -7,7 +7,7 @@ import r2pDataJson from "./data/r2p-data.json";
 import tellTheArchesDataJson from "./data/tell-the-arches.json";
 import teamMilestonesDataJson from "./data/team-milestones.json";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "configuracoes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "desenvolvimento" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -162,6 +162,7 @@ const viewLabels: Record<View, string> = {
   tellarches: "Tell The Arches",
   talento: "Gestão Talento",
   gerenteloja: "Gerente Loja",
+  desenvolvimento: "Em desenvolvimento",
   configuracoes: "Configurações",
 };
 
@@ -402,10 +403,58 @@ function MonthlyBillingControl({ values, onChange }: { values: Record<string, st
   return <section className="monthly-control"><div className="monthly-control-heading"><div><span className="eyebrow">Resumo do mês</span><h3>Custos, inventário e consumo</h3><p>Introduza os campos em branco. Compras, consumos e percentagens são calculados automaticamente.</p></div></div><div className="monthly-control-grid"><section className="monthly-purchases">{field("sales", "Vendas mês")}<p><span>Compras Comida</span><b>{euro(purchaseFood)}</b></p><p><span>Compras Papel</span><b>{euro(purchasePaper)}</b></p><p><span>Compras Total OPS</span><b>{euro(purchaseOps)}</b></p><p><span>Consumo Comida</span><b>{euro(food)}</b></p><p><span>Consumo Papel</span><b>{euro(paper)}</b></p><p><span>Consumo OPS</span><b>{euro(ops)}</b></p></section><section className="monthly-inputs">{field("openingFood", "Inv. inicial comida")}{field("openingOps", "Inv. inicial OPS")}{field("lossesFood", "Perdas comida")}{field("mealsFood", "Refeições comida")}{field("promoFood", "Promo comida")}{field("closingFood", "Inv. final comida")}</section><section className="monthly-inputs">{field("openingPaper", "Inv. inicial papel")}{field("lossesPaper", "Perdas papel")}{field("mealsPaper", "Refeições papel")}{field("promoPaper", "Promo papel")}{field("closingPaper", "Inv. final papel")}{field("closingOps", "Inv. final OPS")}<p><span>% custo comida</span><b>{percent(food)}</b></p><p><span>% custo papel</span><b>{percent(paper)}</b></p><p><span>% custo OPS</span><b>{percent(ops)}</b></p></section></div></section>;
 }
 
+type DevelopmentSection = "cofre" | "deposito";
+type VaultShift = "Manhã" | "Tarde" | "Madrugada";
+type DepositShift = "Abertura" | "Transição" | "Fecho" | "Delivery";
+type DepositRow = { id: number; shift: DepositShift; register: string; employee: string; employeeNumber: string; time: string; rapport: string; withdrawal: string; card: string; cash: string; ticket: string; cheques: string; uber: string; glovo: string; bolt: string };
+
+const vaultDenominations = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500] as const;
+const moneyValue = (value: string) => Number(String(value).replace(",", ".")) || 0;
+const euro = (value: number) => value.toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
+
+function VaultControlPrototype() {
+  const [shift, setShift] = useState<VaultShift>("Manhã");
+  const [counts, setCounts] = useState<Record<string, string>>({});
+  const [theoretical, setTheoretical] = useState("");
+  const [extras, setExtras] = useState({ looseCoins: "", tillFunds: "", invoices: "", bankCoins1: "", bankCoins2: "" });
+  const counted = vaultDenominations.reduce((sum, denomination) => sum + denomination * (Number(counts[String(denomination)]) || 0), 0) + Object.values(extras).reduce((sum, value) => sum + moneyValue(value), 0);
+  const reset = () => { setCounts({}); setTheoretical(""); setExtras({ looseCoins: "", tillFunds: "", invoices: "", bankCoins1: "", bankCoins2: "" }); };
+  return <section className="development-module" aria-labelledby="vault-control-title">
+    <div className="development-module-heading"><div><span className="eyebrow">Protótipo operacional</span><h2 id="vault-control-title">Controlo Cofre</h2><p>Contagem por turno, denominação e valores complementares.</p></div><span className="development-status">Em construção</span></div>
+    <div className="development-toolbar"><label>Data<input type="date" defaultValue={new Date().toISOString().slice(0, 10)} /></label><div className="development-shifts" aria-label="Turno">{(["Manhã", "Tarde", "Madrugada"] as VaultShift[]).map((item) => <button type="button" className={shift === item ? "active" : ""} onClick={() => setShift(item)} key={item}>{item}</button>)}</div></div>
+    <div className="vault-summary"><article><small>Total contado</small><strong>{euro(counted)}</strong></article><article><small>Total teórico</small><strong>{euro(moneyValue(theoretical))}</strong></article><article className={counted - moneyValue(theoretical) === 0 ? "balanced" : "difference"}><small>Diferença</small><strong>{euro(counted - moneyValue(theoretical))}</strong></article></div>
+    <div className="vault-count-grid"><article><h3>Moedas</h3><div className="denomination-grid">{vaultDenominations.filter((value) => value < 5).map((value) => <label key={value}><span>{euro(value)}</span><input type="number" min="0" inputMode="numeric" value={counts[String(value)] || ""} onChange={(event) => setCounts((current) => ({ ...current, [String(value)]: event.target.value }))} placeholder="0" /></label>)}</div></article><article><h3>Notas</h3><div className="denomination-grid">{vaultDenominations.filter((value) => value >= 5).map((value) => <label key={value}><span>{euro(value)}</span><input type="number" min="0" inputMode="numeric" value={counts[String(value)] || ""} onChange={(event) => setCounts((current) => ({ ...current, [String(value)]: event.target.value }))} placeholder="0" /></label>)}</div></article></div>
+    <div className="vault-extras"><label>Moedas soltas<input inputMode="decimal" value={extras.looseCoins} onChange={(event) => setExtras({ ...extras, looseCoins: event.target.value })} placeholder="0,00" /></label><label>Fundos de caixa<input inputMode="decimal" value={extras.tillFunds} onChange={(event) => setExtras({ ...extras, tillFunds: event.target.value })} placeholder="0,00" /></label><label>Faturas<input inputMode="decimal" value={extras.invoices} onChange={(event) => setExtras({ ...extras, invoices: event.target.value })} placeholder="0,00" /></label><label>Moedas banco 1<input inputMode="decimal" value={extras.bankCoins1} onChange={(event) => setExtras({ ...extras, bankCoins1: event.target.value })} placeholder="0,00" /></label><label>Moedas banco 2<input inputMode="decimal" value={extras.bankCoins2} onChange={(event) => setExtras({ ...extras, bankCoins2: event.target.value })} placeholder="0,00" /></label><label>Total teórico<input inputMode="decimal" value={theoretical} onChange={(event) => setTheoretical(event.target.value)} placeholder="0,00" /></label></div>
+    <div className="vault-handover"><label>Gerente que entrega<input placeholder="Nome" /></label><span>→</span><label>Gerente que recebe<input placeholder="Nome" /></label></div>
+    <div className="development-actions"><button type="button" onClick={reset}>Limpar rascunho</button><button type="button" className="primary" disabled>Guardar controlo · brevemente</button></div>
+  </section>;
+}
+
+const newDepositRow = (id: number, shift: DepositShift): DepositRow => ({ id, shift, register: "", employee: "", employeeNumber: "", time: "", rapport: "", withdrawal: "", card: "", cash: "", ticket: "", cheques: "", uber: "", glovo: "", bolt: "" });
+const depositMoneyFields: (keyof DepositRow)[] = ["rapport", "withdrawal", "card", "cash", "ticket", "cheques", "uber", "glovo", "bolt"];
+
+function DepositSheetPrototype() {
+  const [rows, setRows] = useState<DepositRow[]>([newDepositRow(1, "Abertura"), newDepositRow(2, "Transição"), newDepositRow(3, "Fecho"), newDepositRow(4, "Delivery")]);
+  const [responsibles, setResponsibles] = useState<Record<string, string>>({ Abertura: "", Transição: "", Fecho: "" });
+  const difference = (row: DepositRow) => moneyValue(row.rapport) - depositMoneyFields.filter((key) => key !== "rapport").reduce((sum, key) => sum + moneyValue(String(row[key])), 0);
+  const totalDifference = rows.reduce((sum, row) => sum + difference(row), 0);
+  const update = (id: number, key: keyof DepositRow, value: string) => setRows((current) => current.map((row) => row.id === id ? { ...row, [key]: value } : row));
+  return <section className="development-module" aria-labelledby="deposit-sheet-title">
+    <div className="development-module-heading"><div><span className="eyebrow">Protótipo operacional</span><h2 id="deposit-sheet-title">Folha Depósito</h2><p>Registo diário por momento, caixa, colaborador e meio de pagamento.</p></div><span className="development-status">Em construção</span></div>
+    <div className="development-toolbar"><label>Data<input type="date" defaultValue={new Date().toISOString().slice(0, 10)} /></label><div className="deposit-overview"><span><small>Registos</small><strong>{rows.length}</strong></span><span><small>Diferença total</small><strong>{euro(totalDifference)}</strong></span></div></div>
+    <div className="deposit-table-wrap"><table className="deposit-table"><thead><tr><th>Turno</th><th>Caixa</th><th>Funcionário</th><th>N.º emp.</th><th>Hora</th><th>Rapport</th><th>Sangria</th><th>Multibanco</th><th>Dinheiro</th><th>Ticket</th><th>Cheques</th><th>UberEats</th><th>Glovo</th><th>Bolt</th><th>Diferença</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td><select value={row.shift} onChange={(event) => update(row.id, "shift", event.target.value)}>{(["Abertura", "Transição", "Fecho", "Delivery"] as DepositShift[]).map((item) => <option key={item}>{item}</option>)}</select></td><td><input value={row.register} onChange={(event) => update(row.id, "register", event.target.value)} /></td><td><input value={row.employee} onChange={(event) => update(row.id, "employee", event.target.value)} /></td><td><input value={row.employeeNumber} onChange={(event) => update(row.id, "employeeNumber", event.target.value)} /></td><td><input type="time" value={row.time} onChange={(event) => update(row.id, "time", event.target.value)} /></td>{depositMoneyFields.map((key) => <td key={key}><input inputMode="decimal" value={String(row[key])} onChange={(event) => update(row.id, key, event.target.value)} placeholder="0,00" /></td>)}<td className={difference(row) === 0 ? "balanced" : "difference"}>{euro(difference(row))}</td></tr>)}</tbody></table></div>
+    <button type="button" className="deposit-add" onClick={() => setRows((current) => [...current, newDepositRow(Date.now(), "Abertura")])}>＋ Adicionar registo</button>
+    <div className="deposit-responsibles">{(["Abertura", "Transição", "Fecho"] as const).map((item) => <label key={item}>Responsável pelo depósito · {item}<input value={responsibles[item]} onChange={(event) => setResponsibles({ ...responsibles, [item]: event.target.value })} placeholder="Nome" /></label>)}</div>
+    <label className="deposit-observations">Observações<textarea rows={3} placeholder="Registe ocorrências ou justificações relevantes." /></label>
+    <div className="development-actions"><button type="button" onClick={() => setRows([newDepositRow(1, "Abertura"), newDepositRow(2, "Transição"), newDepositRow(3, "Fecho"), newDepositRow(4, "Delivery")])}>Limpar rascunho</button><button type="button" className="primary" disabled>Guardar folha · brevemente</button></div>
+  </section>;
+}
+
 export default function Home() {
   const objectivesExportRef = useRef<HTMLElement>(null);
   const [portalDate, setPortalDate] = useState("");
   const [view, setView] = useState<View>("resumo");
+  const [developmentSection, setDevelopmentSection] = useState<DevelopmentSection>("cofre");
   const [department, setDepartment] = useState<Department>("global");
   const [tasks, setTasks] = useState(initialTasks);
   const [filter, setFilter] = useState<"pendentes" | "concluidas" | "todas">("pendentes");
@@ -474,6 +523,10 @@ export default function Home() {
     }).format(new Date());
     setPortalDate(formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1));
   }, []);
+
+  useEffect(() => {
+    if (view === "desenvolvimento" && currentUser && currentUser.role !== "admin") setView("resumo");
+  }, [view, currentUser]);
 
   useEffect(() => {
     if (!notice.startsWith("Descarga validada")) return;
@@ -1059,7 +1112,7 @@ export default function Home() {
     { id: "equipa", label: "Equipa", glyph: "♟" },
     { id: "gerenteloja" as View, label: "Gerente Loja", glyph: "♛" },
     { id: "faturacao" as View, label: "Controlo faturação", glyph: "€" },
-    ...(currentUser?.role === "admin" ? [{ id: "configuracoes" as View, label: "Configurações", glyph: "⚙" }] : []),
+    ...(currentUser?.role === "admin" ? [{ id: "desenvolvimento" as View, label: "Em desenvolvimento", glyph: "◇" }, { id: "configuracoes" as View, label: "Configurações", glyph: "⚙" }] : []),
   ];
 
   if (!authReady) return <main className="auth-shell"><div className="auth-card auth-loading"><span className="auth-logo">M</span><p>A preparar o McDonald&apos;s Imperial…</p></div></main>;
@@ -1599,6 +1652,14 @@ export default function Home() {
                 </div>
                 <p className="inventory-note">Fonte: relatórios mensais e relatório YTD Tell The Arches do restaurante Imperial, disponíveis na pasta partilhada. O YTD cobre 1 de janeiro a 31 de julho de 2026; fonte validada em 13 de agosto de 2026.</p>
               </div>
+            </section>
+          )}
+
+          {view === "desenvolvimento" && currentUser.role === "admin" && (
+            <section className="development-page" aria-labelledby="development-title">
+              <div className="development-page-heading"><div><span className="eyebrow">Área reservada</span><h2 id="development-title">Em desenvolvimento</h2><p>Protótipos em construção, disponíveis apenas para o administrador.</p></div><span className="development-private-badge">◆ Administrador</span></div>
+              <nav className="development-subnav" aria-label="Módulos em desenvolvimento"><button type="button" className={developmentSection === "cofre" ? "active" : ""} onClick={() => setDevelopmentSection("cofre")}><span>▣</span>Controlo Cofre</button><button type="button" className={developmentSection === "deposito" ? "active" : ""} onClick={() => setDevelopmentSection("deposito")}><span>▤</span>Folha Depósito</button></nav>
+              {developmentSection === "cofre" ? <VaultControlPrototype /> : <DepositSheetPrototype />}
             </section>
           )}
 
