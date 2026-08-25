@@ -135,6 +135,18 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .delivery-disputes-toolbar label { display: grid; gap: 6px; color: #67776f; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 .delivery-disputes-toolbar input, .delivery-disputes-toolbar select { min-width: 180px; border: 1px solid #d7e1dd; border-radius: 9px; padding: 10px 12px; background: #fff; color: #29483d; }
 .delivery-disputes-toolbar button { margin-left: auto; border: 0; border-radius: 10px; padding: 11px 15px; background: #dce7e3; color: #6c7c75; font-weight: 800; }
+.delivery-disputes-toolbar > span { margin-left: auto; padding-bottom: 11px; color: #84918b; font-size: 12px; }
+.delivery-disputes-search input { min-width: 220px; }
+.delivery-disputes-table-wrap { max-height: 680px; overflow: auto; border: 1px solid #dce5e1; border-radius: 14px; }
+.delivery-disputes-table { width: 100%; min-width: 900px; border-collapse: collapse; }
+.delivery-disputes-table th { position: sticky; z-index: 1; top: 0; padding: 13px 15px; background: #eff4f2; color: #66766e; font-size: 11px; text-align: left; text-transform: uppercase; letter-spacing: .05em; }
+.delivery-disputes-table td { padding: 12px 15px; border-top: 1px solid #e5ebe8; color: #4f6259; font-size: 13px; }
+.delivery-disputes-table tbody tr:hover { background: #fafcfb; }
+.delivery-operator, .delivery-flag { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 6px 9px; font-size: 11px; font-weight: 800; }
+.delivery-operator { background: #e9eefb; color: #385899; }
+.delivery-operator.glovo { background: #e9f6ec; color: #21733b; }
+.delivery-flag.yes { background: #dff2e7; color: #237049; }
+.delivery-flag.no { background: #f3e5e6; color: #a94950; }
 .delivery-disputes-empty { display: grid; justify-items: center; gap: 7px; padding: 52px 20px; border: 1px dashed #cbd8d3; border-radius: 14px; color: #687870; text-align: center; }
 .delivery-disputes-empty > span { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: #eaf2ef; color: #26745b; font-size: 24px; }
 .delivery-disputes-empty strong { color: #28483d; font-size: 17px; }
@@ -168,6 +180,7 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
   .delivery-disputes-cards { grid-template-columns: 1fr; }
   .delivery-disputes-toolbar { align-items: stretch; flex-direction: column; }
   .delivery-disputes-toolbar button { margin-left: 0; }
+  .delivery-disputes-toolbar > span { margin-left: 0; padding-bottom: 0; }
 }
 
 * { box-sizing: border-box; }

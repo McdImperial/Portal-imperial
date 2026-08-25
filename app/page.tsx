@@ -505,12 +505,32 @@ function AbsencesPrototype() {
   </section>;
 }
 
+type DeliveryDispute = { requestDate: string; operator: string; partnerId: string; scale: string; operatorPayment: boolean; creditNoteGenerated: boolean; creditNoteValue: number };
+type DeliveryDisputesData = { source: string; updatedAt: string; records: DeliveryDispute[] };
+
 function DeliveryDisputesPrototype() {
+  const [data, setData] = useState<DeliveryDisputesData | null>(null);
+  const [operator, setOperator] = useState("Todos");
+  const [period, setPeriod] = useState("Todos");
+  const [query, setQuery] = useState("");
+  useEffect(() => { fetch("/api/delivery-disputes", { cache: "no-store" }).then((response) => response.ok ? response.json() : Promise.reject()).then(setData).catch(() => setData(null)); }, []);
+  const dateKey = (value: string) => { const parts = value.match(/(\d{2,4})[/-](\d{2})[/-](\d{2,4})/); if (!parts) return ""; return parts[1].length === 4 ? `${parts[1]}-${parts[2]}` : `${parts[3]}-${parts[2]}`; };
+  const dateStamp = (value: string) => { const parts = value.match(/(\d{2,4})[/-](\d{2})[/-](\d{2,4})\s*(.*)/); if (!parts) return 0; const iso = parts[1].length === 4 ? `${parts[1]}-${parts[2]}-${parts[3]}` : `${parts[3]}-${parts[2]}-${parts[1]}`; return new Date(`${iso}T${parts[4] || "00:00:00"}`).getTime() || 0; };
+  const periods = useMemo(() => [...new Set((data?.records || []).map((row) => dateKey(row.requestDate)).filter(Boolean))].sort().reverse(), [data]);
+  const operators = useMemo(() => [...new Set((data?.records || []).map((row) => row.operator))].sort(), [data]);
+  const filtered = useMemo(() => (data?.records || []).filter((row) => (operator === "Todos" || row.operator === operator) && (period === "Todos" || dateKey(row.requestDate) === period) && (!query || row.partnerId.toLocaleLowerCase("pt-PT").includes(query.toLocaleLowerCase("pt-PT")))).sort((a, b) => dateStamp(b.requestDate) - dateStamp(a.requestDate)), [data, operator, period, query]);
+  const paid = filtered.filter((row) => row.operatorPayment).length;
+  const creditNotes = filtered.filter((row) => row.creditNoteGenerated).length;
+  const creditValue = filtered.reduce((total, row) => total + row.creditNoteValue, 0);
+  const euroValue = (value: number) => value.toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
   return <section className="development-module delivery-disputes-module" aria-labelledby="delivery-disputes-title">
-    <div className="development-module-heading"><div><span className="eyebrow">Controlo Delivery</span><h2 id="delivery-disputes-title">Disputas Delivery</h2><p>Área reservada para acompanhar pedidos contestados, valores e respetiva resolução.</p></div><span className="development-status">Em construção</span></div>
-    <div className="delivery-disputes-cards"><article><small>Disputas abertas</small><strong>0</strong><span>A aguardar análise</span></article><article><small>Em tratamento</small><strong>0</strong><span>Com acompanhamento</span></article><article><small>Resolvidas</small><strong>0</strong><span>No período selecionado</span></article><article><small>Valor em disputa</small><strong>0,00 €</strong><span>Total pendente</span></article></div>
-    <div className="delivery-disputes-toolbar"><label>Período<input type="month" defaultValue={new Date().toISOString().slice(0, 7)} /></label><label>Plataforma<select defaultValue="Todas"><option>Todas</option><option>Uber Eats</option><option>Glovo</option><option>Bolt Food</option></select></label><button type="button" disabled>＋ Nova disputa · brevemente</button></div>
-    <div className="delivery-disputes-empty"><span>◎</span><strong>Sem disputas registadas</strong><p>A tabela ficará preparada para apresentar data, plataforma, número do pedido, motivo, valor, evidências e estado da resolução.</p></div>
+    <div className="development-module-heading"><div><span className="eyebrow">Controlo Delivery</span><h2 id="delivery-disputes-title">Disputas Delivery</h2><p>Informação consolidada das disputas Glovo e Uber Eats.</p></div><span className="development-status">Em construção</span></div>
+    {!data ? <div className="delivery-disputes-empty"><span>!</span><strong>Não foi possível carregar as disputas</strong><p>Atualize a página ou confirme a sessão de administrador.</p></div> : <>
+      <div className="delivery-disputes-cards"><article><small>Registos</small><strong>{filtered.length}</strong><span>No filtro selecionado</span></article><article><small>Pagos pelo operador</small><strong>{paid}</strong><span>{filtered.length ? Math.round(paid / filtered.length * 100) : 0}% dos registos</span></article><article><small>Notas de crédito</small><strong>{creditNotes}</strong><span>{filtered.length ? Math.round(creditNotes / filtered.length * 100) : 0}% dos registos</span></article><article><small>Valor NC</small><strong>{euroValue(creditValue)}</strong><span>Total das notas geradas</span></article></div>
+      <div className="delivery-disputes-toolbar"><label>Período<select value={period} onChange={(event) => setPeriod(event.target.value)}><option>Todos</option>{periods.map((item) => <option key={item} value={item}>{new Date(`${item}-01T00:00:00`).toLocaleDateString("pt-PT", { month: "long", year: "numeric" })}</option>)}</select></label><label>Operador<select value={operator} onChange={(event) => setOperator(event.target.value)}><option>Todos</option>{operators.map((item) => <option key={item}>{item}</option>)}</select></label><label className="delivery-disputes-search">ID parceiro<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Procurar ID…" /></label><span>Atualizado em {new Date(data.updatedAt).toLocaleDateString("pt-PT")}</span></div>
+      <div className="delivery-disputes-table-wrap"><table className="delivery-disputes-table"><thead><tr><th>Data pedido</th><th>Operador</th><th>ID Parceiro</th><th>Balança</th><th>Pag. Operador</th><th>NC Gerada</th><th>NC Valor</th></tr></thead><tbody>{filtered.map((row, index) => <tr key={`${row.operator}-${row.partnerId}-${index}`}><td>{row.requestDate}</td><td><span className={`delivery-operator ${row.operator.toLocaleLowerCase("pt-PT")}`}>{row.operator}</span></td><td><strong>{row.partnerId}</strong></td><td>{row.scale || "—"}</td><td><span className={row.operatorPayment ? "delivery-flag yes" : "delivery-flag no"}>{row.operatorPayment ? "Sim" : "Não"}</span></td><td><span className={row.creditNoteGenerated ? "delivery-flag yes" : "delivery-flag no"}>{row.creditNoteGenerated ? "Sim" : "Não"}</span></td><td><strong>{euroValue(row.creditNoteValue)}</strong></td></tr>)}</tbody></table></div>
+      {!filtered.length && <div className="delivery-disputes-empty"><span>◎</span><strong>Sem resultados</strong><p>Não existem disputas correspondentes aos filtros selecionados.</p></div>}
+    </>}
   </section>;
 }
 

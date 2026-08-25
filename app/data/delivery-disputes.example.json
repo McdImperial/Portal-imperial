@@ -1,0 +1,15 @@
+{
+  "source": "Exemplo",
+  "updatedAt": "2026-01-01T00:00:00.000Z",
+  "records": [
+    {
+      "requestDate": "01/01/2026 12:00:00",
+      "operator": "Operador Exemplo",
+      "partnerId": "ABC123",
+      "scale": "✅",
+      "operatorPayment": true,
+      "creditNoteGenerated": false,
+      "creditNoteValue": 0
+    }
+  ]
+}
