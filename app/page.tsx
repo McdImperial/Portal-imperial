@@ -1221,10 +1221,10 @@ export default function Home() {
 
   return (
     <main className="app-shell">
-      <aside className="sidebar" aria-label="Navegação principal">
+      <header className="sidebar platform-header" aria-label="Navegação principal">
         <div className="brand">
           <span className="brand-mark">M</span>
-          <span>McDonald&apos;s Imperial</span>
+          <span><strong>Plataforma McD</strong><small>Imperial</small></span>
         </div>
         <nav className="nav-list">
           {navItems.map((item) => (
@@ -1288,7 +1288,7 @@ export default function Home() {
           <span><strong>{currentUser.name || currentUser.login}</strong><small>{currentUser.login} · {roleLabel(currentUser.role)}</small></span>
           <span className="more">↪</span>
         </button>
-      </aside>
+      </header>
 
       <section className="workspace">
         <header className={view === "areasglobais" ? "topbar centered" : "topbar"}>

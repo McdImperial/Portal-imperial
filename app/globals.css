@@ -1355,6 +1355,256 @@ h2 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.25px; }
   .toolbar-divider { margin: 0 3px; }
   .board-search { order: 3; width: 100%; }
   .view-toggle { margin-left: auto; }
-  .monday-board, .kanban-board { padding-left: 13px; padding-right: 13px; }
+   .monday-board, .kanban-board { padding-left: 13px; padding-right: 13px; }
   .kanban-board { grid-template-columns: repeat(4, 245px); }
+}
+/* Plataforma McD — linguagem visual global 2026 */
+:root {
+  --mcd-yellow: #ffbc0d;
+  --mcd-red: #da291c;
+  --mcd-blue: #1f557f;
+  --mcd-charcoal: #242529;
+  --platform-bg: #f3f4f5;
+  --platform-line: #dfe2e5;
+  --platform-shadow: 0 8px 24px rgba(25, 31, 38, .07);
+}
+
+html, body { background: var(--platform-bg); }
+body { color: #25272b; font-family: Inter, Arial, Helvetica, sans-serif; }
+.app-shell { display: block; min-height: 100vh; background: var(--platform-bg); }
+
+.platform-header {
+  position: sticky;
+  z-index: 50;
+  top: 0;
+  width: 100%;
+  height: auto;
+  min-height: 78px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 245px minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 0 26px;
+  overflow: visible;
+  padding: 14px clamp(22px, 4vw, 72px) 0;
+  color: #27292d;
+  background: rgba(255,255,255,.97);
+  border-bottom: 1px solid var(--platform-line);
+  box-shadow: 0 2px 10px rgba(23,28,34,.035);
+  backdrop-filter: blur(18px);
+}
+.platform-header:has(.department-subtabs) { padding-bottom: 43px; }
+.platform-header .brand {
+  align-self: center;
+  gap: 12px;
+  margin: 0;
+  padding: 0 0 13px;
+  color: #232428;
+  font-size: 18px;
+  letter-spacing: -.45px;
+}
+.platform-header .brand > span:last-child { display: grid; gap: 2px; }
+.platform-header .brand strong { font-weight: 850; }
+.platform-header .brand small { color: #72777d; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.platform-header .brand-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  color: #8a5b00;
+  background: var(--mcd-yellow);
+  box-shadow: inset 0 -2px 0 rgba(113,73,0,.1);
+  font-family: Georgia, serif;
+  font-size: 28px;
+}
+.platform-header .nav-list {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 0 0 13px;
+  scrollbar-width: none;
+}
+.platform-header .nav-list::-webkit-scrollbar { display: none; }
+.platform-header .nav-item {
+  width: auto;
+  min-width: max-content;
+  gap: 7px;
+  padding: 9px 12px;
+  border-radius: 999px;
+  color: #5c616a;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+.platform-header .nav-item:hover { color: #202226; background: #f0f1f2; }
+.platform-header .nav-item.active {
+  color: #1f2125;
+  background: var(--mcd-yellow);
+  box-shadow: none;
+}
+.platform-header .nav-glyph { width: auto; font-size: 14px; }
+.platform-header .nav-count { min-width: 19px; padding: 2px 6px; color: #fff; background: #b82018; font-size: 9px; }
+.platform-header .profile {
+  align-self: center;
+  width: auto;
+  min-width: max-content;
+  margin: 0 0 13px;
+  padding: 0;
+  border: 0;
+  color: #2b2d31;
+}
+.platform-header .profile > span:nth-child(2) { max-width: 150px; }
+.platform-header .profile strong { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.platform-header .profile small { display: none; }
+.platform-header .profile .more { color: #848a90; }
+.platform-header .avatar { width: 36px; height: 36px; color: #fff; background: #135b91; }
+
+.platform-header .sidebar-departments {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-width: 0;
+  margin: 0;
+  border-top: 1px solid #eceef0;
+}
+.platform-header .sidebar-section-title { display: none; }
+.platform-header .department-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 43px;
+}
+.platform-header .department-entry { position: static; display: block; }
+.platform-header .department-tab {
+  width: auto;
+  min-height: 31px;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  color: #656b73;
+}
+.platform-header .department-tab:hover { color: #232529; background: #f1f2f3; }
+.platform-header .department-tab.selected { color: #fff; background: #8c6a22; }
+.platform-header .department-tab.selected .department-initials { color: #fff; background: rgba(255,255,255,.16); }
+.platform-header .department-initials { width: 22px; height: 22px; border-radius: 7px; }
+.platform-header .department-name { font-size: 10px; font-weight: 800; }
+.platform-header .department-active-dot { display: none; }
+.platform-header .department-subtabs {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 43px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 0;
+  padding: 6px clamp(22px, 4vw, 72px);
+  overflow-x: auto;
+  border: 0;
+  border-top: 1px solid #eceef0;
+  background: #fff;
+  scrollbar-width: none;
+}
+.platform-header .department-subtabs::-webkit-scrollbar { display: none; }
+.platform-header .department-subtab {
+  min-width: max-content;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: #676c74;
+  font-size: 10px;
+  font-weight: 750;
+}
+.platform-header .department-subtab:hover { color: #24262a; background: #f0f1f2; }
+.platform-header .department-subtab.active { color: #fff; background: #2b2d31; }
+
+.workspace { min-width: 0; }
+.topbar, .topbar.centered {
+  position: static;
+  height: auto;
+  min-height: 116px;
+  box-sizing: border-box;
+  padding: 26px clamp(24px, 4vw, 76px) 24px;
+  border: 0;
+  background: #fff;
+  backdrop-filter: none;
+}
+.topbar.centered > div { width: auto; text-align: left; }
+.date-line { margin-bottom: 8px; color: #797f85; font-size: 12px; }
+h1 { color: #222428; font-family: Inter, Arial, Helvetica, sans-serif; font-size: clamp(28px, 2.4vw, 40px); font-weight: 850; letter-spacing: -.045em; }
+h2 { color: #26282c; font-size: 20px; font-weight: 820; }
+.content { max-width: 1920px; gap: 24px; padding: 28px clamp(24px, 4vw, 76px) 72px; }
+.toast { top: 148px; color: #202226; background: var(--mcd-yellow); font-weight: 800; }
+
+.metric-card, .panel, .objective-card, .cost-section, .billing-section, .r2p-section, .tell-arches-section, .team-milestones, .settings-section, .restaurant-objectives, .development-module {
+  border-color: var(--platform-line);
+  border-radius: 15px;
+  box-shadow: var(--platform-shadow);
+}
+.metric-card { position: relative; overflow: hidden; border-left: 5px solid var(--mcd-yellow); background: #fff; }
+.metric-card.feature { border-color: var(--platform-line); border-left-color: #267b55; background: #fff; }
+.metric-card strong:not(.big-number), .big-number { color: #222428; font-family: Inter, Arial, Helvetica, sans-serif; font-weight: 850; letter-spacing: -.04em; }
+.panel-heading { padding: 24px 28px 20px; }
+.panel-heading::before, .development-module-heading::before, .team-section-heading::before {
+  content: "";
+  align-self: stretch;
+  width: 4px;
+  min-height: 30px;
+  margin-right: 13px;
+  border-radius: 4px;
+  background: var(--mcd-yellow);
+}
+.panel-heading > div:first-child, .development-module-heading > div:first-child, .team-section-heading > div:first-child { margin-right: auto; }
+.task-row { min-height: 72px; padding-right: 28px; padding-left: 28px; }
+.task-row:hover { background: #f7f8f9; }
+.text-button { color: #1f5f48; }
+.eyebrow { color: #747a80; letter-spacing: .12em; }
+
+.board-source-strip, .board-titlebar, .monday-toolbar, .inventory-detail-heading, .inventory-controls, .r2p-period-bar, .settings-card-title { background: #fff; }
+.monday-group-title, .board-group-title { color: #1f557f; }
+.inventory-product-header, .absence-table th, .deposit-table th, .delivery-disputes-table th, .heatmap-header > span {
+  color: #fff;
+  background: #2b2d31;
+}
+.inventory-product-header button { color: #fff; }
+.inventory-product-header button:hover { color: #fff; background: #404247; }
+.cost-card, .billing-metrics article, .delivery-disputes-cards article, .vault-summary article, .absence-profile-summary article { border-left: 4px solid var(--mcd-yellow); background: #fff; }
+.development-page-heading h2, .development-module-heading h2, .billing-heading h2, .cost-heading h2, .r2p-heading h2, .tell-arches-heading h2 { font-family: Inter, Arial, Helvetica, sans-serif; font-weight: 850; letter-spacing: -.035em; }
+.development-subnav button.active, .development-actions button.primary, .billing-primary, .billing-validate { color: #202226; background: var(--mcd-yellow); box-shadow: none; }
+.development-private-badge, .development-status { color: #8b6200; background: #fff2c7; }
+
+@media (max-width: 1260px) {
+  .platform-header { grid-template-columns: 205px minmax(0,1fr) auto; gap: 0 12px; padding-right: 24px; padding-left: 24px; }
+  .platform-header .brand { font-size: 15px; }
+  .platform-header .nav-item { padding-right: 9px; padding-left: 9px; font-size: 10px; }
+  .platform-header .nav-glyph { display: none; }
+  .platform-header .profile > span:nth-child(2), .platform-header .profile .more { display: none; }
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 800px) {
+  .platform-header, .platform-header:has(.department-subtabs) {
+    position: sticky;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto;
+    padding: 10px 14px 0;
+  }
+  .platform-header .brand { padding-bottom: 9px; }
+  .platform-header .brand small { display: none; }
+  .platform-header .brand-mark { width: 36px; height: 36px; font-size: 23px; }
+  .platform-header .profile { grid-column: 2; grid-row: 1; margin-bottom: 9px; }
+  .platform-header .nav-list { grid-column: 1 / -1; grid-row: 2; padding: 6px 0 9px; border-top: 1px solid #eceef0; }
+  .platform-header .nav-item { padding: 7px 10px; }
+  .platform-header .sidebar-departments { grid-column: 1 / -1; grid-row: 3; overflow-x: auto; }
+  .platform-header .department-list { width: max-content; min-width: 100%; justify-content: flex-start; }
+  .platform-header .department-subtabs { position: static; width: 100vw; height: auto; justify-content: flex-start; margin-left: -14px; padding: 6px 14px; }
+  .topbar, .topbar.centered { min-height: 94px; padding: 21px 18px 18px; }
+  h1 { font-size: 29px; }
+  .content { padding: 20px 14px 52px; }
+  .summary-grid { grid-template-columns: 1fr; }
+  .panel-heading::before, .development-module-heading::before, .team-section-heading::before { display: none; }
 }
