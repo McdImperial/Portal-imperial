@@ -145,6 +145,9 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .delivery-operator, .delivery-flag { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 6px 9px; font-size: 11px; font-weight: 800; }
 .delivery-operator { background: #e9eefb; color: #385899; }
 .delivery-operator.glovo { background: #e9f6ec; color: #21733b; }
+.delivery-operator-logo { display: inline-flex; align-items: center; justify-content: center; width: 86px; height: 38px; overflow: hidden; border: 1px solid #e0e5e2; border-radius: 9px; background: #fff; }
+.delivery-operator-logo img { width: 100%; height: 100%; object-fit: contain; }
+.delivery-operator-logo.glovo img { object-fit: cover; }
 .delivery-flag.yes { background: #dff2e7; color: #237049; }
 .delivery-flag.no { background: #f3e5e6; color: #a94950; }
 .delivery-disputes-empty { display: grid; justify-items: center; gap: 7px; padding: 52px 20px; border: 1px dashed #cbd8d3; border-radius: 14px; color: #687870; text-align: center; }
