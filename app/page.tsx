@@ -403,7 +403,7 @@ function MonthlyBillingControl({ values, onChange }: { values: Record<string, st
   return <section className="monthly-control"><div className="monthly-control-heading"><div><span className="eyebrow">Resumo do mês</span><h3>Custos, inventário e consumo</h3><p>Introduza os campos em branco. Compras, consumos e percentagens são calculados automaticamente.</p></div></div><div className="monthly-control-grid"><section className="monthly-purchases">{field("sales", "Vendas mês")}<p><span>Compras Comida</span><b>{euro(purchaseFood)}</b></p><p><span>Compras Papel</span><b>{euro(purchasePaper)}</b></p><p><span>Compras Total OPS</span><b>{euro(purchaseOps)}</b></p><p><span>Consumo Comida</span><b>{euro(food)}</b></p><p><span>Consumo Papel</span><b>{euro(paper)}</b></p><p><span>Consumo OPS</span><b>{euro(ops)}</b></p></section><section className="monthly-inputs">{field("openingFood", "Inv. inicial comida")}{field("openingOps", "Inv. inicial OPS")}{field("lossesFood", "Perdas comida")}{field("mealsFood", "Refeições comida")}{field("promoFood", "Promo comida")}{field("closingFood", "Inv. final comida")}</section><section className="monthly-inputs">{field("openingPaper", "Inv. inicial papel")}{field("lossesPaper", "Perdas papel")}{field("mealsPaper", "Refeições papel")}{field("promoPaper", "Promo papel")}{field("closingPaper", "Inv. final papel")}{field("closingOps", "Inv. final OPS")}<p><span>% custo comida</span><b>{percent(food)}</b></p><p><span>% custo papel</span><b>{percent(paper)}</b></p><p><span>% custo OPS</span><b>{percent(ops)}</b></p></section></div></section>;
 }
 
-type DevelopmentSection = "cofre" | "deposito" | "faltas";
+type DevelopmentSection = "cofre" | "deposito" | "faltas" | "disputas";
 type VaultShift = "Manhã" | "Tarde" | "Madrugada";
 type DepositShift = "Abertura" | "Transição" | "Fecho" | "Delivery";
 type DepositRow = { id: number; shift: DepositShift; register: string; employee: string; employeeNumber: string; time: string; rapport: string; withdrawal: string; card: string; cash: string; ticket: string; cheques: string; uber: string; glovo: string; bolt: string };
@@ -502,6 +502,15 @@ function AbsencesPrototype() {
         </> : <div className="absence-empty">Selecione um funcionário na lista para consultar o cadastro.</div>}</div>
       </div>}
     </>}
+  </section>;
+}
+
+function DeliveryDisputesPrototype() {
+  return <section className="development-module delivery-disputes-module" aria-labelledby="delivery-disputes-title">
+    <div className="development-module-heading"><div><span className="eyebrow">Controlo Delivery</span><h2 id="delivery-disputes-title">Disputas Delivery</h2><p>Área reservada para acompanhar pedidos contestados, valores e respetiva resolução.</p></div><span className="development-status">Em construção</span></div>
+    <div className="delivery-disputes-cards"><article><small>Disputas abertas</small><strong>0</strong><span>A aguardar análise</span></article><article><small>Em tratamento</small><strong>0</strong><span>Com acompanhamento</span></article><article><small>Resolvidas</small><strong>0</strong><span>No período selecionado</span></article><article><small>Valor em disputa</small><strong>0,00 €</strong><span>Total pendente</span></article></div>
+    <div className="delivery-disputes-toolbar"><label>Período<input type="month" defaultValue={new Date().toISOString().slice(0, 7)} /></label><label>Plataforma<select defaultValue="Todas"><option>Todas</option><option>Uber Eats</option><option>Glovo</option><option>Bolt Food</option></select></label><button type="button" disabled>＋ Nova disputa · brevemente</button></div>
+    <div className="delivery-disputes-empty"><span>◎</span><strong>Sem disputas registadas</strong><p>A tabela ficará preparada para apresentar data, plataforma, número do pedido, motivo, valor, evidências e estado da resolução.</p></div>
   </section>;
 }
 
@@ -1713,8 +1722,8 @@ export default function Home() {
           {view === "desenvolvimento" && currentUser.role === "admin" && (
             <section className="development-page" aria-labelledby="development-title">
               <div className="development-page-heading"><div><span className="eyebrow">Área reservada</span><h2 id="development-title">Em desenvolvimento</h2><p>Protótipos em construção, disponíveis apenas para o administrador.</p></div><span className="development-private-badge">◆ Administrador</span></div>
-              <nav className="development-subnav" aria-label="Módulos em desenvolvimento"><button type="button" className={developmentSection === "cofre" ? "active" : ""} onClick={() => setDevelopmentSection("cofre")}><span>▣</span>Controlo Cofre</button><button type="button" className={developmentSection === "deposito" ? "active" : ""} onClick={() => setDevelopmentSection("deposito")}><span>▤</span>Folha Depósito</button><button type="button" className={developmentSection === "faltas" ? "active" : ""} onClick={() => setDevelopmentSection("faltas")}><span>◷</span>Faltas &amp; Atrasos</button></nav>
-              {developmentSection === "cofre" ? <VaultControlPrototype /> : developmentSection === "deposito" ? <DepositSheetPrototype /> : <AbsencesPrototype />}
+              <nav className="development-subnav" aria-label="Módulos em desenvolvimento"><button type="button" className={developmentSection === "cofre" ? "active" : ""} onClick={() => setDevelopmentSection("cofre")}><span>▣</span>Controlo Cofre</button><button type="button" className={developmentSection === "deposito" ? "active" : ""} onClick={() => setDevelopmentSection("deposito")}><span>▤</span>Folha Depósito</button><button type="button" className={developmentSection === "faltas" ? "active" : ""} onClick={() => setDevelopmentSection("faltas")}><span>◷</span>Faltas &amp; Atrasos</button><button type="button" className={developmentSection === "disputas" ? "active" : ""} onClick={() => setDevelopmentSection("disputas")}><span>◎</span>Disputas Delivery</button></nav>
+              {developmentSection === "cofre" ? <VaultControlPrototype /> : developmentSection === "deposito" ? <DepositSheetPrototype /> : developmentSection === "faltas" ? <AbsencesPrototype /> : <DeliveryDisputesPrototype />}
             </section>
           )}
 
