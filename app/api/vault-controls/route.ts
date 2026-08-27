@@ -4,10 +4,10 @@ import { vaultControls } from "../../../db/schema";
 import { requireUser } from "../auth/_lib";
 
 const shifts = ["Manhã", "Tarde", "Madrugada"] as const;
-const coinDenominations = ["0.01", "0.02", "0.05", "0.1", "0.2", "0.5", "1"] as const;
+const coinDenominations = ["0.05", "0.1", "0.2", "0.5", "1"] as const;
 const noteDenominations = ["5", "10", "20", "50", "100", "200", "500"] as const;
-const largeBagValues: Record<string, number> = { "0.01": 15, "0.02": 30, "0.05": 50, "0.1": 80, "0.2": 160, "0.5": 300, "1": 375 };
-const smallBagValues: Record<string, number> = { "0.01": 0.5, "0.02": 1, "0.05": 2.5, "0.1": 4, "0.2": 8, "0.5": 20, "1": 25 };
+const largeBagValues: Record<string, number> = { "0.05": 50, "0.1": 80, "0.2": 160, "0.5": 300, "1": 375 };
+const smallBagValues: Record<string, number> = { "0.05": 2.5, "0.1": 4, "0.2": 8, "0.5": 20, "1": 25 };
 
 type Payload = {
   controlDate?: string;
