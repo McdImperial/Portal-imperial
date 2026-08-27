@@ -71,6 +71,8 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .vault-records-table { width: 100%; min-width: 1050px; border-collapse: collapse; }
 .vault-records-table th { padding: 12px 14px; background: #f2f6f4; color: #687a72; font-size: 10px; text-align: left; text-transform: uppercase; letter-spacing: .05em; }
 .vault-records-table td { padding: 13px 14px; border-top: 1px solid #e5ece9; color: #4f6259; font-size: 12px; }
+.vault-records-table td > strong { color: #234f40; }
+.vault-table-detail { display: block; margin-top: 3px; color: #8a9691; font-size: 9px; }
 .vault-records-table strong.positive { color: #257a5c; }
 .vault-records-table strong.negative { color: #c54a53; }
 .vault-records-table strong.zero { color: #66766f; }
