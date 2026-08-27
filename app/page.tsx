@@ -405,28 +405,73 @@ function MonthlyBillingControl({ values, onChange }: { values: Record<string, st
 
 type DevelopmentSection = "cofre" | "deposito" | "faltas" | "disputas";
 type VaultShift = "Manhã" | "Tarde" | "Madrugada";
+type VaultRecord = { id: number; controlDate: string; shift: VaultShift; countedTotal: number; theoreticalTotal: number; vaultTotal: number; difference: number; deliveringManager: string; receivingManager: string; createdByName: string };
 type DepositShift = "Abertura" | "Transição" | "Fecho" | "Delivery";
 type DepositRow = { id: number; shift: DepositShift; register: string; employee: string; employeeNumber: string; time: string; rapport: string; withdrawal: string; card: string; cash: string; ticket: string; cheques: string; uber: string; glovo: string; bolt: string };
 
-const vaultDenominations = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500] as const;
+const vaultCoinDenominations = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1] as const;
+const vaultNoteDenominations = [5, 10, 20, 50, 100, 200, 500] as const;
+const vaultLargeBagValues: Record<string, number> = { "0.01": 15, "0.02": 30, "0.05": 50, "0.1": 80, "0.2": 160, "0.5": 300, "1": 375 };
+const vaultSmallBagValues: Record<string, number> = { "0.01": 0.5, "0.02": 1, "0.05": 2.5, "0.1": 4, "0.2": 8, "0.5": 20, "1": 25 };
 const moneyValue = (value: string) => Number(String(value).replace(",", ".")) || 0;
 const euro = (value: number) => value.toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
 
 function VaultControlPrototype() {
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const [month, setMonth] = useState(currentMonth);
+  const [records, setRecords] = useState<VaultRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [controlDate, setControlDate] = useState(new Date().toISOString().slice(0, 10));
   const [shift, setShift] = useState<VaultShift>("Manhã");
-  const [counts, setCounts] = useState<Record<string, string>>({});
-  const [theoretical, setTheoretical] = useState("");
+  const [largeBags, setLargeBags] = useState<Record<string, string>>({});
+  const [smallBags, setSmallBags] = useState<Record<string, string>>({});
+  const [noteCounts, setNoteCounts] = useState<Record<string, string>>({});
   const [extras, setExtras] = useState({ looseCoins: "", tillFunds: "", invoices: "", bankCoins1: "", bankCoins2: "" });
-  const counted = vaultDenominations.reduce((sum, denomination) => sum + denomination * (Number(counts[String(denomination)]) || 0), 0) + Object.values(extras).reduce((sum, value) => sum + moneyValue(value), 0);
-  const reset = () => { setCounts({}); setTheoretical(""); setExtras({ looseCoins: "", tillFunds: "", invoices: "", bankCoins1: "", bankCoins2: "" }); };
+  const [managers, setManagers] = useState({ delivering: "", receiving: "" });
+  const [message, setMessage] = useState("");
+  const [saving, setSaving] = useState(false);
+  const loadRecords = async (selectedMonth: string) => {
+    setLoading(true);
+    try { const response = await fetch(`/api/vault-controls?month=${selectedMonth}`, { cache: "no-store" }); const body = await response.json(); if (!response.ok) throw new Error(body.error); setRecords(body.records || []); }
+    catch { setRecords([]); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { void loadRecords(month); }, [month]);
+  const coinsTotal = vaultCoinDenominations.reduce((sum, denomination) => sum + (Number(largeBags[String(denomination)]) || 0) * vaultLargeBagValues[String(denomination)] + (Number(smallBags[String(denomination)]) || 0) * vaultSmallBagValues[String(denomination)], 0);
+  const notesTotal = vaultNoteDenominations.reduce((sum, denomination) => sum + denomination * (Number(noteCounts[String(denomination)]) || 0), 0);
+  const counted = coinsTotal + notesTotal + moneyValue(extras.looseCoins) + moneyValue(extras.tillFunds) + moneyValue(extras.invoices);
+  const theoretical = shift === "Manhã" ? 1250 : 1000 + moneyValue(extras.bankCoins2);
+  const vaultTotal = theoretical + moneyValue(extras.bankCoins1) + moneyValue(extras.bankCoins2);
+  const difference = counted - vaultTotal;
+  const reset = () => { setLargeBags({}); setSmallBags({}); setNoteCounts({}); setExtras({ looseCoins: "", tillFunds: "", invoices: "", bankCoins1: "", bankCoins2: "" }); setManagers({ delivering: "", receiving: "" }); setMessage(""); };
+  const save = async () => {
+    setSaving(true); setMessage("");
+    try {
+      const response = await fetch("/api/vault-controls", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ controlDate, shift, largeBags: Object.fromEntries(Object.entries(largeBags).map(([key, value]) => [key, Number(value) || 0])), smallBags: Object.fromEntries(Object.entries(smallBags).map(([key, value]) => [key, Number(value) || 0])), noteCounts: Object.fromEntries(Object.entries(noteCounts).map(([key, value]) => [key, Number(value) || 0])), looseCoins: moneyValue(extras.looseCoins), tillFunds: moneyValue(extras.tillFunds), invoices: moneyValue(extras.invoices), bankCoins1: moneyValue(extras.bankCoins1), bankCoins2: moneyValue(extras.bankCoins2), deliveringManager: managers.delivering, receivingManager: managers.receiving }) });
+      const body = await response.json(); if (!response.ok) throw new Error(body.error || "Não foi possível guardar.");
+      setMonth(controlDate.slice(0, 7)); await loadRecords(controlDate.slice(0, 7)); reset(); setModalOpen(false);
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Não foi possível guardar o controlo."); }
+    finally { setSaving(false); }
+  };
+  const positive = records.filter((record) => record.difference > 0).reduce((sum, record) => sum + record.difference, 0);
+  const negative = records.filter((record) => record.difference < 0).reduce((sum, record) => sum + record.difference, 0);
+  const net = records.reduce((sum, record) => sum + record.difference, 0);
   return <section className="development-module" aria-labelledby="vault-control-title">
-    <div className="development-module-heading"><div><span className="eyebrow">Protótipo operacional</span><h2 id="vault-control-title">Controlo Cofre</h2><p>Contagem por turno, denominação e valores complementares.</p></div><span className="development-status">Em construção</span></div>
-    <div className="development-toolbar"><label>Data<input type="date" defaultValue={new Date().toISOString().slice(0, 10)} /></label><div className="development-shifts" aria-label="Turno">{(["Manhã", "Tarde", "Madrugada"] as VaultShift[]).map((item) => <button type="button" className={shift === item ? "active" : ""} onClick={() => setShift(item)} key={item}>{item}</button>)}</div></div>
-    <div className="vault-summary"><article><small>Total contado</small><strong>{euro(counted)}</strong></article><article><small>Total teórico</small><strong>{euro(moneyValue(theoretical))}</strong></article><article className={counted - moneyValue(theoretical) === 0 ? "balanced" : "difference"}><small>Diferença</small><strong>{euro(counted - moneyValue(theoretical))}</strong></article></div>
-    <div className="vault-count-grid"><article><h3>Moedas</h3><div className="denomination-grid">{vaultDenominations.filter((value) => value < 5).map((value) => <label key={value}><span>{euro(value)}</span><input type="number" min="0" inputMode="numeric" value={counts[String(value)] || ""} onChange={(event) => setCounts((current) => ({ ...current, [String(value)]: event.target.value }))} placeholder="0" /></label>)}</div></article><article><h3>Notas</h3><div className="denomination-grid">{vaultDenominations.filter((value) => value >= 5).map((value) => <label key={value}><span>{euro(value)}</span><input type="number" min="0" inputMode="numeric" value={counts[String(value)] || ""} onChange={(event) => setCounts((current) => ({ ...current, [String(value)]: event.target.value }))} placeholder="0" /></label>)}</div></article></div>
-    <div className="vault-extras"><label>Moedas soltas<input inputMode="decimal" value={extras.looseCoins} onChange={(event) => setExtras({ ...extras, looseCoins: event.target.value })} placeholder="0,00" /></label><label>Fundos de caixa<input inputMode="decimal" value={extras.tillFunds} onChange={(event) => setExtras({ ...extras, tillFunds: event.target.value })} placeholder="0,00" /></label><label>Faturas<input inputMode="decimal" value={extras.invoices} onChange={(event) => setExtras({ ...extras, invoices: event.target.value })} placeholder="0,00" /></label><label>Moedas banco 1<input inputMode="decimal" value={extras.bankCoins1} onChange={(event) => setExtras({ ...extras, bankCoins1: event.target.value })} placeholder="0,00" /></label><label>Moedas banco 2<input inputMode="decimal" value={extras.bankCoins2} onChange={(event) => setExtras({ ...extras, bankCoins2: event.target.value })} placeholder="0,00" /></label><label>Total teórico<input inputMode="decimal" value={theoretical} onChange={(event) => setTheoretical(event.target.value)} placeholder="0,00" /></label></div>
-    <div className="vault-handover"><label>Gerente que entrega<input placeholder="Nome" /></label><span>→</span><label>Gerente que recebe<input placeholder="Nome" /></label></div>
-    <div className="development-actions"><button type="button" onClick={reset}>Limpar rascunho</button><button type="button" className="primary" disabled>Guardar controlo · brevemente</button></div>
+    <div className="development-module-heading"><div><span className="eyebrow">Resumo mensal</span><h2 id="vault-control-title">Controlo Cofre</h2><p>Diferenças registadas por data e turno, com identificação da passagem entre gerentes.</p></div><button type="button" className="vault-add-record" onClick={() => setModalOpen(true)}>＋ Adicionar registo</button></div>
+    <div className="vault-month-toolbar"><label>Mês<input type="month" value={month} onChange={(event) => setMonth(event.target.value)} /></label><span>{records.length} registo{records.length === 1 ? "" : "s"}</span></div>
+    <div className="vault-summary"><article><small>Controlos realizados</small><strong>{records.length}</strong></article><article className="balanced"><small>Diferenças positivas</small><strong>{euro(positive)}</strong></article><article className="difference"><small>Diferenças negativas</small><strong>{euro(negative)}</strong></article><article className={net === 0 ? "balanced" : "difference"}><small>Diferença líquida</small><strong>{euro(net)}</strong></article></div>
+    <div className="vault-records-table-wrap"><table className="vault-records-table"><thead><tr><th>Data</th><th>Turno</th><th>Total contado</th><th>Total cofre</th><th>Diferença</th><th>Entrega</th><th>Recebe</th><th>Registado por</th></tr></thead><tbody>{records.map((record) => <tr key={record.id}><td>{new Date(`${record.controlDate}T00:00:00`).toLocaleDateString("pt-PT")}</td><td><span className="vault-shift-tag">{record.shift}</span></td><td>{euro(record.countedTotal)}</td><td>{euro(record.vaultTotal)}</td><td><strong className={record.difference === 0 ? "zero" : record.difference > 0 ? "positive" : "negative"}>{euro(record.difference)}</strong></td><td>{record.deliveringManager}</td><td>{record.receivingManager}</td><td>{record.createdByName}</td></tr>)}</tbody></table>{!loading && !records.length && <div className="vault-empty">Ainda não existem controlos guardados para este mês.</div>}</div>
+    {modalOpen && <div className="vault-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setModalOpen(false); }}><section className="vault-modal" role="dialog" aria-modal="true" aria-labelledby="vault-form-title">
+      <header><div><span className="eyebrow">Novo controlo</span><h3 id="vault-form-title">Adicionar registo de cofre</h3><p>Preencha a contagem e confirme os gerentes responsáveis.</p></div><button type="button" onClick={() => setModalOpen(false)} aria-label="Fechar">×</button></header>
+      <div className="development-toolbar"><label>Data<input type="date" value={controlDate} onChange={(event) => setControlDate(event.target.value)} /></label><div className="development-shifts" aria-label="Turno">{(["Manhã", "Tarde", "Madrugada"] as VaultShift[]).map((item) => <button type="button" className={shift === item ? "active" : ""} onClick={() => setShift(item)} key={item}>{item}</button>)}</div></div>
+      <div className="vault-count-grid"><article><h3>Moedas</h3><div className="vault-coin-table"><div className="vault-coin-header"><span>Moeda</span><span>Sacos grandes</span><span>Sacos pequenos</span><span>Subtotal</span></div>{vaultCoinDenominations.map((value) => { const key = String(value); const subtotal = (Number(largeBags[key]) || 0) * vaultLargeBagValues[key] + (Number(smallBags[key]) || 0) * vaultSmallBagValues[key]; return <label key={value}><span>{euro(value)}</span><input type="number" min="0" inputMode="numeric" value={largeBags[key] || ""} onChange={(event) => setLargeBags((current) => ({ ...current, [key]: event.target.value }))} placeholder="0" /><input type="number" min="0" inputMode="numeric" value={smallBags[key] || ""} onChange={(event) => setSmallBags((current) => ({ ...current, [key]: event.target.value }))} placeholder="0" /><strong>{euro(subtotal)}</strong></label>; })}</div></article><article><h3>Notas</h3><div className="denomination-grid">{vaultNoteDenominations.map((value) => <label key={value}><span>{euro(value)}</span><input type="number" min="0" inputMode="numeric" value={noteCounts[String(value)] || ""} onChange={(event) => setNoteCounts((current) => ({ ...current, [String(value)]: event.target.value }))} placeholder="0" /></label>)}</div></article></div>
+      <div className="vault-extras"><label>Moedas soltas · valor<input inputMode="decimal" value={extras.looseCoins} onChange={(event) => setExtras({ ...extras, looseCoins: event.target.value })} placeholder="0,00" /></label><label>Fundos de caixa<input inputMode="decimal" value={extras.tillFunds} onChange={(event) => setExtras({ ...extras, tillFunds: event.target.value })} placeholder="0,00" /></label><label>Faturas<input inputMode="decimal" value={extras.invoices} onChange={(event) => setExtras({ ...extras, invoices: event.target.value })} placeholder="0,00" /></label><label>Moedas banco 1<input inputMode="decimal" value={extras.bankCoins1} onChange={(event) => setExtras({ ...extras, bankCoins1: event.target.value })} placeholder="0,00" /></label><label>Moedas banco 2<input inputMode="decimal" value={extras.bankCoins2} onChange={(event) => setExtras({ ...extras, bankCoins2: event.target.value })} placeholder="0,00" /></label><label>Total teórico · automático<input value={euro(theoretical)} readOnly /></label></div>
+      <div className="vault-form-summary"><article><small>Total contado</small><strong>{euro(counted)}</strong></article><article><small>Total cofre</small><strong>{euro(vaultTotal)}</strong></article><article className={difference === 0 ? "balanced" : "difference"}><small>Diferença</small><strong>{euro(difference)}</strong></article></div>
+      <div className="vault-handover"><label>Gerente que entrega<input value={managers.delivering} onChange={(event) => setManagers({ ...managers, delivering: event.target.value })} placeholder="Nome completo" /></label><span>→</span><label>Gerente que recebe<input value={managers.receiving} onChange={(event) => setManagers({ ...managers, receiving: event.target.value })} placeholder="Nome completo" /></label></div>
+      {message && <p className="vault-form-message" role="alert">{message}</p>}
+      <div className="development-actions"><button type="button" onClick={reset}>Limpar formulário</button><button type="button" className="primary" onClick={save} disabled={saving}>{saving ? "A guardar…" : "Guardar registo"}</button></div>
+    </section></div>}
   </section>;
 }
 

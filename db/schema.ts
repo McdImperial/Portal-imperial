@@ -110,3 +110,28 @@ export const billingDocuments = sqliteTable("billing_documents", {
 }, (table) => [
   index("idx_billing_documents_delivery_type").on(table.deliveryDate, table.documentType),
 ]);
+
+export const vaultControls = sqliteTable("vault_controls", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  controlDate: text("control_date").notNull(),
+  shift: text("shift").notNull(),
+  largeBags: text("large_bags").notNull().default("{}"),
+  smallBags: text("small_bags").notNull().default("{}"),
+  noteCounts: text("note_counts").notNull().default("{}"),
+  looseCoins: real("loose_coins").notNull().default(0),
+  tillFunds: real("till_funds").notNull().default(0),
+  invoices: real("invoices").notNull().default(0),
+  bankCoins1: real("bank_coins_1").notNull().default(0),
+  bankCoins2: real("bank_coins_2").notNull().default(0),
+  theoreticalTotal: real("theoretical_total").notNull().default(0),
+  countedTotal: real("counted_total").notNull().default(0),
+  vaultTotal: real("vault_total").notNull().default(0),
+  difference: real("difference").notNull().default(0),
+  deliveringManager: text("delivering_manager").notNull(),
+  receivingManager: text("receiving_manager").notNull(),
+  createdBy: integer("created_by").notNull(),
+  createdByName: text("created_by_name").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_vault_controls_date_shift").on(table.controlDate, table.shift),
+]);
