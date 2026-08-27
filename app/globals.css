@@ -125,6 +125,28 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .attendance-legend i.justified { background: #9aa3ad; }
 .attendance-legend i.late { background: #a56100; }
 .employee-history > div:first-child { margin-bottom: 15px; }
+.delivery-balance-summary { margin: 22px 0 28px; padding: 22px; border: 1px solid #dce5e1; border-radius: 16px; background: #fbfcfc; }
+.delivery-balance-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+.delivery-balance-heading h3 { margin: 4px 0 5px; color: #183f33; font-size: 22px; }
+.delivery-balance-heading p { margin: 0; color: #718078; font-size: 13px; }
+.delivery-balance-heading > span { color: #84918b; font-size: 12px; }
+.delivery-balance-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+.delivery-balance-cards article { padding: 18px; border: 1px solid #dce6e2; border-left: 4px solid #d6a53b; border-radius: 14px; background: #fff; }
+.delivery-balance-cards article.weighed { border-left-color: #2f9a68; background: #f1faf5; }
+.delivery-balance-cards article.not-weighed { border-left-color: #d24b55; background: #fff5f5; }
+.delivery-balance-cards small, .delivery-balance-cards span { display: block; color: #718078; }
+.delivery-balance-cards small { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.delivery-balance-cards strong { display: block; margin: 7px 0 4px; color: #183f33; font-size: 32px; }
+.delivery-balance-cards span { font-size: 12px; }
+.delivery-balance-table-wrap { overflow-x: auto; border: 1px solid #dce5e1; border-radius: 12px; background: #fff; }
+.delivery-balance-table { width: 100%; min-width: 720px; border-collapse: collapse; }
+.delivery-balance-table th { padding: 12px 14px; background: #eff4f2; color: #66766e; font-size: 10px; text-align: left; text-transform: uppercase; letter-spacing: .06em; }
+.delivery-balance-table td { padding: 13px 14px; border-top: 1px solid #e5ebe8; color: #4f6259; font-size: 13px; }
+.delivery-balance-table td.positive { color: #237049; font-weight: 800; }
+.delivery-balance-table td.negative { color: #b43e47; font-weight: 800; }
+.balance-percent { display: inline-flex; min-width: 64px; justify-content: center; border-radius: 999px; padding: 5px 8px; font-weight: 800; }
+.balance-percent.positive { background: #dff2e7; color: #237049; }
+.balance-percent.negative { background: #f8dfe1; color: #b43e47; }
 .delivery-disputes-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 22px 0; }
 .delivery-disputes-cards article { padding: 18px; border: 1px solid #dce6e2; border-radius: 14px; background: #f5f8f7; }
 .delivery-disputes-cards small, .delivery-disputes-cards span { display: block; color: #718078; }
@@ -161,6 +183,8 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
   .absence-profile-summary { grid-template-columns: 1fr; }
   .employee-record-layout { grid-template-columns: 1fr; }
   .employee-directory > div { max-height: 280px; }
+  .delivery-balance-cards { grid-template-columns: 1fr; }
+  .delivery-balance-heading { flex-direction: column; }
   .delivery-disputes-cards { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 620px) {
