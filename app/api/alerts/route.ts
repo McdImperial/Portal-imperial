@@ -44,13 +44,13 @@ export async function GET(request: Request) {
     const filters = [status ? eq(alertLogs.status, status) : undefined, from ? gte(alertLogs.createdAt, from) : undefined, to ? lte(alertLogs.createdAt, `${to}T23:59:59`) : undefined, search ? like(alertLogs.alertName, `%${search.slice(0, 80)}%`) : undefined].filter(Boolean);
     return Response.json({ logs: await db.select().from(alertLogs).where(filters.length ? and(...filters as Parameters<typeof and>) : undefined).orderBy(desc(alertLogs.createdAt)).limit(300) });
   }
-  const [alertRows, schedules, conditions, links, recipients, groups, recentLogs] = await Promise.all([
+  const [alertRows, schedules, conditions, links, recipients, groups, groupMembers, recentLogs] = await Promise.all([
     db.select().from(alerts).orderBy(desc(alerts.updatedAt)), db.select().from(alertSchedules), db.select().from(alertConditions), db.select().from(alertRecipientLinks),
-    db.select().from(alertDirectoryRecipients).orderBy(asc(alertDirectoryRecipients.name)), db.select().from(recipientGroups).orderBy(asc(recipientGroups.name)), db.select().from(alertLogs).orderBy(desc(alertLogs.createdAt)).limit(8),
+    db.select().from(alertDirectoryRecipients).orderBy(asc(alertDirectoryRecipients.name)), db.select().from(recipientGroups).orderBy(asc(recipientGroups.name)), db.select().from(recipientGroupMembers), db.select().from(alertLogs).orderBy(desc(alertLogs.createdAt)).limit(8),
   ]);
   const now = new Date(); const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
   const monthLogs = await db.select().from(alertLogs).where(gte(alertLogs.createdAt, monthStart));
-  return Response.json({ alerts: alertRows.map((item) => ({ ...item, schedule: schedules.find((entry) => entry.alertId === item.id), condition: conditions.find((entry) => entry.alertId === item.id), recipientIds: links.filter((entry) => entry.alertId === item.id && entry.recipientId).map((entry) => entry.recipientId), groupIds: links.filter((entry) => entry.alertId === item.id && entry.groupId).map((entry) => entry.groupId) })), recipients, groups, recentLogs, provider: providerStatus(), metrics: { active: alertRows.filter((item) => item.status === "active").length, sentMonth: monthLogs.filter((item) => item.status === "sent" || item.status === "simulated").length, pending: alertRows.filter((item) => item.status === "active" && item.nextRunAt).length, errors: monthLogs.filter((item) => item.status === "failed").length }, canManage: hasPermission(auth.user.role, "manage_alerts") });
+  return Response.json({ alerts: alertRows.map((item) => ({ ...item, schedule: schedules.find((entry) => entry.alertId === item.id), condition: conditions.find((entry) => entry.alertId === item.id), recipientIds: links.filter((entry) => entry.alertId === item.id && entry.recipientId).map((entry) => entry.recipientId), groupIds: links.filter((entry) => entry.alertId === item.id && entry.groupId).map((entry) => entry.groupId) })), recipients, groups: groups.map((group) => ({ ...group, recipientIds: groupMembers.filter((member) => member.groupId === group.id).map((member) => member.recipientId) })), recentLogs, provider: providerStatus(), metrics: { active: alertRows.filter((item) => item.status === "active").length, sentMonth: monthLogs.filter((item) => item.status === "sent" || item.status === "simulated").length, pending: alertRows.filter((item) => item.status === "active" && item.nextRunAt).length, errors: monthLogs.filter((item) => item.status === "failed").length }, canManage: hasPermission(auth.user.role, "manage_alerts") });
 }
 
 export async function POST(request: Request) {
@@ -70,8 +70,12 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   const auth = await requirePermission(request, "manage_alerts"); if (auth.error) return auth.error;
-  const body = await request.json() as { id?: number; action?: string; payload?: AlertPayload } & AlertPayload; if (!body.id) return Response.json({ error: "Alerta obrigatório." }, { status: 400 });
-  const db = getDb(); const [current] = await db.select().from(alerts).where(eq(alerts.id, body.id)).limit(1); if (!current) return Response.json({ error: "Alerta não encontrado." }, { status: 404 });
+  const url = new URL(request.url); const resource = url.searchParams.get("action") || "alert";
+  const body = await request.json() as { id?: number; action?: string; payload?: AlertPayload; name?: string; phone?: string; department?: string; role?: string; description?: string; recipientIds?: number[] } & AlertPayload; if (!body.id) return Response.json({ error: "Registo obrigatório." }, { status: 400 });
+  const db = getDb();
+  if (resource === "recipient") { const name = String(body.name || "").trim(); const phone = String(body.phone || "").replace(/[^+\d]/g, ""); if (name.length < 2 || phone.replace(/\D/g, "").length < 9) return Response.json({ error: "Indique um nome e um contacto válidos." }, { status: 400 }); const [recipient] = await db.update(alertDirectoryRecipients).set({ name, phone, department: String(body.department || ""), role: String(body.role || ""), updatedAt: new Date().toISOString() }).where(eq(alertDirectoryRecipients.id, body.id)).returning(); if (!recipient) return Response.json({ error: "Destinatário não encontrado." }, { status: 404 }); return Response.json({ recipient }); }
+  if (resource === "group") { const name = String(body.name || "").trim(); if (name.length < 2) return Response.json({ error: "Indique o nome do grupo." }, { status: 400 }); const [group] = await db.update(recipientGroups).set({ name, description: String(body.description || ""), updatedAt: new Date().toISOString() }).where(eq(recipientGroups.id, body.id)).returning(); if (!group) return Response.json({ error: "Grupo não encontrado." }, { status: 404 }); await db.delete(recipientGroupMembers).where(eq(recipientGroupMembers.groupId, body.id)); const ids = Array.isArray(body.recipientIds) ? [...new Set(body.recipientIds.map(Number).filter(Boolean))] : []; if (ids.length) await db.insert(recipientGroupMembers).values(ids.map((recipientId) => ({ groupId: body.id as number, recipientId }))); return Response.json({ group }); }
+  const [current] = await db.select().from(alerts).where(eq(alerts.id, body.id)).limit(1); if (!current) return Response.json({ error: "Alerta não encontrado." }, { status: 404 });
   if (body.action === "toggle") { const [alert] = await db.update(alerts).set({ status: current.status === "active" ? "paused" : "active", updatedAt: new Date().toISOString() }).where(eq(alerts.id, current.id)).returning(); return Response.json({ alert }); }
   if (body.action === "duplicate") { const [copy] = await db.insert(alerts).values({ name: `${current.name} (cópia)`, description: current.description, type: current.type, status: "draft", channel: current.channel, templateId: current.templateId, message: current.message, timezone: current.timezone, nextRunAt: current.nextRunAt, createdBy: auth.user.id, createdByName: auth.user.name || auth.user.login }).returning(); const links = await db.select().from(alertRecipientLinks).where(eq(alertRecipientLinks.alertId, current.id)); if (links.length) await db.insert(alertRecipientLinks).values(links.map((link) => ({ alertId: copy.id, recipientId: link.recipientId, groupId: link.groupId }))); return Response.json({ alert: copy }); }
   if (body.action === "test") { const recipients = await resolveAlertRecipients(current.id); if (!recipients.length) return Response.json({ error: "Adicione pelo menos um destinatário ativo." }, { status: 400 }); const results = await executeAlert(current, recipients.slice(0, 1), new Date().toISOString(), true); return Response.json({ tested: true, results, simulation: providerStatus().simulation }); }
@@ -82,6 +86,11 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   const auth = await requireUser(request, ["admin"]); if (auth.error) return auth.error;
-  const id = Number((await request.json() as { id?: number }).id); if (!id) return Response.json({ error: "Alerta obrigatório." }, { status: 400 });
-  await getDb().delete(alerts).where(eq(alerts.id, id)); return Response.json({ deleted: true });
+  const resource = new URL(request.url).searchParams.get("action") || "alert";
+  const id = Number((await request.json() as { id?: number }).id); if (!id) return Response.json({ error: "Registo obrigatório." }, { status: 400 });
+  const db = getDb();
+  if (resource === "recipient") await db.delete(alertDirectoryRecipients).where(eq(alertDirectoryRecipients.id, id));
+  else if (resource === "group") await db.delete(recipientGroups).where(eq(recipientGroups.id, id));
+  else await db.delete(alerts).where(eq(alerts.id, id));
+  return Response.json({ deleted: true });
 }
