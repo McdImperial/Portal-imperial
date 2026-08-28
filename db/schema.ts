@@ -136,6 +136,22 @@ export const vaultControls = sqliteTable("vault_controls", {
   index("idx_vault_controls_date_shift").on(table.controlDate, table.shift),
 ]);
 
+export const coinOrders = sqliteTable("coin_orders", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  orderDate: text("order_date").notNull(),
+  quantities: text("quantities").notNull().default("{}"),
+  totalAmount: real("total_amount").notNull().default(0),
+  depositAt: text("deposit_at"),
+  responsibleManager: text("responsible_manager").notNull().default(""),
+  createdBy: integer("created_by").notNull(),
+  createdByName: text("created_by_name").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_coin_orders_date").on(table.orderDate),
+  index("idx_coin_orders_deposit_at").on(table.depositAt),
+]);
+
 export const alertDirectoryRecipients = sqliteTable("recipients", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(), phone: text("phone").notNull().unique(),
