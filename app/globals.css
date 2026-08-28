@@ -117,7 +117,7 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .coin-order-history-heading h3 { margin: 4px 0 0; color: #203a31; font-size: 18px; }
 .coin-order-history-heading > span { color: #84918b; font-size: 11px; }
 .coin-order-table-wrap { overflow-x: auto; border-top: 1px solid #e3ebe7; }
-.coin-order-table { width: 100%; min-width: 1050px; border-collapse: collapse; }
+.coin-order-table { width: 100%; min-width: 850px; border-collapse: collapse; }
 .coin-order-table th { padding: 12px 14px; background: #f2f6f4; color: #687a72; font-size: 10px; text-align: left; text-transform: uppercase; letter-spacing: .05em; }
 .coin-order-table td { padding: 13px 14px; border-top: 1px solid #e5ece9; color: #4f6259; font-size: 12px; }
 .coin-order-table td > strong { color: #214f40; }
