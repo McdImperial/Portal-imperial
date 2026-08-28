@@ -90,9 +90,10 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .vault-row-actions button { border: 1px solid #cfddd7; border-radius: 7px; padding: 6px 9px; background: #fff; color: #25624e; font-size: 10px; font-weight: 800; cursor: pointer; }
 .vault-row-actions button.delete { border-color: #eed3d5; color: #b43f49; }
 .vault-shift-tag { display: inline-flex; border-radius: 999px; padding: 5px 9px; font-size: 10px; font-weight: 800; }
-.vault-shift-manha { background: #fff0bf; color: #8a5d00; }
-.vault-shift-tarde { background: #dcecff; color: #225f91; }
-.vault-shift-madrugada { background: #eee4fa; color: #67418d; }
+.vault-shift-manha { background: #dff2e7; color: #24714d; }
+.vault-shift-tarde { background: #fff0bf; color: #8a5d00; }
+.vault-shift-madrugada { background: #ffe3c7; color: #a45113; }
+.vault-locked { display: inline-flex; padding: 6px 9px; border-radius: 7px; background: #eef2f0; color: #7d8984; font-size: 10px; font-weight: 800; }
 .vault-invoice-difference { font-weight: 800; }
 .vault-invoice-difference.positive { color: #257a5c; }
 .vault-invoice-difference.negative { color: #c54a53; }

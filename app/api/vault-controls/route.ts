@@ -78,8 +78,12 @@ function serializeRecord(record: typeof vaultControls.$inferSelect) {
   return { ...record, largeBags, smallBags, noteCounts, theoreticalTotal, countedTotal, vaultTotal, difference: Math.round((countedTotal - vaultTotal) * 100) / 100 };
 }
 
+const lisbonDate = (date: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Lisbon", year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+const editableDates = () => [lisbonDate(new Date()), lisbonDate(new Date(Date.now() - 86_400_000))];
+const canEditDate = (role: "admin" | "editor" | "consulta", date: string) => role === "admin" || editableDates().includes(date);
+
 export async function GET(request: Request) {
-  const auth = await requireUser(request, ["admin", "editor"]);
+  const auth = await requireUser(request);
   if (auth.error) return auth.error;
   const month = new URL(request.url).searchParams.get("month") || "";
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return Response.json({ error: "Mês inválido." }, { status: 400 });
@@ -88,11 +92,12 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireUser(request, ["admin", "editor"]);
+  const auth = await requireUser(request);
   if (auth.error) return auth.error;
   try {
     const payload = await request.json() as Payload;
     const values = normalizePayload(payload);
+    if (!canEditDate(auth.user.role, values.controlDate)) throw new Error("Só pode registar controlos de hoje ou de ontem.");
     const [record] = await getDb().insert(vaultControls).values({ ...values, createdBy: auth.user.id, createdByName: auth.user.name || auth.user.login }).returning();
     return Response.json({ record: serializeRecord(record) }, { status: 201 });
   } catch (error) {
@@ -101,12 +106,16 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const auth = await requireUser(request, ["admin"]);
+  const auth = await requireUser(request);
   if (auth.error) return auth.error;
   try {
     const payload = await request.json() as Payload & { id?: number };
     if (!payload.id) throw new Error("Registo obrigatório.");
+    const [current] = await getDb().select().from(vaultControls).where(eq(vaultControls.id, payload.id)).limit(1);
+    if (!current) return Response.json({ error: "Registo não encontrado." }, { status: 404 });
+    if (!canEditDate(auth.user.role, current.controlDate)) throw new Error("Este registo já está bloqueado. Apenas o administrador o pode editar.");
     const values = normalizePayload(payload);
+    if (!canEditDate(auth.user.role, values.controlDate)) throw new Error("Só pode alterar controlos de hoje ou de ontem.");
     const [record] = await getDb().update(vaultControls).set(values).where(eq(vaultControls.id, payload.id)).returning();
     if (!record) return Response.json({ error: "Registo não encontrado." }, { status: 404 });
     return Response.json({ record: serializeRecord(record) });
