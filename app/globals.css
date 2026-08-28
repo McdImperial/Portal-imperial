@@ -89,7 +89,14 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .vault-row-actions { display: flex; gap: 6px; white-space: nowrap; }
 .vault-row-actions button { border: 1px solid #cfddd7; border-radius: 7px; padding: 6px 9px; background: #fff; color: #25624e; font-size: 10px; font-weight: 800; cursor: pointer; }
 .vault-row-actions button.delete { border-color: #eed3d5; color: #b43f49; }
-.vault-shift-tag { display: inline-flex; border-radius: 999px; padding: 5px 9px; background: #e8f1ed; color: #25624f; font-size: 10px; font-weight: 800; }
+.vault-shift-tag { display: inline-flex; border-radius: 999px; padding: 5px 9px; font-size: 10px; font-weight: 800; }
+.vault-shift-manha { background: #fff0bf; color: #8a5d00; }
+.vault-shift-tarde { background: #dcecff; color: #225f91; }
+.vault-shift-madrugada { background: #eee4fa; color: #67418d; }
+.vault-invoice-difference { font-weight: 800; }
+.vault-invoice-difference.positive { color: #257a5c; }
+.vault-invoice-difference.negative { color: #c54a53; }
+.vault-invoice-difference.zero { color: #8a9691; }
 .vault-empty { padding: 36px 20px; color: #78867f; text-align: center; }
 .vault-modal-backdrop { position: fixed; z-index: 110; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(10,31,24,.58); backdrop-filter: blur(4px); }
 .vault-modal { width: min(1180px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; padding: 26px; border-radius: 20px; background: #fff; box-shadow: 0 30px 90px rgba(0,0,0,.28); }
