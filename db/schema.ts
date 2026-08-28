@@ -135,3 +135,67 @@ export const vaultControls = sqliteTable("vault_controls", {
 }, (table) => [
   index("idx_vault_controls_date_shift").on(table.controlDate, table.shift),
 ]);
+
+export const alertDirectoryRecipients = sqliteTable("recipients", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(), phone: text("phone").notNull().unique(),
+  department: text("department").notNull().default(""), role: text("role").notNull().default(""),
+  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`), updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [index("idx_recipients_active_name").on(table.active, table.name)]);
+
+export const recipientGroups = sqliteTable("recipient_groups", {
+  id: integer("id").primaryKey({ autoIncrement: true }), name: text("name").notNull().unique(),
+  description: text("description").notNull().default(""), createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const recipientGroupMembers = sqliteTable("recipient_group_members", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  groupId: integer("group_id").notNull().references(() => recipientGroups.id, { onDelete: "cascade" }),
+  recipientId: integer("recipient_id").notNull().references(() => alertDirectoryRecipients.id, { onDelete: "cascade" }),
+}, (table) => [uniqueIndex("uidx_recipient_group_members_group_recipient").on(table.groupId, table.recipientId), index("idx_recipient_group_members_recipient").on(table.recipientId)]);
+
+export const alertTemplates = sqliteTable("alert_templates", {
+  id: integer("id").primaryKey({ autoIncrement: true }), name: text("name").notNull().unique(),
+  category: text("category").notNull().default("Operacional"), message: text("message").notNull(),
+  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`), updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const alerts = sqliteTable("alerts", {
+  id: integer("id").primaryKey({ autoIncrement: true }), name: text("name").notNull(), description: text("description").notNull().default(""),
+  type: text("type").notNull().default("scheduled"), status: text("status").notNull().default("draft"), channel: text("channel").notNull().default("whatsapp"),
+  templateId: integer("template_id").references(() => alertTemplates.id, { onDelete: "set null" }), message: text("message").notNull(),
+  timezone: text("timezone").notNull().default("Europe/Lisbon"), lastRunAt: text("last_run_at"), nextRunAt: text("next_run_at"),
+  createdBy: integer("created_by").notNull(), createdByName: text("created_by_name").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`), updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [index("idx_alerts_status_next_run").on(table.status, table.nextRunAt)]);
+
+export const alertRecipientLinks = sqliteTable("alert_recipients", {
+  id: integer("id").primaryKey({ autoIncrement: true }), alertId: integer("alert_id").notNull().references(() => alerts.id, { onDelete: "cascade" }),
+  recipientId: integer("recipient_id").references(() => alertDirectoryRecipients.id, { onDelete: "cascade" }), groupId: integer("group_id").references(() => recipientGroups.id, { onDelete: "cascade" }),
+}, (table) => [index("idx_alert_recipients_alert").on(table.alertId), uniqueIndex("uidx_alert_recipients_alert_recipient").on(table.alertId, table.recipientId), uniqueIndex("uidx_alert_recipients_alert_group").on(table.alertId, table.groupId)]);
+
+export const alertSchedules = sqliteTable("alert_schedules", {
+  id: integer("id").primaryKey({ autoIncrement: true }), alertId: integer("alert_id").notNull().unique().references(() => alerts.id, { onDelete: "cascade" }),
+  frequency: text("frequency").notNull().default("once"), scheduledAt: text("scheduled_at"), timeOfDay: text("time_of_day"),
+  weekDays: text("week_days").notNull().default("[]"), monthDay: integer("month_day"), anticipationMinutes: integer("anticipation_minutes").notNull().default(0),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+});
+
+export const alertConditions = sqliteTable("alert_conditions", {
+  id: integer("id").primaryKey({ autoIncrement: true }), alertId: integer("alert_id").notNull().unique().references(() => alerts.id, { onDelete: "cascade" }),
+  source: text("source").notNull().default("manual"), field: text("field").notNull().default(""), operator: text("operator").notNull().default("equals"),
+  expectedValue: text("expected_value").notNull().default(""), payloadPath: text("payload_path").notNull().default(""),
+});
+
+export const alertLogs = sqliteTable("alert_logs", {
+  id: integer("id").primaryKey({ autoIncrement: true }), alertId: integer("alert_id").references(() => alerts.id, { onDelete: "set null" }),
+  alertName: text("alert_name").notNull(), recipientId: integer("recipient_id").references(() => alertDirectoryRecipients.id, { onDelete: "set null" }),
+  recipientName: text("recipient_name").notNull(), recipientPhoneMasked: text("recipient_phone_masked").notNull(), scheduledAt: text("scheduled_at").notNull(),
+  sentAt: text("sent_at"), status: text("status").notNull().default("pending"), provider: text("provider").notNull().default("simulation"),
+  providerMessageId: text("provider_message_id"), idempotencyKey: text("idempotency_key").notNull().unique(), attempt: integer("attempt").notNull().default(1),
+  errorCode: text("error_code"), errorMessage: text("error_message"), renderedMessage: text("rendered_message").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [index("idx_alert_logs_alert_created").on(table.alertId, table.createdAt), index("idx_alert_logs_status_created").on(table.status, table.createdAt)]);

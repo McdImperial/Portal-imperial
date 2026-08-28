@@ -1,4 +1,4 @@
-import { asc, like } from "drizzle-orm";
+import { asc, eq, like } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { vaultControls } from "../../../db/schema";
 import { requireUser } from "../auth/_lib";
@@ -39,13 +39,52 @@ const amount = (value: unknown, label: string) => {
   return Math.round(number * 100) / 100;
 };
 
+function normalizePayload(payload: Payload) {
+  const controlDate = payload.controlDate?.trim() || "";
+  const shift = payload.shift;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(controlDate)) throw new Error("Selecione uma data válida.");
+  if (!shift || !shifts.includes(shift)) throw new Error("Selecione o turno.");
+  const largeBags = validMap(payload.largeBags, coinDenominations);
+  const smallBags = validMap(payload.smallBags, coinDenominations);
+  const noteCounts = validMap(payload.noteCounts, noteDenominations);
+  const looseCoins = amount(payload.looseCoins, "Valor das moedas soltas");
+  const tillFunds = amount(payload.tillFunds, "Valor dos fundos de caixa");
+  const invoices = amount(payload.invoices, "Valor das faturas");
+  const bankCoins1 = amount(payload.bankCoins1, "Moedas banco 1");
+  const bankCoins2 = amount(payload.bankCoins2, "Moedas banco 2");
+  const deliveringManager = payload.deliveringManager?.trim() || "";
+  const receivingManager = payload.receivingManager?.trim() || "";
+  if (!deliveringManager || !receivingManager) throw new Error("Indique os dois gerentes responsáveis.");
+  const coinsTotal = coinDenominations.reduce((sum, key) => sum + largeBags[key] * largeBagValues[key] + smallBags[key] * smallBagValues[key], 0);
+  const notesTotal = noteDenominations.reduce((sum, key) => sum + noteCounts[key] * Number(key), 0);
+  // Fórmulas validadas na folha Controlo Cofre 2026: manhã = 1 250 €;
+  // tarde e madrugada = 1 000 € + fundos de caixa.
+  const theoreticalTotal = shift === "Manhã" ? 1250 : 1000 + tillFunds;
+  const countedTotal = Math.round((coinsTotal + notesTotal + looseCoins + tillFunds + invoices) * 100) / 100;
+  const vaultTotal = Math.round((bankCoins1 + bankCoins2 + theoreticalTotal) * 100) / 100;
+  const difference = Math.round((countedTotal - vaultTotal) * 100) / 100;
+  return { controlDate, shift, largeBags: JSON.stringify(largeBags), smallBags: JSON.stringify(smallBags), noteCounts: JSON.stringify(noteCounts), looseCoins, tillFunds, invoices, bankCoins1, bankCoins2, theoreticalTotal, countedTotal, vaultTotal, difference, deliveringManager, receivingManager };
+}
+
+function serializeRecord(record: typeof vaultControls.$inferSelect) {
+  const largeBags = JSON.parse(record.largeBags) as Record<string, number>;
+  const smallBags = JSON.parse(record.smallBags) as Record<string, number>;
+  const noteCounts = JSON.parse(record.noteCounts) as Record<string, number>;
+  const coinsTotal = coinDenominations.reduce((sum, key) => sum + (Number(largeBags[key]) || 0) * largeBagValues[key] + (Number(smallBags[key]) || 0) * smallBagValues[key], 0);
+  const notesTotal = noteDenominations.reduce((sum, key) => sum + (Number(noteCounts[key]) || 0) * Number(key), 0);
+  const theoreticalTotal = record.shift === "Manhã" ? 1250 : 1000 + Number(record.tillFunds || 0);
+  const countedTotal = Math.round((coinsTotal + notesTotal + Number(record.looseCoins || 0) + Number(record.tillFunds || 0) + Number(record.invoices || 0)) * 100) / 100;
+  const vaultTotal = Math.round((Number(record.bankCoins1 || 0) + Number(record.bankCoins2 || 0) + theoreticalTotal) * 100) / 100;
+  return { ...record, largeBags, smallBags, noteCounts, theoreticalTotal, countedTotal, vaultTotal, difference: Math.round((countedTotal - vaultTotal) * 100) / 100 };
+}
+
 export async function GET(request: Request) {
   const auth = await requireUser(request, ["admin", "editor"]);
   if (auth.error) return auth.error;
   const month = new URL(request.url).searchParams.get("month") || "";
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return Response.json({ error: "Mês inválido." }, { status: 400 });
   const records = await getDb().select().from(vaultControls).where(like(vaultControls.controlDate, `${month}-%`)).orderBy(asc(vaultControls.controlDate), asc(vaultControls.id));
-  return Response.json({ records: records.map((record) => ({ ...record, largeBags: JSON.parse(record.largeBags), smallBags: JSON.parse(record.smallBags), noteCounts: JSON.parse(record.noteCounts) })) });
+  return Response.json({ records: records.map(serializeRecord) });
 }
 
 export async function POST(request: Request) {
@@ -53,30 +92,35 @@ export async function POST(request: Request) {
   if (auth.error) return auth.error;
   try {
     const payload = await request.json() as Payload;
-    const controlDate = payload.controlDate?.trim() || "";
-    const shift = payload.shift;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(controlDate)) throw new Error("Selecione uma data válida.");
-    if (!shift || !shifts.includes(shift)) throw new Error("Selecione o turno.");
-    const largeBags = validMap(payload.largeBags, coinDenominations);
-    const smallBags = validMap(payload.smallBags, coinDenominations);
-    const noteCounts = validMap(payload.noteCounts, noteDenominations);
-    const looseCoins = amount(payload.looseCoins, "Valor das moedas soltas");
-    const tillFunds = amount(payload.tillFunds, "Valor dos fundos de caixa");
-    const invoices = amount(payload.invoices, "Valor das faturas");
-    const bankCoins1 = amount(payload.bankCoins1, "Moedas banco 1");
-    const bankCoins2 = amount(payload.bankCoins2, "Moedas banco 2");
-    const deliveringManager = payload.deliveringManager?.trim() || "";
-    const receivingManager = payload.receivingManager?.trim() || "";
-    if (!deliveringManager || !receivingManager) throw new Error("Indique os dois gerentes responsáveis.");
-    const coinsTotal = coinDenominations.reduce((sum, key) => sum + largeBags[key] * largeBagValues[key] + smallBags[key] * smallBagValues[key], 0);
-    const notesTotal = noteDenominations.reduce((sum, key) => sum + noteCounts[key] * Number(key), 0);
-    const theoreticalTotal = shift === "Manhã" ? 1250 : 1000 + bankCoins2;
-    const countedTotal = Math.round((coinsTotal + notesTotal + looseCoins + tillFunds + invoices) * 100) / 100;
-    const vaultTotal = Math.round((bankCoins1 + bankCoins2 + theoreticalTotal) * 100) / 100;
-    const difference = Math.round((countedTotal - vaultTotal) * 100) / 100;
-    const [record] = await getDb().insert(vaultControls).values({ controlDate, shift, largeBags: JSON.stringify(largeBags), smallBags: JSON.stringify(smallBags), noteCounts: JSON.stringify(noteCounts), looseCoins, tillFunds, invoices, bankCoins1, bankCoins2, theoreticalTotal, countedTotal, vaultTotal, difference, deliveringManager, receivingManager, createdBy: auth.user.id, createdByName: auth.user.name || auth.user.login }).returning();
-    return Response.json({ record: { ...record, largeBags, smallBags, noteCounts } }, { status: 201 });
+    const values = normalizePayload(payload);
+    const [record] = await getDb().insert(vaultControls).values({ ...values, createdBy: auth.user.id, createdByName: auth.user.name || auth.user.login }).returning();
+    return Response.json({ record: serializeRecord(record) }, { status: 201 });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "Não foi possível guardar o controlo." }, { status: 400 });
   }
+}
+
+export async function PATCH(request: Request) {
+  const auth = await requireUser(request, ["admin"]);
+  if (auth.error) return auth.error;
+  try {
+    const payload = await request.json() as Payload & { id?: number };
+    if (!payload.id) throw new Error("Registo obrigatório.");
+    const values = normalizePayload(payload);
+    const [record] = await getDb().update(vaultControls).set(values).where(eq(vaultControls.id, payload.id)).returning();
+    if (!record) return Response.json({ error: "Registo não encontrado." }, { status: 404 });
+    return Response.json({ record: serializeRecord(record) });
+  } catch (error) {
+    return Response.json({ error: error instanceof Error ? error.message : "Não foi possível atualizar o controlo." }, { status: 400 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  const auth = await requireUser(request, ["admin"]);
+  if (auth.error) return auth.error;
+  const id = Number((await request.json() as { id?: number }).id);
+  if (!id) return Response.json({ error: "Registo obrigatório." }, { status: 400 });
+  const [deleted] = await getDb().delete(vaultControls).where(eq(vaultControls.id, id)).returning({ id: vaultControls.id });
+  if (!deleted) return Response.json({ error: "Registo não encontrado." }, { status: 404 });
+  return Response.json({ deleted: true, id });
 }

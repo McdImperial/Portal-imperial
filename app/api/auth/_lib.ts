@@ -3,6 +3,8 @@ import { getDb } from "../../../db";
 import { sessions, users } from "../../../db/schema";
 
 export type AppRole = "admin" | "editor" | "consulta";
+export type AppPermission = "manage_alerts";
+const rolePermissions: Record<AppRole, AppPermission[]> = { admin: ["manage_alerts"], editor: ["manage_alerts"], consulta: [] };
 const COOKIE = "imperial_session";
 const SESSION_SECONDS = 60 * 60 * 24;
 const PBKDF2_ITERATIONS = 100_000;
@@ -83,4 +85,15 @@ export async function requireUser(request: Request, roles?: AppRole[]) {
   if (!user) return { error: Response.json({ error: "Sessão inválida. Inicie sessão novamente." }, { status: 401 }) };
   if (roles && !roles.includes(user.role)) return { error: Response.json({ error: "Não tem permissão para esta ação." }, { status: 403 }) };
   return { user };
+}
+
+export function hasPermission(role: AppRole, permission: AppPermission) {
+  return rolePermissions[role].includes(permission);
+}
+
+export async function requirePermission(request: Request, permission: AppPermission) {
+  const auth = await requireUser(request);
+  if (auth.error) return auth;
+  if (!hasPermission(auth.user.role, permission)) return { error: Response.json({ error: "Não tem permissão para esta ação." }, { status: 403 }) };
+  return auth;
 }
