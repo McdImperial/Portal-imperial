@@ -102,12 +102,22 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .coin-order-summary article { border-left: 4px solid #ffbc0d; border-radius: 14px; padding: 18px; background: #fff; box-shadow: 0 8px 26px rgba(25,55,45,.06); }
 .coin-order-summary small { display: block; color: #7c8983; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .coin-order-summary strong { display: block; margin-top: 10px; color: #193d31; font-family: Georgia,serif; font-size: 27px; }
+.vault-add-record:disabled { opacity: .48; cursor: not-allowed; }
+.coin-pending-deposits { display: grid; grid-template-columns: minmax(230px,.8fr) 2fr; gap: 20px; align-items: center; margin-bottom: 18px; padding: 18px 20px; border: 1px solid #e4d8ac; border-left: 4px solid #ffbc0d; border-radius: 14px; background: #fffbec; }
+.coin-pending-deposits.limit { border-color: #efc7ca; border-left-color: #c74750; background: #fff6f6; }
+.coin-pending-deposits h3 { margin: 4px 0; color: #203a31; font-size: 18px; }
+.coin-pending-deposits p { margin: 0; color: #718079; font-size: 11px; }
+.coin-pending-list { display: flex; flex-wrap: wrap; gap: 9px; }
+.coin-pending-list article { display: grid; min-width: 155px; padding: 10px 12px; border: 1px solid #eadcae; border-radius: 10px; background: #fff; }
+.coin-pending-list article strong { color: #215642; }
+.coin-pending-list article span, .coin-pending-list article small { color: #7b8882; font-size: 10px; }
+.coin-pending-empty { color: #7b8882; font-size: 11px; }
 .coin-order-history { border: 1px solid #dfe8e4; border-radius: 16px; overflow: hidden; background: #fff; }
 .coin-order-history-heading { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; }
 .coin-order-history-heading h3 { margin: 4px 0 0; color: #203a31; font-size: 18px; }
 .coin-order-history-heading > span { color: #84918b; font-size: 11px; }
 .coin-order-table-wrap { overflow-x: auto; border-top: 1px solid #e3ebe7; }
-.coin-order-table { width: 100%; min-width: 900px; border-collapse: collapse; }
+.coin-order-table { width: 100%; min-width: 1050px; border-collapse: collapse; }
 .coin-order-table th { padding: 12px 14px; background: #f2f6f4; color: #687a72; font-size: 10px; text-align: left; text-transform: uppercase; letter-spacing: .05em; }
 .coin-order-table td { padding: 13px 14px; border-top: 1px solid #e5ece9; color: #4f6259; font-size: 12px; }
 .coin-order-table td > strong { color: #214f40; }
@@ -120,6 +130,10 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .coin-order-status.pending { background: #fff0bf; color: #8a5d00; }
 .coin-order-status.deposited { background: #dff1e8; color: #246d52; }
 .coin-order-deposit { border: 1px solid #cbdad4; border-radius: 8px; padding: 7px 10px; background: #fff; color: #25624e; font-size: 10px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+.coin-order-state-select, .coin-order-manager-select { border: 1px solid #cbdad4; border-radius: 8px; padding: 7px 9px; background: #fff; color: #36584c; font-size: 10px; font-weight: 800; }
+.coin-order-state-select.pending { border-color: #ebd492; background: #fff7db; color: #8a5d00; }
+.coin-order-state-select.deposited { border-color: #baddcc; background: #e7f5ee; color: #246d52; }
+.coin-order-manager-select { width: 100%; min-width: 150px; font-weight: 600; }
 .coin-order-modal { width: min(820px,100%); }
 .coin-order-date { display: grid; gap: 6px; max-width: 230px; margin: 18px 0; color: #6a7973; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 .coin-order-date input, .coin-order-deposit-fields input, .coin-order-deposit-fields select { border: 1px solid #d7e2dd; border-radius: 9px; padding: 11px; background: #fff; color: #29463c; }
@@ -132,9 +146,9 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .coin-order-denominations label > b { color: #215642; text-align: right; }
 .coin-order-total { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #dfe8e4; padding-top: 13px; color: #52675e; font-weight: 800; }
 .coin-order-total strong { color: #194f3e; font-size: 21px; }
-.coin-order-deposit-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
+.coin-order-deposit-fields { display: grid; grid-template-columns: minmax(260px,1fr); max-width: 520px; gap: 12px; margin-top: 18px; }
 .coin-order-deposit-fields label { display: grid; gap: 6px; color: #6a7973; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-@media (max-width:700px) { .coin-order-summary { grid-template-columns: 1fr; } .coin-order-denomination-header, .coin-order-denominations > label { grid-template-columns: 70px 1fr 1fr 1fr; gap: 7px; } .coin-order-deposit-fields { grid-template-columns: 1fr; } }
+@media (max-width:700px) { .coin-order-summary, .coin-pending-deposits { grid-template-columns: 1fr; } .coin-order-denomination-header, .coin-order-denominations > label { grid-template-columns: 70px 1fr 1fr 1fr; gap: 7px; } .coin-order-deposit-fields { grid-template-columns: 1fr; } }
 .vault-subnav { display: flex; width: fit-content; gap: 5px; margin: -2px 0 16px; padding: 5px; border-radius: 12px; background: #eaf1ee; }
 .vault-subnav button { border: 0; border-radius: 9px; padding: 9px 13px; background: transparent; color: #60736a; font-size: 11px; font-weight: 800; cursor: pointer; }
 .vault-subnav button.active { background: #fff; color: #174f40; box-shadow: 0 3px 12px rgba(25,58,47,.1); }

@@ -143,6 +143,8 @@ export const coinOrders = sqliteTable("coin_orders", {
   totalAmount: real("total_amount").notNull().default(0),
   depositAt: text("deposit_at"),
   responsibleManager: text("responsible_manager").notNull().default(""),
+  orderManager: text("order_manager").notNull().default(""),
+  depositManager: text("deposit_manager").notNull().default(""),
   createdBy: integer("created_by").notNull(),
   createdByName: text("created_by_name").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
