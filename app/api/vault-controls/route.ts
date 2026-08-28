@@ -1,4 +1,4 @@
-import { asc, eq, like } from "drizzle-orm";
+import { desc, eq, like } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { vaultControls } from "../../../db/schema";
 import { requireUser } from "../auth/_lib";
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
   if (auth.error) return auth.error;
   const month = new URL(request.url).searchParams.get("month") || "";
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return Response.json({ error: "Mês inválido." }, { status: 400 });
-  const records = await getDb().select().from(vaultControls).where(like(vaultControls.controlDate, `${month}-%`)).orderBy(asc(vaultControls.controlDate), asc(vaultControls.id));
+  const records = await getDb().select().from(vaultControls).where(like(vaultControls.controlDate, `${month}-%`)).orderBy(desc(vaultControls.controlDate), desc(vaultControls.id));
   return Response.json({ records: records.map(serializeRecord) });
 }
 

@@ -469,7 +469,7 @@ function VaultControlPrototype({ isAdmin }: { isAdmin: boolean }) {
   const net = records.reduce((sum, record) => sum + record.difference, 0);
   const recordCoinsTotal = (record: VaultRecord) => vaultCoinDenominations.reduce((sum, denomination) => { const key = String(denomination); return sum + (Number(record.largeBags?.[key]) || 0) * vaultLargeBagValues[key] + (Number(record.smallBags?.[key]) || 0) * vaultSmallBagValues[key]; }, Number(record.looseCoins) || 0);
   const recordNotesTotal = (record: VaultRecord) => vaultNoteDenominations.reduce((sum, denomination) => sum + denomination * (Number(record.noteCounts?.[String(denomination)]) || 0), 0);
-  const invoiceDifference = (record: VaultRecord, index: number) => index === 0 ? null : Math.round(((Number(record.invoices) || 0) - (Number(records[index - 1]?.invoices) || 0)) * 100) / 100;
+  const invoiceDifference = (record: VaultRecord, index: number) => index === records.length - 1 ? null : Math.round(((Number(record.invoices) || 0) - (Number(records[index + 1]?.invoices) || 0)) * 100) / 100;
   const shiftClass = (recordShift: VaultShift) => recordShift === "Manhã" ? "manha" : recordShift === "Tarde" ? "tarde" : "madrugada";
   return <section className="development-module" aria-labelledby="vault-control-title">
     <div className="development-module-heading"><div><span className="eyebrow">Resumo mensal</span><h2 id="vault-control-title">Controlo Cofre</h2><p>Diferenças registadas por data e turno, com identificação da passagem entre gerentes.</p></div><button type="button" className="vault-add-record" onClick={openNew}>＋ Adicionar registo</button></div>
