@@ -8,7 +8,7 @@ import tellTheArchesDataJson from "./data/tell-the-arches.json";
 import teamMilestonesDataJson from "./data/team-milestones.json";
 import AlertsCenter from "./alerts-center";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "alertas" | "desenvolvimento" | "configuracoes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -166,6 +166,7 @@ const viewLabels: Record<View, string> = {
   gerenteloja: "Gerente Loja",
   alertas: "Central de Alertas",
   desenvolvimento: "Em desenvolvimento",
+  cofreform: "Formulário Controlo Cofre",
   configuracoes: "Configurações",
 };
 
@@ -421,12 +422,12 @@ const vaultNoteImages: Record<string, string> = Object.fromEntries(vaultNoteDeno
 const moneyValue = (value: string) => Number(String(value).replace(",", ".")) || 0;
 const euro = (value: number) => value.toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
 
-function VaultControlPrototype({ isAdmin }: { isAdmin: boolean }) {
+function VaultControlPrototype({ isAdmin, autoOpen = false }: { isAdmin: boolean; autoOpen?: boolean }) {
   const currentMonth = new Date().toISOString().slice(0, 7);
   const [month, setMonth] = useState(currentMonth);
   const [records, setRecords] = useState<VaultRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(autoOpen);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [controlDate, setControlDate] = useState(new Date().toISOString().slice(0, 10));
   const [shift, setShift] = useState<VaultShift>("Manhã");
@@ -711,6 +712,10 @@ export default function Home() {
       timeZone: "Europe/Lisbon",
     }).format(new Date());
     setPortalDate(formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1));
+  }, []);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("form") === "controlo-cofre") setView("cofreform");
   }, []);
 
   useEffect(() => {
@@ -1407,6 +1412,13 @@ export default function Home() {
         {notice && <div className="toast" role="status">✓ {notice}</div>}
 
         <div className="content">
+          {view === "cofreform" && (currentUser.role === "admin" || currentUser.role === "editor") && (
+            <section className="shared-vault-page" aria-label="Formulário partilhado do Controlo Cofre">
+              <div className="shared-vault-heading"><span className="eyebrow">Acesso direto para a equipa</span><h2>Registar controlo de cofre</h2><p>Preencha a contagem, identifique os gerentes responsáveis e guarde o registo.</p></div>
+              <VaultControlPrototype isAdmin={currentUser.role === "admin"} autoOpen />
+            </section>
+          )}
+          {view === "cofreform" && currentUser.role === "consulta" && <section className="shared-vault-denied"><strong>Acesso não autorizado</strong><p>Este formulário está disponível para administradores e editores do portal.</p></section>}
           {view === "resumo" && (
             <section className="summary-grid" aria-label="Indicadores principais">
               <article className="metric-card feature">

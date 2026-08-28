@@ -138,6 +138,13 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .vault-subnav { display: flex; width: fit-content; gap: 5px; margin: -2px 0 16px; padding: 5px; border-radius: 12px; background: #eaf1ee; }
 .vault-subnav button { border: 0; border-radius: 9px; padding: 9px 13px; background: transparent; color: #60736a; font-size: 11px; font-weight: 800; cursor: pointer; }
 .vault-subnav button.active { background: #fff; color: #174f40; box-shadow: 0 3px 12px rgba(25,58,47,.1); }
+.shared-vault-page { display: grid; gap: 18px; }
+.shared-vault-heading { padding: 20px 22px; border: 1px solid #dce7e2; border-radius: 16px; background: linear-gradient(135deg,#fff,#f1f8f4); }
+.shared-vault-heading h2 { margin: 5px 0; color: #183d31; font-family: Georgia,serif; font-size: 28px; font-weight: 500; }
+.shared-vault-heading p { margin: 0; color: #73817b; }
+.shared-vault-denied { padding: 50px 24px; border: 1px solid #e2e9e6; border-radius: 16px; background: #fff; text-align: center; }
+.shared-vault-denied strong { color: #923d45; font-size: 20px; }
+.shared-vault-denied p { color: #78867f; }
 .vault-modal-backdrop { position: fixed; z-index: 110; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(10,31,24,.58); backdrop-filter: blur(4px); }
 .vault-modal { width: min(1180px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; padding: 26px; border-radius: 20px; background: #fff; box-shadow: 0 30px 90px rgba(0,0,0,.28); }
 .vault-modal > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding-bottom: 18px; border-bottom: 1px solid #e3ebe7; }
