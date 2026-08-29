@@ -45,3 +45,4 @@ next-env.d.ts
 /candidaturas-publicas/
 /app/data/absences-data.json
 /app/data/delivery-disputes.json
+/app/data/credit-notes-data.json

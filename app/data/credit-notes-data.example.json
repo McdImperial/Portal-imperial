@@ -1,0 +1,15 @@
+[
+  {
+    "id": "example-credit-note",
+    "date": "2026-01-15",
+    "documentNumber": "EXEMPLO/0000000000",
+    "claimNumber": "00000000",
+    "referenceInvoice": "0000000000",
+    "reason": "Exemplo fictício de acerto de faturação.",
+    "articles": ["00000-000 ARTIGO DE EXEMPLO · 1 un."],
+    "netAmount": 10,
+    "vatAmount": 0.6,
+    "totalAmount": 10.6,
+    "documentUrl": ""
+  }
+]
