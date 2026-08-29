@@ -127,6 +127,7 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .coin-weekly-suggestion h3 { margin:6px 0 2px; color:#1e4437; font-family:Georgia,serif; font-size:27px; }
 .coin-weekly-suggestion p { margin:0; color:#708078; font-size:11px; }
 .coin-suggestion-copy { display:grid; gap:3px; }
+.coin-suggestion-date-label { margin-top:4px; color:#718079; font-size:9px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
 .coin-suggestion-date { color:#2b8062; font-size:20px; }
 .coin-suggestion-actions { display:grid; gap:8px; }
 .coin-suggestion-actions button { border:0; border-radius:10px; padding:11px 14px; background:#1f6851; color:#fff; font-weight:800; cursor:pointer; white-space:nowrap; }
