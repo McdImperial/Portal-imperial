@@ -851,7 +851,22 @@ export default function Home() {
 
   useEffect(() => {
     if (view !== "configuracoes" || currentUser?.role !== "admin") return;
-    fetch("/api/auth/users/").then((response) => response.ok ? response.json() : Promise.reject()).then((data: { users: ManagedUser[] }) => setManagedUsers(data.users)).catch(() => setNotice("Não foi possível carregar os utilizadores."));
+    let active = true;
+    fetch("/api/auth/users/").then(async (response) => {
+      if (response.status === 401) {
+        if (active) {
+          setCurrentUser(null);
+          setView("resumo");
+          setDataReady(false);
+          setAuthMode("login");
+          setAuthMessage("A sessão expirou. Inicie sessão novamente para continuar.");
+        }
+        return null;
+      }
+      if (!response.ok) throw new Error("Não foi possível carregar os utilizadores.");
+      return response.json() as Promise<{ users: ManagedUser[] }>;
+    }).then((data) => { if (active && data) setManagedUsers(data.users); }).catch(() => { if (active) setNotice("Não foi possível carregar os utilizadores."); });
+    return () => { active = false; };
   }, [view, currentUser]);
 
   useEffect(() => {
