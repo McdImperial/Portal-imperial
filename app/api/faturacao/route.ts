@@ -22,7 +22,19 @@ function validateFile(raw: FormDataEntryValue, type: string) {
 export async function GET(request: Request) {
   const auth = await requireUser(request); if (auth.error) return auth.error;
   const deliveryDate = new URL(request.url).searchParams.get("deliveryDate");
-  if (!deliveryDate || !/^\d{4}-\d{2}-\d{2}$/.test(deliveryDate)) return Response.json({ error: "Data de entrega inválida." }, { status: 400 });
+  if (!deliveryDate) {
+    const documents = await getDb().select().from(billingDocuments).orderBy(desc(billingDocuments.deliveryDate), desc(billingDocuments.createdAt));
+    const grouped = new Map<string, { id: string; date: string; label: string; supplier: "HAVI"; haviDocuments: number; myStoreDocuments: number; status: "Completa" | "Incompleta" }>();
+    for (const document of documents) {
+      const current = grouped.get(document.deliveryDate) || { id: document.deliveryDate, date: document.deliveryDate, label: new Intl.DateTimeFormat("pt-PT", { day: "2-digit", month: "short" }).format(new Date(`${document.deliveryDate}T12:00:00`)).replace(".", ""), supplier: "HAVI" as const, haviDocuments: 0, myStoreDocuments: 0, status: "Incompleta" as const };
+      if (document.documentType === "havi") current.haviDocuments += 1;
+      if (document.documentType === "mystore") current.myStoreDocuments += 1;
+      current.status = current.haviDocuments > 0 && current.myStoreDocuments > 0 ? "Completa" : "Incompleta";
+      grouped.set(document.deliveryDate, current);
+    }
+    return Response.json({ deliveries: Array.from(grouped.values()) });
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(deliveryDate)) return Response.json({ error: "Data de entrega inválida." }, { status: 400 });
   return Response.json({ documents: await getDb().select().from(billingDocuments).where(eq(billingDocuments.deliveryDate, deliveryDate)).orderBy(desc(billingDocuments.createdAt)) });
 }
 
