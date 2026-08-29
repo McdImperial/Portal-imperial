@@ -7,9 +7,10 @@ import r2pDataJson from "./data/r2p-data.json";
 import tellTheArchesDataJson from "./data/tell-the-arches.json";
 import teamMilestonesDataJson from "./data/team-milestones.json";
 import creditNotesDataJson from "./data/credit-notes-data.json";
+import managerScheduleDataJson from "./data/manager-schedule-data.json";
 import AlertsCenter from "./alerts-center";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "managerhours" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -20,6 +21,7 @@ type BillingSupplier = "HAVI" | "Maia Paper" | "Air Liquide";
 type BillingDelivery = { id: string; date: string; label: string; supplier: BillingSupplier; haviDocuments?: number; myStoreDocuments?: number; status?: "Completa" | "Incompleta" };
 type CreditNote = { id: string; date: string; documentNumber: string; claimNumber: string; referenceInvoice: string; reason: string; articles: string[]; netAmount: number; vatAmount: number; totalAmount: number; documentUrl: string };
 const creditNotes = creditNotesDataJson as CreditNote[];
+const managerSchedule = managerScheduleDataJson;
 type AppUser = { id: number; name: string; login: string; role: AppRole; department: UserDepartment; status: string };
 type ManagedUser = AppUser & { createdAt: string; approvedAt: string | null };
 type CleaningIntervention = {
@@ -168,6 +170,7 @@ const viewLabels: Record<View, string> = {
   talento: "Gestão Talento",
   haccp: "Portal HACCP",
   gerenteloja: "Gerente Loja",
+  managerhours: "Horário Equipa Gestão",
   alertas: "Central de Alertas",
   desenvolvimento: "Em desenvolvimento",
   cofreform: "Formulário Controlo Cofre",
@@ -760,6 +763,7 @@ export default function Home() {
   const [collapsedEvaluationDepartments, setCollapsedEvaluationDepartments] = useState<Partial<Record<EvaluationDepartment, boolean>>>({});
   const [talentCandidates, setTalentCandidates] = useState<TalentCandidate[]>([]);
   const [talentLoading, setTalentLoading] = useState(false);
+  const [managerScheduleTab, setManagerScheduleTab] = useState<"definitions" | "annual" | "monthly" | "hours">("monthly");
 
   useEffect(() => {
     const formattedDate = new Intl.DateTimeFormat("pt-PT", {
@@ -780,7 +784,7 @@ export default function Home() {
   }, [view, currentUser]);
 
   useEffect(() => {
-    const managerViews: View[] = ["gerenteloja", "objetivos", "areasglobais", "equipa", "alertas"];
+    const managerViews: View[] = ["gerenteloja", "objetivos", "areasglobais", "equipa", "managerhours", "alertas"];
     if (currentUser && currentUser.role !== "admin" && managerViews.includes(view)) setView("resumo");
   }, [view, currentUser]);
 
@@ -1417,7 +1421,7 @@ export default function Home() {
         </div>
         <nav className="nav-list">
           {navItems.map((item) => (
-            <button key={item.id} className={view === item.id || item.id === "gerenteloja" && (["objetivos", "areasglobais", "equipa", "alertas"] as View[]).includes(view) ? "nav-item active" : "nav-item"} onClick={() => setView(item.id)}>
+            <button key={item.id} className={view === item.id || item.id === "gerenteloja" && (["objetivos", "areasglobais", "equipa", "managerhours", "alertas"] as View[]).includes(view) ? "nav-item active" : "nav-item"} onClick={() => setView(item.id)}>
               <span className="nav-glyph">{item.glyph}</span>{item.label}
             </button>
           ))}
@@ -1486,7 +1490,7 @@ export default function Home() {
         {notice && <div className="toast" role="status">✓ {notice}</div>}
 
         <div className="content">
-          {currentUser.role === "admin" && (["gerenteloja", "objetivos", "areasglobais", "equipa", "alertas"] as View[]).includes(view) && <nav className="section-subnav" aria-label="Áreas do Gerente Loja"><button type="button" className={view === "gerenteloja" ? "active" : ""} onClick={() => setView("gerenteloja")}>Visão geral</button><button type="button" className={view === "objetivos" ? "active" : ""} onClick={() => { setDepartment("global"); setView("objetivos"); }}>Objetivos</button><button type="button" className={view === "areasglobais" ? "active" : ""} onClick={() => { setDepartment("global"); setView("areasglobais"); }}>Áreas</button><button type="button" className={view === "equipa" ? "active" : ""} onClick={() => { setDepartment("global"); setView("equipa"); }}>Equipa</button><button type="button" className={view === "alertas" ? "active" : ""} onClick={() => setView("alertas")}>Central de Alertas</button></nav>}
+          {currentUser.role === "admin" && (["gerenteloja", "objetivos", "areasglobais", "equipa", "managerhours", "alertas"] as View[]).includes(view) && <nav className="section-subnav" aria-label="Áreas do Gerente Loja"><button type="button" className={view === "gerenteloja" ? "active" : ""} onClick={() => setView("gerenteloja")}>Visão geral</button><button type="button" className={view === "objetivos" ? "active" : ""} onClick={() => { setDepartment("global"); setView("objetivos"); }}>Objetivos</button><button type="button" className={view === "areasglobais" ? "active" : ""} onClick={() => { setDepartment("global"); setView("areasglobais"); }}>Áreas</button><button type="button" className={view === "equipa" ? "active" : ""} onClick={() => { setDepartment("global"); setView("equipa"); }}>Equipa</button><button type="button" className={view === "managerhours" ? "active" : ""} onClick={() => setView("managerhours")}>Horário Equipa Gestão</button><button type="button" className={view === "alertas" ? "active" : ""} onClick={() => setView("alertas")}>Central de Alertas</button></nav>}
 
           {view === "financeiro" && <section className="finance-page" aria-labelledby="finance-title"><div className="finance-heading"><div><span className="eyebrow">Gestão financeira</span><h2 id="finance-title">Financeiro</h2><p>Controlo e acompanhamento dos movimentos financeiros do restaurante.</p></div></div><nav className="section-subnav" aria-label="Áreas financeiras"><button type="button" className="active">Controlo Cofre</button></nav><nav className="vault-subnav" aria-label="Áreas do Controlo Cofre"><button type="button" className={vaultSection === "resumo" ? "active" : ""} onClick={() => setVaultSection("resumo")}>Resumo Controlo Cofre</button><button type="button" className={vaultSection === "moedas" ? "active" : ""} onClick={() => setVaultSection("moedas")}>Pedido moedas</button><button type="button" className={vaultSection === "faturas" ? "active" : ""} onClick={() => setVaultSection("faturas")}>Faturas</button></nav>{vaultSection === "resumo" ? <VaultControlPrototype isAdmin={currentUser.role === "admin"} /> : vaultSection === "moedas" ? <CoinOrdersPrototype isAdmin={currentUser.role === "admin"} /> : <VaultInvoicesPrototype isAdmin={currentUser.role === "admin"} />}</section>}
 
@@ -1606,6 +1610,15 @@ export default function Home() {
               <div className="availability-frame"><iframe title="Análise de disponibilidades da equipa" src="https://analise-disponibilidades-equipa.tiagosoutelo.chatgpt.site/" /></div>
             </section>
           )}
+
+          {view === "managerhours" && currentUser.role === "admin" && <section className="manager-schedule-page" aria-labelledby="manager-schedule-title">
+            <div className="manager-schedule-heading"><div><span className="eyebrow">Gerente Loja · Planeamento</span><h2 id="manager-schedule-title">Horário Equipa Gestão</h2><p>Planeamento anual e mensal, códigos de horário e controlo de horas da equipa de gestão.</p></div><span>Dados da folha partilhada</span></div>
+            <nav className="manager-schedule-tabs" aria-label="Secções do horário da equipa de gestão"><button type="button" className={managerScheduleTab === "definitions" ? "active" : ""} onClick={() => setManagerScheduleTab("definitions")}>Definições</button><button type="button" className={managerScheduleTab === "annual" ? "active" : ""} onClick={() => setManagerScheduleTab("annual")}>Horário anual</button><button type="button" className={managerScheduleTab === "monthly" ? "active" : ""} onClick={() => setManagerScheduleTab("monthly")}>Horário mensal</button><button type="button" className={managerScheduleTab === "hours" ? "active" : ""} onClick={() => setManagerScheduleTab("hours")}>Controlo Horas Gerentes</button></nav>
+            {managerScheduleTab === "definitions" && <section className="manager-schedule-card"><div className="manager-card-title"><div><span className="eyebrow">Códigos e intervalos</span><h3>Definições</h3></div><strong>{managerSchedule.definitions.length} códigos</strong></div><div className="schedule-definitions"><div className="schedule-definition-row header"><span>Designação</span><span>Código</span><span>Entrada</span><span>Saída</span><span>Entrada</span><span>Saída</span><span>Tipo</span></div>{managerSchedule.definitions.map((definition) => <div className="schedule-definition-row" key={definition.name}><span><strong>{definition.name}</strong></span><span><i>{definition.code}</i></span><span>{definition.firstIn || "—"}</span><span>{definition.firstOut || "—"}</span><span>{definition.secondIn || "—"}</span><span>{definition.secondOut || "—"}</span><span><em className={definition.kind === "Trabalho" ? "working" : "absence"}>{definition.kind}</em></span></div>)}</div></section>}
+            {managerScheduleTab === "annual" && <section className="manager-schedule-card"><div className="manager-card-title"><div><span className="eyebrow">Plano 2026</span><h3>Horário anual · agosto</h3><p>Vista do período mais recente da folha anual.</p></div><strong>{managerSchedule.annual.length} gerentes</strong></div><div className="schedule-grid-wrap"><div className="schedule-grid" style={{ gridTemplateColumns: `190px repeat(${managerSchedule.dates.length}, 118px)` }}><div className="schedule-cell header manager">Gerente</div>{managerSchedule.dates.map((date) => <div className="schedule-cell header" key={date}><strong>{new Date(`${date}T12:00:00`).toLocaleDateString("pt-PT", { day: "2-digit", month: "short" })}</strong><small>{new Date(`${date}T12:00:00`).toLocaleDateString("pt-PT", { weekday: "short" })}</small></div>)}{managerSchedule.annual.flatMap((row) => [<div className="schedule-cell manager" key={`${row.name}-name`}><strong>{row.name}</strong></div>, ...row.shifts.map((shift, index) => <div className={`schedule-cell shift ${shift === "OFF" ? "off" : shift.startsWith("F") ? "holiday" : ""}`} key={`${row.name}-${index}`}>{shift}</div>)])}</div></div></section>}
+            {managerScheduleTab === "monthly" && <section className="manager-schedule-card"><div className="manager-card-title"><div><span className="eyebrow">Vista operacional</span><h3>Horário mensal · {managerSchedule.monthly.label}</h3><p>Turnos da equipa e cobertura prevista por período.</p></div><strong>{managerSchedule.monthly.dates.length} dias visíveis</strong></div><div className="schedule-grid-wrap"><div className="schedule-grid monthly" style={{ gridTemplateColumns: `190px repeat(${managerSchedule.monthly.dates.length}, 118px)` }}><div className="schedule-cell header manager">Gerente</div>{managerSchedule.monthly.dates.map((date) => <div className="schedule-cell header" key={date}><strong>{new Date(`${date}T12:00:00`).toLocaleDateString("pt-PT", { day: "2-digit", month: "short" })}</strong><small>{new Date(`${date}T12:00:00`).toLocaleDateString("pt-PT", { weekday: "short" })}</small></div>)}{managerSchedule.annual.flatMap((row) => [<div className="schedule-cell manager" key={`${row.name}-monthly-name`}><strong>{row.name}</strong></div>, ...row.shifts.map((shift, index) => <div className={`schedule-cell shift ${shift === "OFF" ? "off" : shift.startsWith("F") ? "holiday" : ""}`} key={`${row.name}-monthly-${index}`}>{shift}</div>)])}{managerSchedule.monthly.coverage.flatMap((row) => [<div className="schedule-cell coverage manager" key={`${row.label}-name`}><strong>{row.label}</strong></div>, ...row.values.map((value, index) => <div className="schedule-cell coverage" key={`${row.label}-${index}`}>{value}</div>)])}</div></div></section>}
+            {managerScheduleTab === "hours" && <section className="manager-schedule-card"><div className="manager-card-title"><div><span className="eyebrow">Diferenças e movimentos</span><h3>Controlo Horas Gerentes</h3><p>Comparação entre horário previsto e horário realizado, com motivo e saldo.</p></div><strong>{managerSchedule.hourControl.length} movimentos</strong></div><div className="manager-hours-table"><div className="manager-hours-row header"><span>Gerente</span><span>Data</span><span>Horário previsto</span><span>Horário real</span><span>Motivo</span><span>Horas</span><span>Movimento</span><span>Saldo</span></div>{managerSchedule.hourControl.map((record, index) => <div className="manager-hours-row" key={`${record.manager}-${record.date}-${index}`}><span><strong>{record.manager}</strong></span><span>{record.date}</span><span>{record.planned}</span><span>{record.actual}</span><span>{record.reason}</span><span className={record.hours.startsWith("-") ? "negative-value" : ""}>{record.hours}</span><span className={record.movement.startsWith("-") ? "negative-value" : "positive-value"}>{record.movement}</span><span><strong>{record.balance}</strong></span></div>)}</div></section>}
+          </section>}
 
           {view === "haccp" && department === "qualidade" && (
             <section className="haccp-page" aria-label="Portal HACCP">

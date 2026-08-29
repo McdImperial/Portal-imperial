@@ -1,0 +1,7 @@
+{
+  "definitions": [{ "name": "Turno de exemplo", "code": "08:00  16:30", "firstIn": "08:00", "firstOut": "12:00", "secondIn": "12:30", "secondOut": "16:30", "kind": "Trabalho" }],
+  "dates": ["2026-01-01"],
+  "annual": [{ "name": "GERENTE EXEMPLO", "shifts": ["08:00  16:30"] }],
+  "monthly": { "label": "janeiro 2026", "dates": ["2026-01-01"], "rows": [{ "name": "GERENTE EXEMPLO", "shifts": ["OFF"] }], "coverage": [{ "label": "Total a trabalhar", "values": [0] }] },
+  "hourControl": [{ "manager": "Gerente Exemplo", "date": "01/01/2026", "planned": "08:00-16:30", "actual": "08:00-17:30", "reason": "Exemplo fictício", "hours": "1", "movement": "0,00 €", "balance": "0,00 €" }]
+}
