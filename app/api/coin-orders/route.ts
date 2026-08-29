@@ -1,4 +1,4 @@
-import { desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { coinOrders, coinOrderSettings } from "../../../db/schema";
 import { requireUser } from "../auth/_lib";
@@ -25,8 +25,8 @@ export async function POST(request: Request) {
   const auth = await requireUser(request);
   if (auth.error) return auth.error;
   try {
-    const payload = await request.json() as { orderDate?: string; quantities?: Record<string, number>; orderManager?: string };
-    const pending = await getDb().select({ id: coinOrders.id }).from(coinOrders).where(isNull(coinOrders.depositAt)).limit(2);
+    const payload = await request.json() as { orderDate?: string; quantities?: Record<string, number>; orderManager?: string; noOrderNeeded?: boolean };
+    const pending = await getDb().select({ id: coinOrders.id }).from(coinOrders).where(and(isNull(coinOrders.depositAt), eq(coinOrders.noOrderNeeded, false))).limit(2);
     if (auth.user.role !== "admin" && pending.length >= 2) throw new Error("Já existem dois depósitos pendentes. Registe pelo menos um depósito antes de criar outro pedido.");
     const orderDate = payload.orderDate?.trim() || "";
     if (!/^\d{4}-\d{2}-\d{2}$/.test(orderDate)) throw new Error("Selecione uma data válida.");
@@ -36,11 +36,12 @@ export async function POST(request: Request) {
       if (!Number.isInteger(value) || value < 0 || value > 10000) throw new Error("As quantidades devem ser números inteiros positivos.");
       return [key, value];
     }));
-    const totalAmount = Math.round(denominations.reduce((sum, key) => sum + quantities[key] * bagValues[key], 0) * 100) / 100;
-    if (totalAmount <= 0) throw new Error("Indique pelo menos uma manga de moedas.");
+    const noOrderNeeded = Boolean(payload.noOrderNeeded);
+    const totalAmount = noOrderNeeded ? 0 : Math.round(denominations.reduce((sum, key) => sum + quantities[key] * bagValues[key], 0) * 100) / 100;
+    if (!noOrderNeeded && totalAmount <= 0) throw new Error("Indique pelo menos uma manga de moedas ou assinale que não é necessário pedir.");
     const orderManager = payload.orderManager?.trim() || "";
-    if (!orderManager) throw new Error("Selecione o gerente do pedido.");
-    const [record] = await getDb().insert(coinOrders).values({ orderDate, quantities: JSON.stringify(quantities), totalAmount, orderManager, responsibleManager: orderManager, createdBy: auth.user.id, createdByName: auth.user.name || auth.user.login }).returning();
+    if (!noOrderNeeded && !orderManager) throw new Error("Selecione o gerente do pedido.");
+    const [record] = await getDb().insert(coinOrders).values({ orderDate, quantities: JSON.stringify(noOrderNeeded ? Object.fromEntries(denominations.map((key) => [key, 0])) : quantities), totalAmount, noOrderNeeded, orderManager, responsibleManager: orderManager, createdBy: auth.user.id, createdByName: auth.user.name || auth.user.login }).returning();
     return Response.json({ record: serialize(record) }, { status: 201 });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "Não foi possível guardar o pedido." }, { status: 400 });
@@ -51,7 +52,7 @@ export async function PATCH(request: Request) {
   const auth = await requireUser(request);
   if (auth.error) return auth.error;
   try {
-    const payload = await request.json() as { id?: number; mode?: "deposit" | "edit" | "settings"; status?: "Pendente" | "Depositado"; depositManager?: string; depositDate?: string; orderDate?: string; quantities?: Record<string, number>; orderManager?: string; minimumLargeBags?: Record<string, number> };
+    const payload = await request.json() as { id?: number; mode?: "deposit" | "edit" | "settings"; status?: "Pendente" | "Depositado"; depositManager?: string; depositDate?: string; orderDate?: string; quantities?: Record<string, number>; orderManager?: string; minimumLargeBags?: Record<string, number>; noOrderNeeded?: boolean };
     if (payload.mode === "settings") {
       if (auth.user.role !== "admin") return Response.json({ error: "Apenas o administrador pode alterar os mínimos." }, { status: 403 });
       const minimumLargeBags = Object.fromEntries(denominations.map((key) => { const value = Number(payload.minimumLargeBags?.[key] ?? 1); if (!Number.isInteger(value) || value < 0 || value > 100) throw new Error("Os mínimos devem ser números inteiros entre 0 e 100."); return [key, value]; }));
@@ -66,9 +67,9 @@ export async function PATCH(request: Request) {
       if (auth.user.role !== "admin") return Response.json({ error: "Apenas o administrador pode editar o pedido." }, { status: 403 });
       const orderDate = payload.orderDate?.trim() || ""; if (!/^\d{4}-\d{2}-\d{2}$/.test(orderDate)) throw new Error("Selecione uma data válida.");
       const source = payload.quantities || {}; const quantities = Object.fromEntries(denominations.map((key) => { const value = Number(source[key] || 0); if (!Number.isInteger(value) || value < 0 || value > 10000) throw new Error("As quantidades devem ser números inteiros positivos."); return [key, value]; }));
-      const totalAmount = Math.round(denominations.reduce((sum, key) => sum + quantities[key] * bagValues[key], 0) * 100) / 100; if (totalAmount <= 0) throw new Error("Indique pelo menos uma manga de moedas.");
-      const orderManager = payload.orderManager?.trim() || ""; if (!orderManager) throw new Error("Selecione o gerente do pedido.");
-      const [record] = await getDb().update(coinOrders).set({ orderDate, quantities: JSON.stringify(quantities), totalAmount, orderManager, responsibleManager: orderManager, updatedAt: new Date().toISOString() }).where(eq(coinOrders.id, id)).returning();
+      const noOrderNeeded = Boolean(payload.noOrderNeeded); const totalAmount = noOrderNeeded ? 0 : Math.round(denominations.reduce((sum, key) => sum + quantities[key] * bagValues[key], 0) * 100) / 100; if (!noOrderNeeded && totalAmount <= 0) throw new Error("Indique pelo menos uma manga de moedas ou assinale que não é necessário pedir.");
+      const orderManager = payload.orderManager?.trim() || ""; if (!noOrderNeeded && !orderManager) throw new Error("Selecione o gerente do pedido.");
+      const [record] = await getDb().update(coinOrders).set({ orderDate, quantities: JSON.stringify(noOrderNeeded ? Object.fromEntries(denominations.map((key) => [key, 0])) : quantities), totalAmount, noOrderNeeded, orderManager, responsibleManager: orderManager, depositAt: noOrderNeeded ? null : current.depositAt, depositManager: noOrderNeeded ? "" : current.depositManager, updatedAt: new Date().toISOString() }).where(eq(coinOrders.id, id)).returning();
       return Response.json({ record: serialize(record) });
     }
     if (!payload.status) throw new Error("Selecione um estado válido.");

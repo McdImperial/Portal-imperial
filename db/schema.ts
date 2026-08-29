@@ -141,6 +141,7 @@ export const coinOrders = sqliteTable("coin_orders", {
   orderDate: text("order_date").notNull(),
   quantities: text("quantities").notNull().default("{}"),
   totalAmount: real("total_amount").notNull().default(0),
+  noOrderNeeded: integer("no_order_needed", { mode: "boolean" }).notNull().default(false),
   depositAt: text("deposit_at"),
   responsibleManager: text("responsible_manager").notNull().default(""),
   orderManager: text("order_manager").notNull().default(""),

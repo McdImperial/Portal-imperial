@@ -1,0 +1,1 @@
+ALTER TABLE `coin_orders` ADD `no_order_needed` integer DEFAULT false NOT NULL;

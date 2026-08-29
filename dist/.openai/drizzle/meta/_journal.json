@@ -141,6 +141,13 @@
       "when": 1788038773779,
       "tag": "0019_living_ogun",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1788039733650,
+      "tag": "0020_burly_leader",
+      "breakpoints": true
     }
   ]
 }
