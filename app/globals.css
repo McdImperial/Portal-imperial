@@ -132,14 +132,16 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .coin-suggestion-actions { display:grid; gap:8px; }
 .coin-suggestion-actions button { border:0; border-radius:10px; padding:11px 14px; background:#1f6851; color:#fff; font-weight:800; cursor:pointer; white-space:nowrap; }
 .coin-suggestion-actions button.secondary { border:1px solid #b8d5c9; background:#fff; color:#215a46; }
+.coin-suggestion-actions button.secondary.editing { border-color:#1f6851; background:#1f6851; color:#fff; box-shadow:0 0 0 3px rgba(31,104,81,.12); }
 .coin-suggestion-detail { display:grid; grid-template-columns:repeat(5,minmax(72px,1fr)); gap:7px; }
 .coin-suggestion-detail article { display:grid; justify-items:center; gap:3px; padding:8px 5px; border:1px solid #d9e6e0; border-radius:10px; background:#fff; text-align:center; }
 .coin-suggestion-detail article.needs-order { border-color:#ebd18b; background:#fff9e8; }
 .coin-suggestion-detail img { width:31px; height:31px; object-fit:contain; }
 .coin-suggestion-detail small { color:#79867f; font-size:9px; }
-.coin-suggestion-detail label { display:flex; align-items:center; justify-content:center; gap:4px; color:#617169; font-size:9px; }
+.coin-suggestion-detail label { display:flex; align-items:center; justify-content:center; gap:4px; color:#617169; font-size:9px; white-space:nowrap; }
 .coin-suggestion-detail label input { width:42px; min-height:27px; padding:3px; border:1px solid #cadbd3; border-radius:6px; text-align:center; font-weight:800; }
-.coin-suggestion-detail strong { color:#28634f; font-size:10px; }
+.coin-suggestion-detail label input:disabled { border-color:transparent; background:#edf3f0; color:#456258; opacity:1; }
+.coin-suggestion-detail strong { color:#28634f; font-size:15px; }
 .coin-suggestion-detail .needs-order strong { color:#946400; }
 .coin-order-history { border: 1px solid #dfe8e4; border-radius: 16px; overflow: hidden; background: #fff; }
 .coin-order-history-heading { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; }
