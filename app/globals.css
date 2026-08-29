@@ -128,6 +128,9 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .coin-order-table { width: 100%; min-width: 850px; border-collapse: collapse; }
 .coin-order-table th { padding: 12px 14px; background: #f2f6f4; color: #687a72; font-size: 10px; text-align: left; text-transform: uppercase; letter-spacing: .05em; }
 .coin-order-table td { padding: 13px 14px; border-top: 1px solid #e5ece9; color: #4f6259; font-size: 12px; }
+.coin-order-table.centered th, .coin-order-table.centered td { text-align: center; vertical-align: middle; }
+.coin-order-table.centered .coin-order-value { justify-items: center; }
+.coin-order-table.centered .coin-order-manager-select { margin-inline: auto; }
 .coin-order-table td > strong { color: #214f40; }
 .coin-order-detail { display: flex; flex-wrap: wrap; gap: 5px; }
 .coin-order-detail span { padding: 4px 7px; border-radius: 7px; background: #f1f5f3; white-space: nowrap; }
@@ -142,6 +145,8 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .coin-order-state-select.pending { border-color: #ebd492; background: #fff7db; color: #8a5d00; }
 .coin-order-state-select.deposited { border-color: #baddcc; background: #e7f5ee; color: #246d52; }
 .coin-order-manager-select { width: 100%; min-width: 150px; font-weight: 600; }
+.coin-order-deposit-date { border: 1px solid #cbdad4; border-radius: 8px; padding: 7px 9px; background: #fff; color: #36584c; font-size: 10px; font-weight: 700; }
+.coin-order-actions { justify-content: center; }
 .coin-order-modal { width: min(820px,100%); }
 .coin-order-date { display: grid; gap: 6px; max-width: 230px; margin: 18px 0; color: #6a7973; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 .coin-order-date input, .coin-order-deposit-fields input, .coin-order-deposit-fields select { border: 1px solid #d7e2dd; border-radius: 9px; padding: 11px; background: #fff; color: #29463c; }

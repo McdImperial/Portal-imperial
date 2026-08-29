@@ -14,14 +14,14 @@ const serialize = (record: typeof coinOrders.$inferSelect) => ({
 });
 
 export async function GET(request: Request) {
-  const auth = await requireUser(request, ["admin"]);
+  const auth = await requireUser(request);
   if (auth.error) return auth.error;
   const records = await getDb().select().from(coinOrders).orderBy(desc(coinOrders.orderDate), desc(coinOrders.id));
   return Response.json({ records: records.map(serialize) });
 }
 
 export async function POST(request: Request) {
-  const auth = await requireUser(request, ["admin"]);
+  const auth = await requireUser(request);
   if (auth.error) return auth.error;
   try {
     const payload = await request.json() as { orderDate?: string; quantities?: Record<string, number>; orderManager?: string };
@@ -47,18 +47,31 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const auth = await requireUser(request, ["admin"]);
+  const auth = await requireUser(request);
   if (auth.error) return auth.error;
   try {
-    const payload = await request.json() as { id?: number; status?: "Pendente" | "Depositado"; depositManager?: string };
+    const payload = await request.json() as { id?: number; mode?: "deposit" | "edit"; status?: "Pendente" | "Depositado"; depositManager?: string; depositDate?: string; orderDate?: string; quantities?: Record<string, number>; orderManager?: string };
     const id = Number(payload.id);
-    if (!id || !payload.status) throw new Error("Selecione um estado válido.");
+    if (!id) throw new Error("Pedido inválido.");
     const [current] = await getDb().select().from(coinOrders).where(eq(coinOrders.id, id)).limit(1);
     if (!current) return Response.json({ error: "Pedido não encontrado." }, { status: 404 });
+    if (payload.mode === "edit") {
+      if (auth.user.role !== "admin") return Response.json({ error: "Apenas o administrador pode editar o pedido." }, { status: 403 });
+      const orderDate = payload.orderDate?.trim() || ""; if (!/^\d{4}-\d{2}-\d{2}$/.test(orderDate)) throw new Error("Selecione uma data válida.");
+      const source = payload.quantities || {}; const quantities = Object.fromEntries(denominations.map((key) => { const value = Number(source[key] || 0); if (!Number.isInteger(value) || value < 0 || value > 10000) throw new Error("As quantidades devem ser números inteiros positivos."); return [key, value]; }));
+      const totalAmount = Math.round(denominations.reduce((sum, key) => sum + quantities[key] * bagValues[key], 0) * 100) / 100; if (totalAmount <= 0) throw new Error("Indique pelo menos uma manga de moedas.");
+      const orderManager = payload.orderManager?.trim() || ""; if (!orderManager) throw new Error("Selecione o gerente do pedido.");
+      const [record] = await getDb().update(coinOrders).set({ orderDate, quantities: JSON.stringify(quantities), totalAmount, orderManager, responsibleManager: orderManager, updatedAt: new Date().toISOString() }).where(eq(coinOrders.id, id)).returning();
+      return Response.json({ record: serialize(record) });
+    }
+    if (!payload.status) throw new Error("Selecione um estado válido.");
+    if (current.depositAt && auth.user.role !== "admin") return Response.json({ error: "Um pedido depositado só pode ser alterado pelo administrador." }, { status: 403 });
     const depositManager = payload.depositManager?.trim() || "";
     if (payload.status === "Depositado" && !depositManager) throw new Error("Selecione o gerente do depósito.");
+    const depositDate = payload.depositDate?.trim() || "";
+    if (payload.status === "Depositado" && !/^\d{4}-\d{2}-\d{2}$/.test(depositDate)) throw new Error("Selecione o dia do depósito.");
     const [record] = await getDb().update(coinOrders).set(payload.status === "Depositado"
-      ? { depositAt: current.depositAt || new Date().toISOString(), depositManager, updatedAt: new Date().toISOString() }
+      ? { depositAt: `${depositDate}T12:00:00.000Z`, depositManager, updatedAt: new Date().toISOString() }
       : { depositAt: null, depositManager: "", updatedAt: new Date().toISOString() }
     ).where(eq(coinOrders.id, id)).returning();
     if (!record) return Response.json({ error: "Pedido não encontrado." }, { status: 404 });
@@ -66,4 +79,11 @@ export async function PATCH(request: Request) {
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "Não foi possível registar o depósito." }, { status: 400 });
   }
+}
+
+export async function DELETE(request: Request) {
+  const auth = await requireUser(request, ["admin"]); if (auth.error) return auth.error;
+  const id = Number((await request.json() as { id?: number }).id); if (!id) return Response.json({ error: "Pedido inválido." }, { status: 400 });
+  const [deleted] = await getDb().delete(coinOrders).where(eq(coinOrders.id, id)).returning({ id: coinOrders.id });
+  return deleted ? Response.json({ deleted: true }) : Response.json({ error: "Pedido não encontrado." }, { status: 404 });
 }
