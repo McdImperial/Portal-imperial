@@ -154,6 +154,14 @@ export const coinOrders = sqliteTable("coin_orders", {
   index("idx_coin_orders_deposit_at").on(table.depositAt),
 ]);
 
+export const coinOrderSettings = sqliteTable("coin_order_settings", {
+  id: integer("id").primaryKey(),
+  minimumLargeBags: text("minimum_large_bags").notNull().default('{"0.05":1,"0.1":1,"0.2":1,"0.5":1,"1":1}'),
+  updatedBy: integer("updated_by").notNull(),
+  updatedByName: text("updated_by_name").notNull(),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const alertDirectoryRecipients = sqliteTable("recipients", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(), phone: text("phone").notNull().unique(),

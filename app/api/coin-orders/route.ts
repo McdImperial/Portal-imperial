@@ -1,6 +1,6 @@
 import { desc, eq, isNull } from "drizzle-orm";
 import { getDb } from "../../../db";
-import { coinOrders } from "../../../db/schema";
+import { coinOrders, coinOrderSettings } from "../../../db/schema";
 import { requireUser } from "../auth/_lib";
 
 const denominations = ["0.05", "0.1", "0.2", "0.5", "1"] as const;
@@ -17,7 +17,8 @@ export async function GET(request: Request) {
   const auth = await requireUser(request);
   if (auth.error) return auth.error;
   const records = await getDb().select().from(coinOrders).orderBy(desc(coinOrders.orderDate), desc(coinOrders.id));
-  return Response.json({ records: records.map(serialize) });
+  const [settings] = await getDb().select().from(coinOrderSettings).limit(1);
+  return Response.json({ records: records.map(serialize), minimumLargeBags: settings ? JSON.parse(settings.minimumLargeBags) : Object.fromEntries(denominations.map((key) => [key, 1])) });
 }
 
 export async function POST(request: Request) {
@@ -50,7 +51,13 @@ export async function PATCH(request: Request) {
   const auth = await requireUser(request);
   if (auth.error) return auth.error;
   try {
-    const payload = await request.json() as { id?: number; mode?: "deposit" | "edit"; status?: "Pendente" | "Depositado"; depositManager?: string; depositDate?: string; orderDate?: string; quantities?: Record<string, number>; orderManager?: string };
+    const payload = await request.json() as { id?: number; mode?: "deposit" | "edit" | "settings"; status?: "Pendente" | "Depositado"; depositManager?: string; depositDate?: string; orderDate?: string; quantities?: Record<string, number>; orderManager?: string; minimumLargeBags?: Record<string, number> };
+    if (payload.mode === "settings") {
+      if (auth.user.role !== "admin") return Response.json({ error: "Apenas o administrador pode alterar os mínimos." }, { status: 403 });
+      const minimumLargeBags = Object.fromEntries(denominations.map((key) => { const value = Number(payload.minimumLargeBags?.[key] ?? 1); if (!Number.isInteger(value) || value < 0 || value > 100) throw new Error("Os mínimos devem ser números inteiros entre 0 e 100."); return [key, value]; }));
+      const [settings] = await getDb().insert(coinOrderSettings).values({ id: 1, minimumLargeBags: JSON.stringify(minimumLargeBags), updatedBy: auth.user.id, updatedByName: auth.user.name || auth.user.login }).onConflictDoUpdate({ target: coinOrderSettings.id, set: { minimumLargeBags: JSON.stringify(minimumLargeBags), updatedBy: auth.user.id, updatedByName: auth.user.name || auth.user.login, updatedAt: new Date().toISOString() } }).returning();
+      return Response.json({ minimumLargeBags: JSON.parse(settings.minimumLargeBags) });
+    }
     const id = Number(payload.id);
     if (!id) throw new Error("Pedido inválido.");
     const [current] = await getDb().select().from(coinOrders).where(eq(coinOrders.id, id)).limit(1);

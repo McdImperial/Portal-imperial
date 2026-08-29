@@ -120,15 +120,21 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .coin-pending-list article strong { color: #215642; }
 .coin-pending-list article span, .coin-pending-list article small { color: #7b8882; font-size: 10px; }
 .coin-pending-empty { color: #7b8882; font-size: 11px; }
-.coin-weekly-suggestion { display:grid; grid-template-columns:minmax(260px,.9fr) 2fr auto; align-items:center; gap:18px; margin-bottom:18px; padding:18px 20px; border:1px solid #cfe2d9; border-left:4px solid #2b8062; border-radius:14px; background:#f4faf7; }
-.coin-weekly-suggestion h3 { margin:4px 0; color:#1e4437; font-size:18px; }
+.coin-weekly-suggestion { display:grid; grid-template-columns:minmax(285px,.9fr) 2fr auto; align-items:center; gap:18px; margin-bottom:18px; padding:18px 20px; border:1px solid #cfe2d9; border-left:4px solid #2b8062; border-radius:14px; background:#f4faf7; }
+.coin-weekly-suggestion h3 { margin:6px 0 2px; color:#1e4437; font-family:Georgia,serif; font-size:27px; }
 .coin-weekly-suggestion p { margin:0; color:#708078; font-size:11px; }
-.coin-weekly-suggestion > button { border:0; border-radius:10px; padding:11px 14px; background:#1f6851; color:#fff; font-weight:800; cursor:pointer; white-space:nowrap; }
+.coin-suggestion-copy { display:grid; gap:3px; }
+.coin-suggestion-date { color:#2b8062; font-size:20px; }
+.coin-suggestion-actions { display:grid; gap:8px; }
+.coin-suggestion-actions button { border:0; border-radius:10px; padding:11px 14px; background:#1f6851; color:#fff; font-weight:800; cursor:pointer; white-space:nowrap; }
+.coin-suggestion-actions button.secondary { border:1px solid #b8d5c9; background:#fff; color:#215a46; }
 .coin-suggestion-detail { display:grid; grid-template-columns:repeat(5,minmax(72px,1fr)); gap:7px; }
 .coin-suggestion-detail article { display:grid; justify-items:center; gap:3px; padding:8px 5px; border:1px solid #d9e6e0; border-radius:10px; background:#fff; text-align:center; }
 .coin-suggestion-detail article.needs-order { border-color:#ebd18b; background:#fff9e8; }
 .coin-suggestion-detail img { width:31px; height:31px; object-fit:contain; }
 .coin-suggestion-detail small { color:#79867f; font-size:9px; }
+.coin-suggestion-detail label { display:flex; align-items:center; justify-content:center; gap:4px; color:#617169; font-size:9px; }
+.coin-suggestion-detail label input { width:42px; min-height:27px; padding:3px; border:1px solid #cadbd3; border-radius:6px; text-align:center; font-weight:800; }
 .coin-suggestion-detail strong { color:#28634f; font-size:10px; }
 .coin-suggestion-detail .needs-order strong { color:#946400; }
 .coin-order-history { border: 1px solid #dfe8e4; border-radius: 16px; overflow: hidden; background: #fff; }
@@ -166,6 +172,8 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .coin-order-denomination-header { color: #77857f; font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .coin-order-denominations > label { min-height: 60px; }
 .coin-order-denominations .currency-coin img { width: 52px; height: 52px; object-fit: contain; }
+.coin-order-denominations .currency-coin { width:auto; height:auto; gap:3px; }
+.coin-order-denominations .currency-coin small { color:#9a6b0d; font-size:8px; font-weight:800; white-space:nowrap; }
 .coin-order-denominations input { width: 100%; border: 1px solid #d7e2dd; border-radius: 9px; padding: 10px; text-align: right; }
 .coin-order-denominations label > b { color: #215642; text-align: right; }
 .coin-order-total { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #dfe8e4; padding-top: 13px; color: #52675e; font-weight: 800; }
