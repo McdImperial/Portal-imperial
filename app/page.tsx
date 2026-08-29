@@ -8,7 +8,7 @@ import tellTheArchesDataJson from "./data/tell-the-arches.json";
 import teamMilestonesDataJson from "./data/team-milestones.json";
 import AlertsCenter from "./alerts-center";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -159,6 +159,7 @@ const viewLabels: Record<View, string> = {
   equipa: "Equipa",
   custos: "Custo, Comida, Papel e OPS",
   faturacao: "Controlo de faturação",
+  financeiro: "Financeiro",
   r2p: "Tempos de serviço · R2P",
   tellarches: "Tell The Arches",
   talento: "Gestão Talento",
@@ -407,7 +408,7 @@ function MonthlyBillingControl({ values, onChange }: { values: Record<string, st
   return <section className="monthly-control"><div className="monthly-control-heading"><div><span className="eyebrow">Resumo do mês</span><h3>Custos, inventário e consumo</h3><p>Introduza os campos em branco. Compras, consumos e percentagens são calculados automaticamente.</p></div></div><div className="monthly-control-grid"><section className="monthly-purchases">{field("sales", "Vendas mês")}<p><span>Compras Comida</span><b>{euro(purchaseFood)}</b></p><p><span>Compras Papel</span><b>{euro(purchasePaper)}</b></p><p><span>Compras Total OPS</span><b>{euro(purchaseOps)}</b></p><p><span>Consumo Comida</span><b>{euro(food)}</b></p><p><span>Consumo Papel</span><b>{euro(paper)}</b></p><p><span>Consumo OPS</span><b>{euro(ops)}</b></p></section><section className="monthly-inputs">{field("openingFood", "Inv. inicial comida")}{field("openingOps", "Inv. inicial OPS")}{field("lossesFood", "Perdas comida")}{field("mealsFood", "Refeições comida")}{field("promoFood", "Promo comida")}{field("closingFood", "Inv. final comida")}</section><section className="monthly-inputs">{field("openingPaper", "Inv. inicial papel")}{field("lossesPaper", "Perdas papel")}{field("mealsPaper", "Refeições papel")}{field("promoPaper", "Promo papel")}{field("closingPaper", "Inv. final papel")}{field("closingOps", "Inv. final OPS")}<p><span>% custo comida</span><b>{percent(food)}</b></p><p><span>% custo papel</span><b>{percent(paper)}</b></p><p><span>% custo OPS</span><b>{percent(ops)}</b></p></section></div></section>;
 }
 
-type DevelopmentSection = "cofre" | "deposito" | "faltas" | "disputas";
+type DevelopmentSection = "deposito" | "faltas" | "disputas";
 type VaultShift = "Manhã" | "Tarde" | "Madrugada";
 type VaultRecord = { id: number; controlDate: string; shift: VaultShift; largeBags: Record<string, number>; smallBags: Record<string, number>; noteCounts: Record<string, number>; looseCoins: number; tillFunds: number; invoices: number; bankCoins1: number; bankCoins2: number; countedTotal: number; theoreticalTotal: number; vaultTotal: number; difference: number; deliveringManager: string; receivingManager: string; createdByName: string };
 type DepositShift = "Abertura" | "Transição" | "Fecho" | "Delivery";
@@ -649,7 +650,7 @@ export default function Home() {
   const objectivesExportRef = useRef<HTMLElement>(null);
   const [portalDate, setPortalDate] = useState("");
   const [view, setView] = useState<View>("resumo");
-  const [developmentSection, setDevelopmentSection] = useState<DevelopmentSection>("cofre");
+  const [developmentSection, setDevelopmentSection] = useState<DevelopmentSection>("deposito");
   const [vaultSection, setVaultSection] = useState<"resumo" | "moedas">("resumo");
   const [department, setDepartment] = useState<Department>("global");
   const [tasks, setTasks] = useState(initialTasks);
@@ -1321,11 +1322,8 @@ export default function Home() {
 
   const navItems: { id: View; label: string; glyph: string }[] = [
     { id: "resumo", label: "Resumo", glyph: "▦" },
-    { id: "tarefas", label: "Tarefas", glyph: "✓" },
-    { id: "objetivos", label: "Objetivos", glyph: "◎" },
-    { id: "areasglobais", label: "Áreas", glyph: "⌂" },
-    { id: "equipa", label: "Equipa", glyph: "♟" },
     { id: "gerenteloja" as View, label: "Gerente Loja", glyph: "♛" },
+    { id: "financeiro" as View, label: "Financeiro", glyph: "€" },
     { id: "faturacao" as View, label: "Controlo faturação", glyph: "€" },
     { id: "alertas" as View, label: "Central de Alertas", glyph: "🔔" },
     ...(currentUser?.role === "admin" ? [{ id: "desenvolvimento" as View, label: "Em desenvolvimento", glyph: "◇" }, { id: "configuracoes" as View, label: "Configurações", glyph: "⚙" }] : []),
@@ -1360,9 +1358,8 @@ export default function Home() {
         </div>
         <nav className="nav-list">
           {navItems.map((item) => (
-            <button key={item.id} className={view === item.id ? "nav-item active" : "nav-item"} onClick={() => { setView(item.id); if (item.id === "areasglobais" || item.id === "objetivos" || item.id === "equipa") setDepartment("global"); }}>
+            <button key={item.id} className={view === item.id || item.id === "gerenteloja" && (["objetivos", "areasglobais", "equipa"] as View[]).includes(view) ? "nav-item active" : "nav-item"} onClick={() => setView(item.id)}>
               <span className="nav-glyph">{item.glyph}</span>{item.label}
-              {item.id === "tarefas" && <span className="nav-count">{pending}</span>}
             </button>
           ))}
         </nav>
@@ -1383,9 +1380,6 @@ export default function Home() {
                 </button>
                 {item.id !== "global" && department === item.id && (
                   <div className="department-subtabs" aria-label={`Subsecções de ${item.label}`}>
-                    <button className={view === "tarefas" ? "department-subtab active" : "department-subtab"} onClick={() => setView("tarefas")}>
-                      ✓ <span>Tarefas</span>
-                    </button>
                     <button className={view === "objetivos" ? "department-subtab active" : "department-subtab"} onClick={() => setView("objetivos")}>
                       ◎ <span>Objetivos mensais</span>
                     </button>
@@ -1433,6 +1427,10 @@ export default function Home() {
         {notice && <div className="toast" role="status">✓ {notice}</div>}
 
         <div className="content">
+          {(["gerenteloja", "objetivos", "areasglobais", "equipa"] as View[]).includes(view) && <nav className="section-subnav" aria-label="Áreas do Gerente Loja"><button type="button" className={view === "gerenteloja" ? "active" : ""} onClick={() => setView("gerenteloja")}>Visão geral</button><button type="button" className={view === "objetivos" ? "active" : ""} onClick={() => { setDepartment("global"); setView("objetivos"); }}>Objetivos</button><button type="button" className={view === "areasglobais" ? "active" : ""} onClick={() => { setDepartment("global"); setView("areasglobais"); }}>Áreas</button><button type="button" className={view === "equipa" ? "active" : ""} onClick={() => { setDepartment("global"); setView("equipa"); }}>Equipa</button></nav>}
+
+          {view === "financeiro" && <section className="finance-page" aria-labelledby="finance-title"><div className="finance-heading"><div><span className="eyebrow">Gestão financeira</span><h2 id="finance-title">Financeiro</h2><p>Controlo e acompanhamento dos movimentos financeiros do restaurante.</p></div></div><nav className="section-subnav" aria-label="Áreas financeiras"><button type="button" className="active">Controlo Cofre</button></nav><nav className="vault-subnav" aria-label="Áreas do Controlo Cofre"><button type="button" className={vaultSection === "resumo" ? "active" : ""} onClick={() => setVaultSection("resumo")}>Resumo Controlo Cofre</button><button type="button" className={vaultSection === "moedas" ? "active" : ""} onClick={() => setVaultSection("moedas")}>Pedido moedas</button></nav>{vaultSection === "resumo" ? <VaultControlPrototype isAdmin={currentUser.role === "admin"} /> : <CoinOrdersPrototype />}</section>}
+
           {view === "cofreform" && (
             <section className="shared-vault-page" aria-label="Formulário partilhado do Controlo Cofre">
               <div className="shared-vault-heading"><span className="eyebrow">Acesso direto para a equipa</span><h2>Registar controlo de cofre</h2><p>Preencha a contagem, identifique os gerentes responsáveis e guarde o registo.</p></div>
@@ -1880,8 +1878,8 @@ export default function Home() {
           {view === "desenvolvimento" && currentUser.role === "admin" && (
             <section className="development-page" aria-labelledby="development-title">
               <div className="development-page-heading"><div><span className="eyebrow">Área reservada</span><h2 id="development-title">Em desenvolvimento</h2><p>Protótipos em construção, disponíveis apenas para o administrador.</p></div><span className="development-private-badge">◆ Administrador</span></div>
-              <nav className="development-subnav" aria-label="Módulos em desenvolvimento"><button type="button" className={developmentSection === "cofre" ? "active" : ""} onClick={() => setDevelopmentSection("cofre")}><span>▣</span>Controlo Cofre</button><button type="button" className={developmentSection === "deposito" ? "active" : ""} onClick={() => setDevelopmentSection("deposito")}><span>▤</span>Folha Depósito</button><button type="button" className={developmentSection === "faltas" ? "active" : ""} onClick={() => setDevelopmentSection("faltas")}><span>◷</span>Faltas &amp; Atrasos</button><button type="button" className={developmentSection === "disputas" ? "active" : ""} onClick={() => setDevelopmentSection("disputas")}><span>◎</span>Disputas Delivery</button></nav>
-              {developmentSection === "cofre" ? <><nav className="vault-subnav" aria-label="Áreas do Controlo Cofre"><button type="button" className={vaultSection === "resumo" ? "active" : ""} onClick={() => setVaultSection("resumo")}>Resumo Controlo Cofre</button><button type="button" className={vaultSection === "moedas" ? "active" : ""} onClick={() => setVaultSection("moedas")}>Pedido moedas</button></nav>{vaultSection === "resumo" ? <VaultControlPrototype isAdmin={currentUser.role === "admin"} /> : <CoinOrdersPrototype />}</> : developmentSection === "deposito" ? <DepositSheetPrototype /> : developmentSection === "faltas" ? <AbsencesPrototype /> : <DeliveryDisputesPrototype />}
+              <nav className="development-subnav" aria-label="Módulos em desenvolvimento"><button type="button" className={developmentSection === "deposito" ? "active" : ""} onClick={() => setDevelopmentSection("deposito")}><span>▤</span>Folha Depósito</button><button type="button" className={developmentSection === "faltas" ? "active" : ""} onClick={() => setDevelopmentSection("faltas")}><span>◷</span>Faltas &amp; Atrasos</button><button type="button" className={developmentSection === "disputas" ? "active" : ""} onClick={() => setDevelopmentSection("disputas")}><span>◎</span>Disputas Delivery</button></nav>
+              {developmentSection === "deposito" ? <DepositSheetPrototype /> : developmentSection === "faltas" ? <AbsencesPrototype /> : <DeliveryDisputesPrototype />}
             </section>
           )}
 
