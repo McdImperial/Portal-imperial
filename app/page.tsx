@@ -439,7 +439,6 @@ function VaultControlPrototype({ isAdmin, autoOpen = false }: { isAdmin: boolean
   const [managers, setManagers] = useState({ delivering: "", receiving: "" });
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
-  const [latestVaultRecord, setLatestVaultRecord] = useState<VaultRecord | null>(null);
   const managementTeam = teamMilestonesData.organisation.managementLevels.flat().map((person) => person.name);
   const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Lisbon" });
   const yesterday = new Date(Date.now() - 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Lisbon" });
@@ -522,6 +521,7 @@ function VaultInvoicesPrototype({ isAdmin }: { isAdmin: boolean }) {
 
 function CoinOrdersPrototype({ isAdmin }: { isAdmin: boolean }) {
   const [records, setRecords] = useState<CoinOrder[]>([]);
+  const [latestVaultRecord, setLatestVaultRecord] = useState<VaultRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [orderDate, setOrderDate] = useState(new Date().toISOString().slice(0, 10));
