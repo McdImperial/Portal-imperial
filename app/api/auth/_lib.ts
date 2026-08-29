@@ -4,7 +4,7 @@ import { sessions, users } from "../../../db/schema";
 
 export type AppRole = "admin" | "editor" | "consulta";
 export type AppPermission = "manage_alerts";
-const rolePermissions: Record<AppRole, AppPermission[]> = { admin: ["manage_alerts"], editor: ["manage_alerts"], consulta: [] };
+const rolePermissions: Record<AppRole, AppPermission[]> = { admin: ["manage_alerts"], editor: [], consulta: [] };
 const COOKIE = "imperial_session";
 const SESSION_SECONDS = 60 * 60 * 24;
 const PBKDF2_ITERATIONS = 100_000;

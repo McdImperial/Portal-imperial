@@ -34,7 +34,7 @@ async function saveRelations(alertId: number, payload: AlertPayload) {
 }
 
 export async function GET(request: Request) {
-  const auth = await requireUser(request); if (auth.error) return auth.error;
+  const auth = await requireUser(request, ["admin"]); if (auth.error) return auth.error;
   await ensureTemplates();
   const db = getDb(); const url = new URL(request.url); const resource = url.searchParams.get("resource") || "dashboard";
   if (resource === "recipients") return Response.json({ recipients: await db.select().from(alertDirectoryRecipients).orderBy(asc(alertDirectoryRecipients.name)), groups: await db.select().from(recipientGroups).orderBy(asc(recipientGroups.name)), members: await db.select().from(recipientGroupMembers) });

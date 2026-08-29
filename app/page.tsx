@@ -753,6 +753,11 @@ export default function Home() {
   }, [view, currentUser]);
 
   useEffect(() => {
+    const managerViews: View[] = ["gerenteloja", "objetivos", "areasglobais", "equipa", "alertas"];
+    if (currentUser && currentUser.role !== "admin" && managerViews.includes(view)) setView("resumo");
+  }, [view, currentUser]);
+
+  useEffect(() => {
     if (!notice.startsWith("Descarga validada")) return;
     setBillingCalculated(true);
     setNotice("Cálculo da descarga concluído. Os resultados serão preenchidos após a leitura dos ficheiros.");
@@ -1345,10 +1350,9 @@ export default function Home() {
 
   const navItems: { id: View; label: string; glyph: string }[] = [
     { id: "resumo", label: "Resumo", glyph: "▦" },
-    { id: "gerenteloja" as View, label: "Gerente Loja", glyph: "♛" },
+    ...(currentUser?.role === "admin" ? [{ id: "gerenteloja" as View, label: "Gerente Loja", glyph: "♛" }] : []),
     { id: "financeiro" as View, label: "Financeiro", glyph: "€" },
     { id: "faturacao" as View, label: "Controlo faturação", glyph: "€" },
-    { id: "alertas" as View, label: "Central de Alertas", glyph: "🔔" },
     ...(currentUser?.role === "admin" ? [{ id: "desenvolvimento" as View, label: "Em desenvolvimento", glyph: "◇" }, { id: "configuracoes" as View, label: "Configurações", glyph: "⚙" }] : []),
   ];
 
@@ -1381,7 +1385,7 @@ export default function Home() {
         </div>
         <nav className="nav-list">
           {navItems.map((item) => (
-            <button key={item.id} className={view === item.id || item.id === "gerenteloja" && (["objetivos", "areasglobais", "equipa"] as View[]).includes(view) ? "nav-item active" : "nav-item"} onClick={() => setView(item.id)}>
+            <button key={item.id} className={view === item.id || item.id === "gerenteloja" && (["objetivos", "areasglobais", "equipa", "alertas"] as View[]).includes(view) ? "nav-item active" : "nav-item"} onClick={() => setView(item.id)}>
               <span className="nav-glyph">{item.glyph}</span>{item.label}
             </button>
           ))}
@@ -1450,7 +1454,7 @@ export default function Home() {
         {notice && <div className="toast" role="status">✓ {notice}</div>}
 
         <div className="content">
-          {(["gerenteloja", "objetivos", "areasglobais", "equipa"] as View[]).includes(view) && <nav className="section-subnav" aria-label="Áreas do Gerente Loja"><button type="button" className={view === "gerenteloja" ? "active" : ""} onClick={() => setView("gerenteloja")}>Visão geral</button><button type="button" className={view === "objetivos" ? "active" : ""} onClick={() => { setDepartment("global"); setView("objetivos"); }}>Objetivos</button><button type="button" className={view === "areasglobais" ? "active" : ""} onClick={() => { setDepartment("global"); setView("areasglobais"); }}>Áreas</button><button type="button" className={view === "equipa" ? "active" : ""} onClick={() => { setDepartment("global"); setView("equipa"); }}>Equipa</button></nav>}
+          {currentUser.role === "admin" && (["gerenteloja", "objetivos", "areasglobais", "equipa", "alertas"] as View[]).includes(view) && <nav className="section-subnav" aria-label="Áreas do Gerente Loja"><button type="button" className={view === "gerenteloja" ? "active" : ""} onClick={() => setView("gerenteloja")}>Visão geral</button><button type="button" className={view === "objetivos" ? "active" : ""} onClick={() => { setDepartment("global"); setView("objetivos"); }}>Objetivos</button><button type="button" className={view === "areasglobais" ? "active" : ""} onClick={() => { setDepartment("global"); setView("areasglobais"); }}>Áreas</button><button type="button" className={view === "equipa" ? "active" : ""} onClick={() => { setDepartment("global"); setView("equipa"); }}>Equipa</button><button type="button" className={view === "alertas" ? "active" : ""} onClick={() => setView("alertas")}>Central de Alertas</button></nav>}
 
           {view === "financeiro" && <section className="finance-page" aria-labelledby="finance-title"><div className="finance-heading"><div><span className="eyebrow">Gestão financeira</span><h2 id="finance-title">Financeiro</h2><p>Controlo e acompanhamento dos movimentos financeiros do restaurante.</p></div></div><nav className="section-subnav" aria-label="Áreas financeiras"><button type="button" className="active">Controlo Cofre</button></nav><nav className="vault-subnav" aria-label="Áreas do Controlo Cofre"><button type="button" className={vaultSection === "resumo" ? "active" : ""} onClick={() => setVaultSection("resumo")}>Resumo Controlo Cofre</button><button type="button" className={vaultSection === "moedas" ? "active" : ""} onClick={() => setVaultSection("moedas")}>Pedido moedas</button><button type="button" className={vaultSection === "faturas" ? "active" : ""} onClick={() => setVaultSection("faturas")}>Faturas</button></nav>{vaultSection === "resumo" ? <VaultControlPrototype isAdmin={currentUser.role === "admin"} /> : vaultSection === "moedas" ? <CoinOrdersPrototype /> : <VaultInvoicesPrototype isAdmin={currentUser.role === "admin"} />}</section>}
 
