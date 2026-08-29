@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   try {
     const payload = await request.json() as { orderDate?: string; quantities?: Record<string, number>; orderManager?: string };
     const pending = await getDb().select({ id: coinOrders.id }).from(coinOrders).where(isNull(coinOrders.depositAt)).limit(2);
-    if (pending.length >= 2) throw new Error("Já existem dois depósitos pendentes. Registe pelo menos um depósito antes de criar outro pedido.");
+    if (auth.user.role !== "admin" && pending.length >= 2) throw new Error("Já existem dois depósitos pendentes. Registe pelo menos um depósito antes de criar outro pedido.");
     const orderDate = payload.orderDate?.trim() || "";
     if (!/^\d{4}-\d{2}-\d{2}$/.test(orderDate)) throw new Error("Selecione uma data válida.");
     const source = payload.quantities || {};
