@@ -174,6 +174,30 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .vault-modal > header p { margin: 0; color: #75827d; }
 .vault-modal > header button { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #eef4f1; color: #315f50; font-size: 26px; cursor: pointer; }
 .vault-form-message { margin: 14px 0 0; border-radius: 10px; padding: 10px 12px; background: #fff0f0; color: #a83d46; font-weight: 700; }
+.invoice-heading-actions { display:flex; align-items:center; gap:9px; flex-wrap:wrap; justify-content:flex-end; }
+.invoice-camera-input { position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
+.invoice-secondary { border:1px solid #cfdcd6; border-radius:11px; padding:11px 15px; background:#fff; color:#245d4b; font-weight:800; cursor:pointer; }
+.invoice-table { min-width:1450px; }
+.invoice-items { display:block; max-width:260px; overflow:hidden; color:#596b63; text-overflow:ellipsis; white-space:nowrap; cursor:help; }
+.invoice-tag { display:inline-flex; padding:5px 8px; border-radius:999px; background:#eef4f1; color:#2e6955; font-size:10px; font-weight:800; }
+.invoice-checkbox { display:inline-grid; place-items:center; cursor:pointer; }
+.invoice-checkbox input { position:absolute; opacity:0; }
+.invoice-checkbox span { display:grid; place-items:center; width:22px; height:22px; border:2px solid #c9d8d1; border-radius:6px; background:#fff; }
+.invoice-checkbox input:checked + span { border-color:#27815f; background:#27815f; }
+.invoice-checkbox input:checked + span::after { content:"✓"; color:#fff; font-size:14px; font-weight:900; }
+.invoice-modal { width:min(940px,100%); }
+.invoice-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:20px; }
+.invoice-form-grid > label { display:grid; gap:7px; color:#5b6e65; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; }
+.invoice-form-grid > label.wide { grid-column:1/-1; }
+.invoice-form-grid input:not([type="checkbox"]), .invoice-form-grid select, .invoice-form-grid textarea { width:100%; border:1px solid #d7e2dd; border-radius:10px; padding:11px 12px; background:#fbfcfb; color:#243c33; font:inherit; text-transform:none; letter-spacing:0; }
+.invoice-check-field { display:flex!important; grid-auto-flow:column; justify-content:start; align-items:center; gap:9px!important; padding:12px; border:1px solid #dce5e1; border-radius:10px; text-transform:none!important; letter-spacing:0!important; }
+.invoice-check-field input { width:18px; height:18px; accent-color:#27775c; }
+.invoice-image-note { margin:14px 0 0; padding:10px 12px; border-radius:9px; background:#eff6f2; color:#527066; font-size:12px; }
+.invoice-reading { display:grid; justify-items:center; gap:7px; padding:60px 20px; color:#49675c; text-align:center; }
+.invoice-reading span { font-size:42px; animation:invoice-spin 1s linear infinite; }
+.invoice-reading strong { color:#183d31; font-size:20px; }
+.invoice-reading p { margin:0; color:#7b8983; }
+@keyframes invoice-spin { to { transform:rotate(360deg); } }
 .development-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 .development-actions button, .deposit-add { border: 1px solid #cbdad4; border-radius: 10px; padding: 11px 15px; background: #fff; color: #29624f; font-weight: 800; cursor: pointer; }
 .development-actions button.primary { border-color: #174f40; background: #174f40; color: #fff; }

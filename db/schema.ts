@@ -168,6 +168,26 @@ export const recipientGroups = sqliteTable("recipient_groups", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const vaultInvoices = sqliteTable("vault_invoices", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  invoiceDate: text("invoice_date").notNull(),
+  entity: text("entity").notNull(),
+  items: text("items").notNull().default("[]"),
+  totalAmount: real("total_amount").notNull().default(0),
+  rubric: text("rubric").notNull(),
+  tag: text("tag").notNull(),
+  beneficiary: text("beneficiary").notNull(),
+  verified: integer("verified", { mode: "boolean" }).notNull().default(false),
+  pettyCash: integer("petty_cash", { mode: "boolean" }).notNull().default(false),
+  imageName: text("image_name").notNull().default(""),
+  createdBy: integer("created_by").notNull(),
+  createdByName: text("created_by_name").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_vault_invoices_date").on(table.invoiceDate),
+]);
+
 export const recipientGroupMembers = sqliteTable("recipient_group_members", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   groupId: integer("group_id").notNull().references(() => recipientGroups.id, { onDelete: "cascade" }),
