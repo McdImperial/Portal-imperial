@@ -50,13 +50,13 @@ export async function POST(request: Request) {
       if (body.action !== "calculate" || !body.deliveryDate || !/^\d{4}-\d{2}-\d{2}$/.test(body.deliveryDate)) throw new Error("Pedido de cálculo inválido.");
       const documents = await getDb().select().from(billingDocuments).where(eq(billingDocuments.deliveryDate, body.deliveryDate));
       const havi = documents.find((document) => document.documentType === "havi");
-      const myStore = documents.find((document) => document.documentType === "mystore");
-      if (!havi || !myStore) throw new Error("Carregue primeiro a fatura HAVI e o documento My Store.");
-      if (!havi.contentType.includes("pdf") || !myStore.contentType.includes("pdf")) throw new Error("O cálculo automático está disponível para documentos PDF.");
+      const myStore = documents.filter((document) => document.documentType === "mystore");
+      if (!havi || !myStore.length) throw new Error("Carregue primeiro a fatura HAVI e o documento My Store.");
+      if (!havi.contentType.includes("pdf") || myStore.some((document) => !document.contentType.includes("pdf"))) throw new Error("O cálculo automático está disponível para documentos PDF.");
       const bucket = storage();
-      const [haviObject, myStoreObject] = await Promise.all([bucket.get(havi.fileKey), bucket.get(myStore.fileKey)]);
-      if (!haviObject || !myStoreObject) throw new Error("Não foi possível ler um dos documentos guardados.");
-      const analysis = await calculateBillingAnalysis(await haviObject.arrayBuffer(), await myStoreObject.arrayBuffer());
+      const [haviObject, ...myStoreObjects] = await Promise.all([bucket.get(havi.fileKey), ...myStore.map((document) => bucket.get(document.fileKey))]);
+      if (!haviObject || myStoreObjects.some((document) => !document)) throw new Error("Não foi possível ler um dos documentos guardados.");
+      const analysis = await calculateBillingAnalysis(await haviObject.arrayBuffer(), await Promise.all(myStoreObjects.map((document) => document!.arrayBuffer())));
       await getDb().insert(billingAnalyses).values({ deliveryDate: body.deliveryDate, resultJson: JSON.stringify(analysis), calculatedByName: auth.user.name, updatedAt: new Date().toISOString() }).onConflictDoUpdate({ target: billingAnalyses.deliveryDate, set: { resultJson: JSON.stringify(analysis), calculatedByName: auth.user.name, updatedAt: new Date().toISOString() } });
       return Response.json({ analysis });
     }
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   const auth = await requireUser(request); if (auth.error) return auth.error;
-  if (!canUpload(auth.user)) return Response.json({ error: "Não tem permissão para eliminar descargas." }, { status: 403 });
+  if (auth.user.role !== "admin") return Response.json({ error: "Apenas o administrador pode eliminar descargas." }, { status: 403 });
   const deliveryDate = new URL(request.url).searchParams.get("deliveryDate");
   if (!deliveryDate || !/^\d{4}-\d{2}-\d{2}$/.test(deliveryDate)) return Response.json({ error: "Data de entrega inválida." }, { status: 400 });
   const documents = await getDb().select().from(billingDocuments).where(eq(billingDocuments.deliveryDate, deliveryDate));

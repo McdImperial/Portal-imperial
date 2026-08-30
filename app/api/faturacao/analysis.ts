@@ -1,6 +1,6 @@
 import { extractText } from "unpdf";
 
-export type BillingProduct = { code: string; name: string; value: number };
+export type BillingProduct = { code: string; matchCode: string; name: string; unitPrice: number; value: number };
 export type BillingAnalysisResult = {
   totalHavi: number;
   totalMyStore: number;
@@ -11,9 +11,10 @@ export type BillingAnalysisResult = {
   calculatedAt: string;
 };
 
-const moneyPattern = /-?\d{1,3}(?:[ .]\d{3})*,\d{2}/g;
+const moneyPattern = /-?\d{1,3}(?:[ .]\d{3})*,\d{2,4}/g;
 const parseMoney = (raw: string) => Number(raw.replace(/\s/g, "").replace(/\./g, "").replace(",", "."));
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+const matchCode = (value: string) => value.replace(/\D/g, "").replace(/^0+/, "") || "0";
 
 function moneyValues(line: string) {
   return Array.from(line.matchAll(moneyPattern), (match) => parseMoney(match[0])).filter(Number.isFinite);
@@ -38,12 +39,14 @@ function parseProducts(text: string): BillingProduct[] {
     const values = moneyValues(line);
     if (!codeMatch || !values.length || /ATCUD|NIF|DOCUMENTO|FATURA|ENCOMENDA/i.test(line)) continue;
     const code = codeMatch[1];
+    const canonicalCode = matchCode(code);
     const afterCode = line.slice((codeMatch.index || 0) + code.length).trim();
     const firstNumber = afterCode.search(/\s-?\d/);
     const name = (firstNumber > 2 ? afterCode.slice(0, firstNumber) : afterCode).replace(/[|;]+$/g, "").trim() || `Artigo ${code}`;
     const value = values.at(-1) || 0;
-    const current = products.get(code);
-    products.set(code, { code, name: current?.name || name, value: (current?.value || 0) + value });
+    const unitPrice = values.length >= 2 ? values.at(-2) || value : value;
+    const current = products.get(canonicalCode);
+    products.set(canonicalCode, { code, matchCode: canonicalCode, name: current?.name || name, unitPrice: current?.unitPrice || unitPrice, value: (current?.value || 0) + value });
   }
   return Array.from(products.values());
 }
@@ -59,21 +62,22 @@ function rubricFor(product: BillingProduct) {
   return "Outros";
 }
 
-export async function calculateBillingAnalysis(haviBytes: ArrayBuffer, myStoreBytes: ArrayBuffer): Promise<BillingAnalysisResult> {
-  const [{ text: haviText }, { text: myStoreText }] = await Promise.all([
+export async function calculateBillingAnalysis(haviBytes: ArrayBuffer, myStoreFiles: ArrayBuffer[]): Promise<BillingAnalysisResult> {
+  const [{ text: haviText }, ...myStoreDocuments] = await Promise.all([
     extractText(new Uint8Array(haviBytes), { mergePages: true }),
-    extractText(new Uint8Array(myStoreBytes), { mergePages: true }),
+    ...myStoreFiles.map((bytes) => extractText(new Uint8Array(bytes), { mergePages: true })),
   ]);
+  const myStoreText = myStoreDocuments.map(({ text }) => text).join("\n");
   const haviProducts = parseProducts(haviText);
   const myStoreProducts = parseProducts(myStoreText);
-  const myStoreByCode = new Map(myStoreProducts.map((product) => [product.code, product]));
+  const myStoreByCode = new Map(myStoreProducts.map((product) => [product.matchCode, product]));
   const priceDifferences = haviProducts.flatMap((havi) => {
-    const myStore = myStoreByCode.get(havi.code);
+    const myStore = myStoreByCode.get(havi.matchCode);
     if (!myStore) return [];
-    const difference = havi.value - myStore.value;
-    return Math.abs(difference) >= 0.005 ? [{ code: havi.code, product: havi.name, myStore: myStore.value, havi: havi.value, difference }] : [];
+    const difference = havi.unitPrice - myStore.unitPrice;
+    return Math.abs(difference) >= 0.005 ? [{ code: havi.code, product: havi.name, myStore: myStore.unitPrice, havi: havi.unitPrice, difference }] : [];
   });
-  const missingProducts = haviProducts.filter((product) => !myStoreByCode.has(product.code)).map(({ code, name: product, value }) => ({ code, product, value }));
+  const missingProducts = haviProducts.filter((product) => !myStoreByCode.has(product.matchCode)).map(({ code, name: product, value }) => ({ code, product, value }));
   const rubrics: Record<string, number> = { "Comida": 0, "Papel": 0, "F. Operacionais": 0, "Material administrativo": 0, "Happy Meal": 0, "Produtos frescos": 0, "Outros": 0 };
   for (const product of haviProducts) rubrics[rubricFor(product)] += product.value;
   const totalHavi = parseTotal(haviText);
