@@ -1,9 +1,10 @@
 import { desc, eq } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 import { getDb } from "../../../db";
-import { billingDocuments } from "../../../db/schema";
+import { billingAnalyses, billingDocuments } from "../../../db/schema";
 import { requireUser } from "../auth/_lib";
 import { archiveInGoogleDrive } from "./google-drive";
+import { calculateBillingAnalysis } from "./analysis";
 
 const maxFileSize = 12 * 1024 * 1024;
 const cleanName = (name: string) => name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "-").slice(-120) || "documento";
@@ -35,13 +36,30 @@ export async function GET(request: Request) {
     return Response.json({ deliveries: Array.from(grouped.values()) });
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(deliveryDate)) return Response.json({ error: "Data de entrega inválida." }, { status: 400 });
-  return Response.json({ documents: await getDb().select().from(billingDocuments).where(eq(billingDocuments.deliveryDate, deliveryDate)).orderBy(desc(billingDocuments.createdAt)) });
+  const documents = await getDb().select().from(billingDocuments).where(eq(billingDocuments.deliveryDate, deliveryDate)).orderBy(desc(billingDocuments.createdAt));
+  const [savedAnalysis] = await getDb().select().from(billingAnalyses).where(eq(billingAnalyses.deliveryDate, deliveryDate)).limit(1);
+  return Response.json({ documents, analysis: savedAnalysis ? JSON.parse(savedAnalysis.resultJson) : null });
 }
 
 export async function POST(request: Request) {
   const auth = await requireUser(request); if (auth.error) return auth.error;
   if (!canUpload(auth.user)) return Response.json({ error: "Não tem permissão para carregar documentos." }, { status: 403 });
   try {
+    if (request.headers.get("content-type")?.includes("application/json")) {
+      const body = await request.json() as { action?: string; deliveryDate?: string };
+      if (body.action !== "calculate" || !body.deliveryDate || !/^\d{4}-\d{2}-\d{2}$/.test(body.deliveryDate)) throw new Error("Pedido de cálculo inválido.");
+      const documents = await getDb().select().from(billingDocuments).where(eq(billingDocuments.deliveryDate, body.deliveryDate));
+      const havi = documents.find((document) => document.documentType === "havi");
+      const myStore = documents.find((document) => document.documentType === "mystore");
+      if (!havi || !myStore) throw new Error("Carregue primeiro a fatura HAVI e o documento My Store.");
+      if (!havi.contentType.includes("pdf") || !myStore.contentType.includes("pdf")) throw new Error("O cálculo automático está disponível para documentos PDF.");
+      const bucket = storage();
+      const [haviObject, myStoreObject] = await Promise.all([bucket.get(havi.fileKey), bucket.get(myStore.fileKey)]);
+      if (!haviObject || !myStoreObject) throw new Error("Não foi possível ler um dos documentos guardados.");
+      const analysis = await calculateBillingAnalysis(await haviObject.arrayBuffer(), await myStoreObject.arrayBuffer());
+      await getDb().insert(billingAnalyses).values({ deliveryDate: body.deliveryDate, resultJson: JSON.stringify(analysis), calculatedByName: auth.user.name, updatedAt: new Date().toISOString() }).onConflictDoUpdate({ target: billingAnalyses.deliveryDate, set: { resultJson: JSON.stringify(analysis), calculatedByName: auth.user.name, updatedAt: new Date().toISOString() } });
+      return Response.json({ analysis });
+    }
     const form = await request.formData(); const deliveryDate = String(form.get("deliveryDate") || ""); const supplier = String(form.get("supplier") || "HAVI"); const documentType = String(form.get("documentType") || ""); const files = form.getAll("documents");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(deliveryDate) || !["HAVI", "Maia Paper", "Air Liquide"].includes(supplier) || !["havi", "mystore"].includes(documentType)) throw new Error("Dados de entrega inválidos.");
     if (!files.length || documentType === "havi" && files.length !== 1) throw new Error(documentType === "havi" ? "Carregue apenas uma fatura HAVI por entrega." : "Selecione pelo menos um ficheiro.");
@@ -59,5 +77,6 @@ export async function DELETE(request: Request) {
   const documents = await getDb().select().from(billingDocuments).where(eq(billingDocuments.deliveryDate, deliveryDate));
   for (const document of documents) await storage().delete(document.fileKey);
   await getDb().delete(billingDocuments).where(eq(billingDocuments.deliveryDate, deliveryDate));
+  await getDb().delete(billingAnalyses).where(eq(billingAnalyses.deliveryDate, deliveryDate));
   return Response.json({ deleted: documents.length });
 }

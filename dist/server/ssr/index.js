@@ -33,7 +33,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 	enumerable: true
 }) : target, mod));
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/server/http-error-responses.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/server/http-error-responses.js
 /**
 * Build a 404 Not Found plain-text response.
 *
@@ -48,7 +48,7 @@ function notFoundResponse(init) {
 	});
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/utils/base-path.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/utils/base-path.js
 /**
 * Shared basePath helpers.
 *
@@ -72,7 +72,7 @@ function stripBasePath(pathname, basePath) {
 	return pathname.slice(basePath.length) || "/";
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/server/headers.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/server/headers.js
 /** URL-encoded JSON route params carried on RSC responses. */
 var VINEXT_PARAMS_HEADER = "X-Vinext-Params";
 /** Deduplicated, sorted list of mounted layout slots for cache keying. */
@@ -86,7 +86,7 @@ var NEXT_ROUTER_PREFETCH_HEADER = "Next-Router-Prefetch";
 var NEXT_ROUTER_SEGMENT_PREFETCH_HEADER = "Next-Router-Segment-Prefetch";
 var NEXT_URL_HEADER = "Next-Url";
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/server/request-pipeline.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/server/request-pipeline.js
 /**
 * Returns true if a request pathname looks like a protocol-relative open
 * redirect, in either literal or percent-encoded form.
@@ -121,7 +121,7 @@ function isOpenRedirectShaped(rawPathname) {
 	return false;
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/server/artifact-compatibility.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/server/artifact-compatibility.js
 function createArtifactCompatibilityEnvelope(input = {}) {
 	return {
 		schemaVersion: 1,
@@ -525,7 +525,7 @@ var require_react = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_production();
 }));
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/server/app-elements-wire.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/server/app-elements-wire.js
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var APP_INTERCEPTION_SEPARATOR = "\0";
 var APP_ARTIFACT_COMPATIBILITY_KEY = "__artifactCompatibility";
@@ -742,7 +742,7 @@ var AppElementsWire = {
 	withLayoutFlags
 };
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/shims/url-safety.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/shims/url-safety.js
 /**
 * Shared URL safety utilities for Link, Form, and navigation shims.
 *
@@ -784,7 +784,7 @@ function assertSafeNavigationUrl(url) {
 	if (isDangerousScheme(url)) throw new Error(DANGEROUS_URL_BLOCK_MESSAGE);
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/shims/url-utils.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/shims/url-utils.js
 /**
 * Shared URL utilities for same-origin detection.
 *
@@ -863,13 +863,13 @@ function isHashOnlyBrowserUrlChange(href, currentHref, basePath = "") {
 	}
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/client/instrumentation-client-state.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/client/instrumentation-client-state.js
 var clientInstrumentationHooks = null;
 function notifyAppRouterTransitionStart(href, navigationType) {
 	clientInstrumentationHooks?.onRouterTransitionStart?.(href, navigationType);
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/server/app-rsc-render-mode.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/server/app-rsc-render-mode.js
 var APP_RSC_RENDER_MODE_NAVIGATION = "navigation";
 var APP_RSC_RENDER_MODE_REFRESH_PRESERVE_UI = "refresh-preserve-ui";
 var APP_RSC_RENDER_MODE_ACTION_RERENDER_PRESERVE_UI = "action-rerender-preserve-ui";
@@ -881,7 +881,7 @@ function parseAppRscRenderMode(value) {
 	}
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/server/app-rsc-cache-busting.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/server/app-rsc-cache-busting.js
 /**
 * RSC cache-busting hashes cover the headers that make a `.rsc` payload vary.
 * Client-side variant headers must survive transit through CDNs and reverse
@@ -979,7 +979,7 @@ async function createRscRequestUrl(href, headers) {
 	return `${url.pathname}${url.search}`;
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/shims/readonly-url-search-params.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/shims/readonly-url-search-params.js
 var ReadonlyURLSearchParamsError = class extends Error {
 	constructor() {
 		super("Method unavailable on `ReadonlyURLSearchParams`. Read more: https://nextjs.org/docs/app/api-reference/functions/use-search-params#updating-searchparams");
@@ -1004,7 +1004,7 @@ var ReadonlyURLSearchParams = class extends URLSearchParams {
 	}
 };
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/shims/navigation.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/shims/navigation.js
 /**
 * next/navigation shim
 *
@@ -1604,7 +1604,7 @@ if (!isServer) {
 	}
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/shims/internal/als-registry.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/shims/internal/als-registry.js
 /**
 * Shared helper for registering AsyncLocalStorage instances on `globalThis`
 * via `Symbol.for(...)` so that they survive multiple module instances.
@@ -1655,7 +1655,7 @@ function getOrCreateAls(key) {
 	return _g$2[sym] ??= new AsyncLocalStorage$1();
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/shims/unified-request-context.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/shims/unified-request-context.js
 var _REQUEST_CONTEXT_ALS_KEY = Symbol.for("vinext.requestContext.als");
 var _g$1 = globalThis;
 var _als$1 = getOrCreateAls("vinext.unifiedRequestContext.als");
@@ -1729,7 +1729,7 @@ function isInsideUnifiedScope() {
 	return _als$1.getStore() != null;
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/shims/navigation-state.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/shims/navigation-state.js
 /**
 * Server-only navigation state backed by AsyncLocalStorage.
 *
@@ -1780,7 +1780,7 @@ var _accessors = {
 _registerStateAccessors(_accessors);
 globalThis[GLOBAL_ACCESSORS_KEY] = _accessors;
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/shims/script-nonce-context.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/shims/script-nonce-context.js
 var ScriptNonceContext = import_react.createContext(void 0);
 function ScriptNonceProvider(props) {
 	return import_react.createElement(ScriptNonceContext.Provider, { value: props.nonce }, props.children);
@@ -1790,7 +1790,7 @@ function withScriptNonce(element, nonce) {
 	return import_react.createElement(ScriptNonceProvider, { nonce }, element);
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/server/html.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/server/html.js
 /**
 * HTML-safe JSON serialization for embedding data in <script> tags.
 *
@@ -1864,7 +1864,7 @@ var require_jsx_runtime = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_jsx_runtime_production();
 }));
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/shims/slot.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/shims/slot.js
 var slot_exports = /* @__PURE__ */ __exportAll({
 	Children: () => Children,
 	ChildrenContext: () => ChildrenContext,
@@ -1904,10 +1904,10 @@ function ParallelSlot({ name }) {
 	return import_react.useContext(ParallelSlotsContext)?.[name] ?? null;
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/server/app-browser-hydration.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/server/app-browser-hydration.js
 var RSC_FORM_STATE_GLOBAL = "__VINEXT_RSC_FORM_STATE__";
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/server/app-client-reference-preloader.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/server/app-client-reference-preloader.js
 var resolvedPreload = Promise.resolve();
 function createClientReferencePreloader(options) {
 	let allReferencesPreloaded = false;
@@ -1950,7 +1950,7 @@ function createClientReferencePreloader(options) {
 	} };
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/server/app-page-stream.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/server/app-page-stream.js
 /**
 * Wraps a stream so that `onFlush` is called when the last byte has been read
 * by the downstream consumer (i.e. when the HTTP layer finishes draining the
@@ -1987,7 +1987,7 @@ function deferUntilStreamConsumed(stream, onFlush) {
 	});
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/server/app-ssr-stream.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/server/app-ssr-stream.js
 /**
 * Fix invalid preload "as" values in RSC Flight hint lines before they reach
 * the client. React Flight emits HL hints with as="stylesheet" for CSS, but
@@ -10245,7 +10245,7 @@ var require_react_dom_server_legacy_browser_production = /* @__PURE__ */ __commo
 	exports.version = "19.2.6";
 }));
 //#endregion
-//#region node_modules/.pnpm/@vitejs+plugin-rsc@0.5.26_react-dom@19.2.6_react@19.2.6__react-server-dom-webpack@19.2._5ed79734f7c11ac6a5c7780563564cee/node_modules/@vitejs/plugin-rsc/dist/dist-rz-Bnebz.js
+//#region node_modules/.pnpm/@vitejs+plugin-rsc@0.5.26_react-dom@19.2.6_react@19.2.6__react-server-dom-webpack@19.2._416fdff44b8e2a2a1874acc2e8d04920/node_modules/@vitejs/plugin-rsc/dist/dist-rz-Bnebz.js
 var import_server_edge = (/* @__PURE__ */ __commonJSMin(((exports) => {
 	var b;
 	var l;
@@ -10273,7 +10273,7 @@ function memoize(f, options) {
 	});
 }
 //#endregion
-//#region node_modules/.pnpm/@vitejs+plugin-rsc@0.5.26_react-dom@19.2.6_react@19.2.6__react-server-dom-webpack@19.2._5ed79734f7c11ac6a5c7780563564cee/node_modules/@vitejs/plugin-rsc/dist/shared-BViDMJTQ.js
+//#region node_modules/.pnpm/@vitejs+plugin-rsc@0.5.26_react-dom@19.2.6_react@19.2.6__react-server-dom-webpack@19.2._416fdff44b8e2a2a1874acc2e8d04920/node_modules/@vitejs/plugin-rsc/dist/shared-BViDMJTQ.js
 function removeReferenceCacheTag(id) {
 	return id.split("$$cache=")[0];
 }
@@ -10287,7 +10287,7 @@ function setInternalRequire() {
 	};
 }
 //#endregion
-//#region node_modules/.pnpm/@vitejs+plugin-rsc@0.5.26_react-dom@19.2.6_react@19.2.6__react-server-dom-webpack@19.2._5ed79734f7c11ac6a5c7780563564cee/node_modules/@vitejs/plugin-rsc/dist/core/ssr.js
+//#region node_modules/.pnpm/@vitejs+plugin-rsc@0.5.26_react-dom@19.2.6_react@19.2.6__react-server-dom-webpack@19.2._416fdff44b8e2a2a1874acc2e8d04920/node_modules/@vitejs/plugin-rsc/dist/core/ssr.js
 var init = false;
 function setRequireModule(options) {
 	if (init) return;
@@ -10302,7 +10302,7 @@ function createServerConsumerManifest() {
 	return {};
 }
 //#endregion
-//#region node_modules/.pnpm/react-server-dom-webpack@19.2.6_react-dom@19.2.6_react@19.2.6__react@19.2.6_webpack@5.109.2_esbuild@0.28.1_/node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.edge.production.js
+//#region node_modules/.pnpm/react-server-dom-webpack@19.2.6_react-dom@19.2.6_react@19.2.6__react@19.2.6_webpack@5.1_98c3f7819f770cf41bdfe38a9c87d62d/node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.edge.production.js
 /**
 * @license React
 * react-server-dom-webpack-client.edge.production.js
@@ -11615,7 +11615,7 @@ var require_react_server_dom_webpack_client_edge_production = /* @__PURE__ */ __
 	};
 }));
 //#endregion
-//#region node_modules/.pnpm/@vitejs+plugin-rsc@0.5.26_react-dom@19.2.6_react@19.2.6__react-server-dom-webpack@19.2._5ed79734f7c11ac6a5c7780563564cee/node_modules/@vitejs/plugin-rsc/dist/react/ssr.js
+//#region node_modules/.pnpm/@vitejs+plugin-rsc@0.5.26_react-dom@19.2.6_react@19.2.6__react-server-dom-webpack@19.2._416fdff44b8e2a2a1874acc2e8d04920/node_modules/@vitejs/plugin-rsc/dist/react/ssr.js
 var import_client_edge = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_server_dom_webpack_client_edge_production();
 })))(), 1);
@@ -11628,13 +11628,13 @@ function createFromReadableStream(stream, options = {}) {
 //#endregion
 //#region \0virtual:vite-rsc/client-references
 var client_references_default = {
-	"3dd901d9dc77": async () => {
-		const m = await import("./assets/page-CxcmpxN9.js");
-		return { get "default"() {
-			return m["default"];
+	"0267e74c1d52": async () => {
+		const m = await import("./assets/layout-segment-context-BAY-a-qx.js");
+		return { get "LayoutSegmentProvider"() {
+			return m["LayoutSegmentProvider"];
 		} };
 	},
-	"6d0635d915dc": async () => {
+	"05b45acc03fd": async () => {
 		const m = await Promise.resolve().then(() => slot_exports);
 		return {
 			get "Children"() {
@@ -11648,14 +11648,14 @@ var client_references_default = {
 			}
 		};
 	},
-	"6efdf509a785": async () => {
-		const m = await import("./assets/page-Cu2_qpTD.js");
+	"3dd901d9dc77": async () => {
+		const m = await import("./assets/page-CxcmpxN9.js");
 		return { get "default"() {
 			return m["default"];
 		} };
 	},
-	"a706f558ce72": async () => {
-		const m = await import("./assets/error-boundary-EkBA-Mzn.js");
+	"59fca594cf69": async () => {
+		const m = await import("./assets/error-boundary-e0qcA6IG.js");
 		return {
 			get "ErrorBoundary"() {
 				return m["ErrorBoundary"];
@@ -11674,15 +11674,15 @@ var client_references_default = {
 			}
 		};
 	},
-	"ac148d091f0a": async () => {
-		const m = await import("./assets/layout-segment-context-BGzTeC2j.js");
-		return { get "LayoutSegmentProvider"() {
-			return m["LayoutSegmentProvider"];
+	"6efdf509a785": async () => {
+		const m = await import("./assets/page-_6rOQOpZ.js");
+		return { get "default"() {
+			return m["default"];
 		} };
 	}
 };
 //#endregion
-//#region node_modules/.pnpm/@vitejs+plugin-rsc@0.5.26_react-dom@19.2.6_react@19.2.6__react-server-dom-webpack@19.2._5ed79734f7c11ac6a5c7780563564cee/node_modules/@vitejs/plugin-rsc/dist/ssr.js
+//#region node_modules/.pnpm/@vitejs+plugin-rsc@0.5.26_react-dom@19.2.6_react@19.2.6__react-server-dom-webpack@19.2._416fdff44b8e2a2a1874acc2e8d04920/node_modules/@vitejs/plugin-rsc/dist/ssr.js
 var import_react_dom = /* @__PURE__ */ __toESM(require_react_dom(), 1);
 var onClientReference;
 initialize();
@@ -11727,7 +11727,7 @@ function preloadDeps(deps) {
 	});
 }
 //#endregion
-//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._6e29d3c1e221dce46ffd79bec19b99c1/node_modules/vinext/dist/server/app-ssr-entry.js
+//#region node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/server/app-ssr-entry.js
 var clientReferencePreloader = createClientReferencePreloader({
 	getReferences() {
 		return client_references_default;

@@ -1,14 +1,21 @@
 {
+  "node_modules/.pnpm/unpdf@1.8.1/node_modules/unpdf/dist/pdfjs.mjs": {
+    "file": "assets/pdfjs-gbW_Ml8Z.js",
+    "name": "pdfjs",
+    "src": "node_modules/.pnpm/unpdf@1.8.1/node_modules/unpdf/dist/pdfjs.mjs",
+    "isDynamicEntry": true
+  },
   "virtual:cloudflare/worker-entry": {
     "file": "index.js",
     "name": "index",
     "src": "virtual:cloudflare/worker-entry",
     "isEntry": true,
     "dynamicImports": [
-      "virtual:cloudflare/worker-entry"
+      "virtual:cloudflare/worker-entry",
+      "node_modules/.pnpm/unpdf@1.8.1/node_modules/unpdf/dist/pdfjs.mjs"
     ],
     "css": [
-      "assets/index-CiMdFu1Y.css"
+      "assets/index-LT2b8n64.css"
     ]
   }
 }

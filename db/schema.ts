@@ -111,6 +111,13 @@ export const billingDocuments = sqliteTable("billing_documents", {
   index("idx_billing_documents_delivery_type").on(table.deliveryDate, table.documentType),
 ]);
 
+export const billingAnalyses = sqliteTable("billing_analyses", {
+  deliveryDate: text("delivery_date").primaryKey(),
+  resultJson: text("result_json").notNull(),
+  calculatedByName: text("calculated_by_name").notNull(),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const vaultControls = sqliteTable("vault_controls", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   controlDate: text("control_date").notNull(),
