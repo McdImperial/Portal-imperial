@@ -204,6 +204,16 @@ export const vaultInvoices = sqliteTable("vault_invoices", {
   index("idx_vault_invoices_date").on(table.invoiceDate),
 ]);
 
+export const pettyCashClosures = sqliteTable("petty_cash_closures", {
+  month: text("month").primaryKey(),
+  completedDate: text("completed_date").notNull(),
+  manager: text("manager").notNull(),
+  completedBy: integer("completed_by").notNull(),
+  completedByName: text("completed_by_name").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const recipientGroupMembers = sqliteTable("recipient_group_members", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   groupId: integer("group_id").notNull().references(() => recipientGroups.id, { onDelete: "cascade" }),

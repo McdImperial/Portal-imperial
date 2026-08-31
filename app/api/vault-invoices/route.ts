@@ -1,6 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { getDb } from "../../../db";
-import { vaultInvoices } from "../../../db/schema";
+import { pettyCashClosures, vaultInvoices } from "../../../db/schema";
 import { requireUser } from "../auth/_lib";
 
 const rubrics = ["Outros Gastos Controláveis", "Combustível"];
@@ -31,19 +31,21 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const auth = await requireUser(request); if (auth.error) return auth.error;
-  try { const payload = await request.json() as Record<string, unknown>; const [record] = await getDb().insert(vaultInvoices).values({ ...values(payload), createdBy: auth.user.id, createdByName: auth.user.name || auth.user.login }).returning(); return Response.json({ record: serialize(record) }, { status: 201 }); }
+  try { const payload = await request.json() as Record<string, unknown>; const invoiceValues = values(payload); const [record] = await getDb().insert(vaultInvoices).values({ ...invoiceValues, createdBy: auth.user.id, createdByName: auth.user.name || auth.user.login }).returning(); if (invoiceValues.pettyCash) await getDb().delete(pettyCashClosures).where(eq(pettyCashClosures.month, invoiceValues.invoiceDate.slice(0, 7))); return Response.json({ record: serialize(record) }, { status: 201 }); }
   catch (error) { return Response.json({ error: error instanceof Error ? error.message : "Não foi possível guardar a fatura." }, { status: 400 }); }
 }
 
 export async function PATCH(request: Request) {
   const auth = await requireUser(request); if (auth.error) return auth.error;
-  try { const payload = await request.json() as Record<string, unknown>; const id = Number(payload.id); if (!id) throw new Error("Fatura inválida."); const [record] = await getDb().update(vaultInvoices).set(values(payload)).where(eq(vaultInvoices.id, id)).returning(); if (!record) return Response.json({ error: "Fatura não encontrada." }, { status: 404 }); return Response.json({ record: serialize(record) }); }
+  try { const payload = await request.json() as Record<string, unknown>; const id = Number(payload.id); if (!id) throw new Error("Fatura inválida."); const [current] = await getDb().select().from(vaultInvoices).where(eq(vaultInvoices.id, id)).limit(1); if (!current) return Response.json({ error: "Fatura não encontrada." }, { status: 404 }); const invoiceValues = values(payload); const [record] = await getDb().update(vaultInvoices).set(invoiceValues).where(eq(vaultInvoices.id, id)).returning(); for (const month of new Set([current.invoiceDate.slice(0, 7), invoiceValues.invoiceDate.slice(0, 7)])) await getDb().delete(pettyCashClosures).where(eq(pettyCashClosures.month, month)); return Response.json({ record: serialize(record) }); }
   catch (error) { return Response.json({ error: error instanceof Error ? error.message : "Não foi possível atualizar a fatura." }, { status: 400 }); }
 }
 
 export async function DELETE(request: Request) {
   const auth = await requireUser(request, ["admin"]); if (auth.error) return auth.error;
   const id = Number((await request.json() as { id?: number }).id); if (!id) return Response.json({ error: "Fatura inválida." }, { status: 400 });
+  const [current] = await getDb().select().from(vaultInvoices).where(eq(vaultInvoices.id, id)).limit(1);
   const [deleted] = await getDb().delete(vaultInvoices).where(eq(vaultInvoices.id, id)).returning({ id: vaultInvoices.id });
+  if (deleted && current?.pettyCash) await getDb().delete(pettyCashClosures).where(eq(pettyCashClosures.month, current.invoiceDate.slice(0, 7)));
   return deleted ? Response.json({ ok: true }) : Response.json({ error: "Fatura não encontrada." }, { status: 404 });
 }
