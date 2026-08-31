@@ -46,7 +46,6 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .vault-month-toolbar input { border: 1px solid #d9e4df; border-radius: 10px; padding: 10px 12px; color: #203a31; }
 .vault-month-toolbar > span { color: #7d8a85; font-size: 13px; }
 .vault-summary { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 18px; }
-.petty-cash-summary { grid-template-columns: repeat(3, minmax(0,1fr)); margin-top: 18px; }
 .vault-summary article { padding: 18px; border-radius: 14px; background: #f2f6f4; }
 .vault-summary small, .deposit-overview small { display: block; color: #7d8a85; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
 .vault-summary strong { display: block; margin-top: 7px; color: #18372d; font-family: Georgia, serif; font-size: 26px; }
@@ -223,23 +222,6 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .invoice-checkbox span { display:grid; place-items:center; width:22px; height:22px; border:2px solid #c9d8d1; border-radius:6px; background:#fff; }
 .invoice-checkbox input:checked + span { border-color:#27815f; background:#27815f; }
 .invoice-checkbox input:checked + span::after { content:"✓"; color:#fff; font-size:14px; font-weight:900; }
-.petty-cash-month-toolbar { display:flex; align-items:end; justify-content:space-between; gap:16px; margin:18px 0 12px; padding:14px 18px; border:1px solid var(--line); border-radius:13px; background:#f7faf8; }
-.petty-cash-month-toolbar label,.petty-cash-close label { display:grid; gap:6px; color:#61736b; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; }
-.petty-cash-month-toolbar input,.petty-cash-close input,.petty-cash-close select { min-height:42px; border:1px solid #cfddd7; border-radius:9px; background:#fff; padding:8px 11px; color:#18372d; font:inherit; text-transform:none; letter-spacing:0; }
-.petty-cash-month-toolbar span { color:var(--muted); font-size:11px; }
-.petty-cash-close,.petty-cash-complete { display:grid; align-items:end; gap:14px; margin-bottom:18px; padding:17px 19px; border:1px solid #d6e4de; border-radius:14px; background:#f4f9f6; }
-.petty-cash-close { grid-template-columns:minmax(280px,1fr) 180px 250px auto; }
-.petty-cash-close small,.petty-cash-complete small { display:block; color:#698078; font-size:9px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
-.petty-cash-close strong,.petty-cash-complete strong { display:block; margin-top:5px; color:#18372d; font-size:16px; }
-.petty-cash-close p,.petty-cash-complete p { margin:5px 0 0; color:var(--muted); font-size:10px; }
-.petty-cash-close button { min-height:42px; border:0; border-radius:9px; background:#165b45; color:#fff; padding:0 16px; font:inherit; font-size:10px; font-weight:900; cursor:pointer; }
-.petty-cash-close button:disabled { background:#cbd7d2; cursor:not-allowed; }
-.petty-cash-complete { grid-template-columns:auto 1fr; align-items:center; border-color:#b8dfcc; background:#edf8f2; }
-.petty-cash-complete>span { display:grid; place-items:center; width:42px; height:42px; border-radius:50%; background:#25805d; color:#fff; font-size:20px; font-weight:900; }
-.petty-cash-transfer { border:1px solid #bad8cc; border-radius:8px; background:#eef8f3; color:#1f6f52; padding:7px 10px; font:inherit; font-size:9px; font-weight:900; cursor:pointer; }
-.petty-cash-transfer.remove { border-color:#e7c8b9; background:#fff7f2; color:#9a4c2c; }
-@media(max-width:900px){.petty-cash-close{grid-template-columns:1fr 1fr}.petty-cash-close>div{grid-column:1/-1}.petty-cash-summary{grid-template-columns:1fr 1fr 1fr}}
-@media(max-width:620px){.petty-cash-month-toolbar{align-items:stretch;flex-direction:column}.petty-cash-close,.petty-cash-summary{grid-template-columns:1fr}.petty-cash-close>div{grid-column:auto}}
 .invoice-modal { width:min(940px,100%); }
 .invoice-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:20px; }
 .invoice-form-grid > label { display:grid; gap:7px; color:#5b6e65; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; }
