@@ -46,6 +46,7 @@ button.billing-validate{font-size:0!important}button.billing-validate:after{cont
 .vault-month-toolbar input { border: 1px solid #d9e4df; border-radius: 10px; padding: 10px 12px; color: #203a31; }
 .vault-month-toolbar > span { color: #7d8a85; font-size: 13px; }
 .vault-summary { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 18px; }
+.petty-cash-summary { grid-template-columns: repeat(3, minmax(0,1fr)); margin-top: 18px; }
 .vault-summary article { padding: 18px; border-radius: 14px; background: #f2f6f4; }
 .vault-summary small, .deposit-overview small { display: block; color: #7d8a85; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
 .vault-summary strong { display: block; margin-top: 7px; color: #18372d; font-family: Georgia, serif; font-size: 26px; }
