@@ -36,3 +36,10 @@ export const healthMetrics = sqliteTable("health_metrics", {
   uniqueIndex("idx_health_metrics_source_key").on(table.sourceKey),
   index("idx_health_metrics_profile_group_metric_date").on(table.profile, table.groupName, table.metricKey, table.recordedAt),
 ]);
+
+export const financeExpenses = sqliteTable("finance_expenses", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  month: text("month").notNull(), name: text("name").notNull(), amount: real("amount").notNull(),
+  paymentType: text("payment_type").notNull(), entity: text("entity"), reference: text("reference"), dueDate: text("due_date"),
+  status: text("status").notNull().default("Pendente"), bank: text("bank").notNull(), createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [index("idx_finance_expenses_month_due").on(table.month, table.dueDate)]);
