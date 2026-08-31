@@ -10,6 +10,16 @@ const maxFileSize = 12 * 1024 * 1024;
 const cleanName = (name: string) => name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "-").slice(-120) || "documento";
 function storage() { const bucket = (env as unknown as { CANDIDATURES?: R2Bucket }).CANDIDATURES; if (!bucket) throw new Error("O armazenamento de documentos ainda não está disponível."); return bucket; }
 function canUpload(user: { role: string }) { return user.role === "admin" || user.role === "editor"; }
+async function calculateDocuments(documents: (typeof billingDocuments.$inferSelect)[]) {
+  const havi = documents.find((document) => document.documentType === "havi");
+  const myStore = documents.filter((document) => document.documentType === "mystore");
+  if (!havi || !myStore.length) throw new Error("Carregue primeiro a fatura HAVI e o documento My Store.");
+  if (!havi.contentType.includes("pdf") || myStore.some((document) => !document.contentType.includes("pdf"))) throw new Error("O cálculo automático está disponível para documentos PDF.");
+  const bucket = storage();
+  const [haviObject, ...myStoreObjects] = await Promise.all([bucket.get(havi.fileKey), ...myStore.map((document) => bucket.get(document.fileKey))]);
+  if (!haviObject || myStoreObjects.some((document) => !document)) throw new Error("Não foi possível ler um dos documentos guardados.");
+  return calculateBillingAnalysis(await haviObject.arrayBuffer(), await Promise.all(myStoreObjects.map((document) => document!.arrayBuffer())));
+}
 function validateFile(raw: FormDataEntryValue, type: string) {
   if (!(raw instanceof File) || !raw.size) throw new Error("Selecione pelo menos um ficheiro.");
   if (raw.size > maxFileSize) throw new Error(`O ficheiro ${raw.name} não pode ultrapassar 12 MB.`);
@@ -38,7 +48,14 @@ export async function GET(request: Request) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(deliveryDate)) return Response.json({ error: "Data de entrega inválida." }, { status: 400 });
   const documents = await getDb().select().from(billingDocuments).where(eq(billingDocuments.deliveryDate, deliveryDate)).orderBy(desc(billingDocuments.createdAt));
   const [savedAnalysis] = await getDb().select().from(billingAnalyses).where(eq(billingAnalyses.deliveryDate, deliveryDate)).limit(1);
-  return Response.json({ documents, analysis: savedAnalysis ? JSON.parse(savedAnalysis.resultJson) : null });
+  let analysis = savedAnalysis ? JSON.parse(savedAnalysis.resultJson) : null;
+  if (analysis && analysis.analysisVersion !== 2 && documents.some((document) => document.documentType === "havi") && documents.some((document) => document.documentType === "mystore")) {
+    try {
+      analysis = await calculateDocuments(documents);
+      await getDb().insert(billingAnalyses).values({ deliveryDate, resultJson: JSON.stringify(analysis), calculatedByName: auth.user.name, updatedAt: new Date().toISOString() }).onConflictDoUpdate({ target: billingAnalyses.deliveryDate, set: { resultJson: JSON.stringify(analysis), calculatedByName: auth.user.name, updatedAt: new Date().toISOString() } });
+    } catch { /* Keep the previous result available if an archived file cannot be read. */ }
+  }
+  return Response.json({ documents, analysis });
 }
 
 export async function POST(request: Request) {
@@ -49,14 +66,7 @@ export async function POST(request: Request) {
       const body = await request.json() as { action?: string; deliveryDate?: string };
       if (body.action !== "calculate" || !body.deliveryDate || !/^\d{4}-\d{2}-\d{2}$/.test(body.deliveryDate)) throw new Error("Pedido de cálculo inválido.");
       const documents = await getDb().select().from(billingDocuments).where(eq(billingDocuments.deliveryDate, body.deliveryDate));
-      const havi = documents.find((document) => document.documentType === "havi");
-      const myStore = documents.filter((document) => document.documentType === "mystore");
-      if (!havi || !myStore.length) throw new Error("Carregue primeiro a fatura HAVI e o documento My Store.");
-      if (!havi.contentType.includes("pdf") || myStore.some((document) => !document.contentType.includes("pdf"))) throw new Error("O cálculo automático está disponível para documentos PDF.");
-      const bucket = storage();
-      const [haviObject, ...myStoreObjects] = await Promise.all([bucket.get(havi.fileKey), ...myStore.map((document) => bucket.get(document.fileKey))]);
-      if (!haviObject || myStoreObjects.some((document) => !document)) throw new Error("Não foi possível ler um dos documentos guardados.");
-      const analysis = await calculateBillingAnalysis(await haviObject.arrayBuffer(), await Promise.all(myStoreObjects.map((document) => document!.arrayBuffer())));
+      const analysis = await calculateDocuments(documents);
       await getDb().insert(billingAnalyses).values({ deliveryDate: body.deliveryDate, resultJson: JSON.stringify(analysis), calculatedByName: auth.user.name, updatedAt: new Date().toISOString() }).onConflictDoUpdate({ target: billingAnalyses.deliveryDate, set: { resultJson: JSON.stringify(analysis), calculatedByName: auth.user.name, updatedAt: new Date().toISOString() } });
       return Response.json({ analysis });
     }
