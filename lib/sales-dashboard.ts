@@ -1,0 +1,64 @@
+const SHEET_ID = "1oqxL2WkPwgDayHOuwd4zhJK_1rv2ksSF5RcVVJeZPMI";
+const SHEET_NAME = "Novo Resumo";
+const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+const CACHE_MS = 15 * 60 * 1000;
+
+export const salesChannels = [
+  { id: "delivery", label: "Delivery", sales: "VendasDelivery", transactions: "GC'sDelivery" },
+  { id: "counter", label: "Balcão", sales: "VendasBalcão", transactions: "GC'sBalcão" },
+  { id: "sok", label: "SOK", sales: "VendasSOK", transactions: "GC'sSOK" },
+  { id: "drive", label: "Drive", sales: "VendasDrive", transactions: "GC'sDrive" },
+  { id: "mccafe", label: "McCafé", sales: "VendasMcCafé", transactions: "GC'sMcCafé" },
+  { id: "store", label: "Serviço Loja", sales: "VendasServiçoLoja", transactions: "GC'sServiçoLoja" },
+  { id: "mop", label: "MOP", sales: "VendasMOP", transactions: "GC'sMOP" },
+  { id: "table", label: "Serviço Mesa", sales: "VendasMesa", transactions: "GC'sMesa" },
+] as const;
+
+type NumericValue = number | null;
+export type GoogleSheetsCredentials = { GOOGLE_SERVICE_ACCOUNT_EMAIL?: string; GOOGLE_PRIVATE_KEY?: string };
+type SalesRow = { restaurant: string; year: number; month: number; date: string; salesTotal: NumericValue; transactionsTotal: NumericValue; channels: Record<string, { sales: NumericValue; transactions: NumericValue }> };
+type CacheState = { fetchedAt: number; rows: SalesRow[] };
+let cache: CacheState | null = null;
+
+function parseCsv(text: string) {
+  const rows: string[][] = []; let row: string[] = []; let cell = ""; let quoted = false;
+  for (let i = 0; i < text.length; i += 1) { const char = text[i]; const next = text[i + 1]; if (char === '"' && quoted && next === '"') { cell += '"'; i += 1; } else if (char === '"') quoted = !quoted; else if (char === "," && !quoted) { row.push(cell); cell = ""; } else if ((char === "\n" || char === "\r") && !quoted) { if (char === "\r" && next === "\n") i += 1; row.push(cell); if (row.some(Boolean)) rows.push(row); row = []; cell = ""; } else cell += char; }
+  row.push(cell); if (row.some(Boolean)) rows.push(row); return rows;
+}
+
+function numberValue(value: string | undefined): NumericValue { if (value == null || !value.trim()) return null; const clean = value.replace(/\u00a0/g, " ").replace(/€/g, "").replace(/\s/g, "").replace(/\./g, "").replace(",", ".").replace(/%/g, ""); const parsed = Number(clean); return Number.isFinite(parsed) ? parsed : null; }
+function dateValue(value: string | undefined) { const match = value?.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); if (!match) return null; return { day: Number(match[1]), month: Number(match[2]), year: Number(match[3]), iso: `${match[3]}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}` }; }
+
+const encoder = new TextEncoder();
+const base64Url = (value: ArrayBuffer | string) => { const bytes = typeof value === "string" ? encoder.encode(value) : new Uint8Array(value); let binary = ""; bytes.forEach((byte) => { binary += String.fromCharCode(byte); }); return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, ""); };
+const fromPem = (pem: string) => Uint8Array.from(atob(pem.replace(/-----(BEGIN|END) PRIVATE KEY-----|\s/g, "")), (character) => character.charCodeAt(0));
+async function sheetsToken(credentials: GoogleSheetsCredentials) { if (!credentials.GOOGLE_SERVICE_ACCOUNT_EMAIL || !credentials.GOOGLE_PRIVATE_KEY) return null; const now = Math.floor(Date.now() / 1000); const header = base64Url(JSON.stringify({ alg: "RS256", typ: "JWT" })); const payload = base64Url(JSON.stringify({ iss: credentials.GOOGLE_SERVICE_ACCOUNT_EMAIL, scope: "https://www.googleapis.com/auth/spreadsheets.readonly", aud: "https://oauth2.googleapis.com/token", iat: now, exp: now + 3600 })); const key = await crypto.subtle.importKey("pkcs8", fromPem(credentials.GOOGLE_PRIVATE_KEY), { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]); const signature = base64Url(await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, encoder.encode(`${header}.${payload}`))); const response = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion: `${header}.${payload}.${signature}` }) }); if (!response.ok) throw new Error("Não foi possível autenticar a leitura do Google Sheet."); return (await response.json() as { access_token: string }).access_token; }
+
+function normalizeRows(table: string[][]) {
+  const headers = table[0] ?? []; const index = new Map(headers.map((header, position) => [String(header).trim(), position])); const value = (raw: string[], name: string) => raw[index.get(name) ?? -1];
+  return table.slice(1).flatMap((raw): SalesRow[] => { const restaurant = value(raw, "Restaurante")?.trim(); const date = dateValue(value(raw, "Data")); if (!restaurant || !date) return []; const channels = Object.fromEntries(salesChannels.map((channel) => [channel.id, { sales: numberValue(value(raw, channel.sales)), transactions: numberValue(value(raw, channel.transactions)) }])); return [{ restaurant, year: date.year, month: date.month, date: date.iso, salesTotal: numberValue(value(raw, "VendasTotais")), transactionsTotal: numberValue(value(raw, "GC'sTotais")), channels }]; });
+}
+
+async function loadRows(credentials: GoogleSheetsCredentials = {}) {
+  if (cache && Date.now() - cache.fetchedAt < CACHE_MS) return cache;
+  const token = await sheetsToken(credentials); let table: string[][];
+  if (token) { const range = encodeURIComponent(`'${SHEET_NAME}'!A:X`); const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?majorDimension=ROWS&valueRenderOption=FORMATTED_VALUE`, { headers: { Authorization: `Bearer ${token}` } }); if (!response.ok) throw new Error(response.status === 403 ? "Partilhe o Google Sheet com a conta de serviço configurada no portal." : `Google Sheet indisponível (${response.status}).`); table = (await response.json() as { values?: string[][] }).values ?? []; }
+  else { const response = await fetch(SHEET_CSV_URL, { headers: { Accept: "text/csv" } }); if (!response.ok) throw new Error("A credencial Google do alojamento não está disponível e a folha não é pública."); table = parseCsv(await response.text()); }
+  const rows = normalizeRows(table); if (!rows.length) throw new Error("A folha Novo Resumo não devolveu registos válidos.");
+  cache = { fetchedAt: Date.now(), rows }; return cache;
+}
+
+function sumPresent(values: NumericValue[]) { const present = values.filter((value): value is number => value != null); return present.length ? present.reduce((sum, value) => sum + value, 0) : null; }
+function pct(current: NumericValue, prior: NumericValue) { return current != null && prior != null && prior !== 0 ? (current / prior - 1) * 100 : null; }
+function difference(current: NumericValue, prior: NumericValue) { return current != null && prior != null ? current - prior : null; }
+function aggregate(rows: SalesRow[]) { const salesTotal = sumPresent(rows.map((row) => row.salesTotal)); const transactionsTotal = sumPresent(rows.map((row) => row.transactionsTotal)); return { salesTotal, transactionsTotal, averageTicket: salesTotal != null && transactionsTotal ? salesTotal / transactionsTotal : null, channels: salesChannels.map((channel) => { const sales = sumPresent(rows.map((row) => row.channels[channel.id].sales)); const transactions = sumPresent(rows.map((row) => row.channels[channel.id].transactions)); return { id: channel.id, label: channel.label, sales, transactions, averageTicket: sales != null && transactions ? sales / transactions : null, weight: sales != null && salesTotal ? sales / salesTotal * 100 : null }; }).filter((channel) => channel.sales != null && channel.sales !== 0) }; }
+
+export async function getSalesDashboard(params: { restaurant?: string; year?: number; month?: number | null; period?: string }, credentials: GoogleSheetsCredentials = {}) {
+  const loaded = await loadRows(credentials); const restaurantNames = [...new Set(loaded.rows.map((row) => row.restaurant))].sort((a, b) => a.localeCompare(b, "pt")); const restaurants = ["Todos", ...restaurantNames]; const years = [...new Set(loaded.rows.map((row) => row.year))].sort((a, b) => b - a);
+  const restaurant = params.restaurant && restaurants.includes(params.restaurant) ? params.restaurant : restaurantNames.includes("Imperial") ? "Imperial" : restaurantNames[0]; const year = params.year && years.includes(params.year) ? params.year : years[0]; const restaurantRows = restaurant === "Todos" ? loaded.rows : loaded.rows.filter((row) => row.restaurant === restaurant); const availableMonths = [...new Set(restaurantRows.filter((row) => row.year === year).map((row) => row.month))].sort((a, b) => a - b); const latestMonth = availableMonths.at(-1) ?? 12; const period = ["month", "ytd", "year"].includes(params.period ?? "") ? params.period! : "ytd"; const selectedMonth = params.month && availableMonths.includes(params.month) ? params.month : latestMonth;
+  const monthSet = period === "month" ? [selectedMonth] : period === "ytd" ? availableMonths.filter((month) => month <= selectedMonth) : availableMonths; const currentRows = restaurantRows.filter((row) => row.year === year && monthSet.includes(row.month)); const priorRows = restaurantRows.filter((row) => row.year === year - 1 && monthSet.includes(row.month)); const current = aggregate(currentRows); const prior = aggregate(priorRows);
+  const channels = current.channels.map((channel) => { const previous = prior.channels.find((item) => item.id === channel.id); return { ...channel, salesYoY: pct(channel.sales, previous?.sales ?? null), transactionsYoY: pct(channel.transactions, previous?.transactions ?? null), weightYoYPp: difference(channel.weight, previous?.weight ?? null) }; }).sort((a, b) => (b.sales ?? 0) - (a.sales ?? 0));
+  const monthly = Array.from({ length: 12 }, (_, offset) => offset + 1).map((month) => { const now = aggregate(restaurantRows.filter((row) => row.year === year && row.month === month)); const before = aggregate(restaurantRows.filter((row) => row.year === year - 1 && row.month === month)); return { month, current: now, prior: before, salesYoY: pct(now.salesTotal, before.salesTotal), transactionsYoY: pct(now.transactionsTotal, before.transactionsTotal), ticketYoY: pct(now.averageTicket, before.averageTicket), channelYoY: Object.fromEntries(salesChannels.map((channel) => { const a = now.channels.find((item) => item.id === channel.id)?.sales ?? null; const b = before.channels.find((item) => item.id === channel.id)?.sales ?? null; return [channel.id, pct(a, b)]; })) }; });
+  const salesYoY = pct(current.salesTotal, prior.salesTotal); const transactionsYoY = pct(current.transactionsTotal, prior.transactionsTotal); const ticketYoY = pct(current.averageTicket, prior.averageTicket); const strongest = channels.filter((channel) => channel.salesYoY != null).sort((a, b) => (b.salesYoY ?? 0) - (a.salesYoY ?? 0)); const leading = channels[0]; const highlights = [salesYoY == null ? null : `Vendas ${salesYoY >= 0 ? "cresceram" : "diminuíram"} ${Math.abs(salesYoY).toLocaleString("pt-PT", { maximumFractionDigits: 1 })}% vs período homólogo.`, leading?.weight == null ? null : `${leading.label} representa ${leading.weight.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}% das vendas.`, strongest[0]?.salesYoY == null ? null : `${strongest[0].label} foi o canal com maior crescimento: ${strongest[0].salesYoY >= 0 ? "+" : ""}${strongest[0].salesYoY.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%.`, strongest.at(-1)?.salesYoY == null ? null : `${strongest.at(-1)!.label} registou a maior quebra: ${strongest.at(-1)!.salesYoY!.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%.`, current.averageTicket != null && prior.averageTicket != null ? `A bandeja média ${current.averageTicket >= prior.averageTicket ? "aumentou" : "diminuiu"} ${Math.abs(current.averageTicket - prior.averageTicket).toLocaleString("pt-PT", { style: "currency", currency: "EUR" })} vs ano anterior.` : null].filter(Boolean);
+  return { source: { spreadsheetId: SHEET_ID, sheet: SHEET_NAME, fetchedAt: new Date(loaded.fetchedAt).toISOString(), cacheMinutes: CACHE_MS / 60000 }, filters: { restaurants, years, restaurant, year, month: selectedMonth, period, availableMonths }, kpis: { salesTotal: current.salesTotal, salesDifference: difference(current.salesTotal, prior.salesTotal), salesYoY, transactionsTotal: current.transactionsTotal, transactionsDifference: difference(current.transactionsTotal, prior.transactionsTotal), transactionsYoY, averageTicket: current.averageTicket, averageTicketDifference: difference(current.averageTicket, prior.averageTicket), averageTicketYoY: ticketYoY }, channels, monthly, highlights };
+}
