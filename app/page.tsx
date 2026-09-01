@@ -8,6 +8,7 @@ import tellTheArchesDataJson from "./data/tell-the-arches.json";
 import teamMilestonesDataJson from "./data/team-milestones.json";
 import creditNotesDataJson from "./data/credit-notes-data.json";
 import managerScheduleDataJson from "./data/manager-schedule-data.json";
+import managerSalesDataJson from "./data/manager-sales-data.json";
 import AlertsCenter from "./alerts-center";
 
 type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "managerdashboard" | "managerhours" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
@@ -23,6 +24,8 @@ type BillingAnalysis = { totalHavi: number; totalMyStore: number; totalDifferenc
 type CreditNote = { id: string; date: string; documentNumber: string; claimNumber: string; referenceInvoice: string; reason: string; articles: string[]; netAmount: number; vatAmount: number; totalAmount: number; documentUrl: string };
 const creditNotes = creditNotesDataJson as CreditNote[];
 const managerSchedule = managerScheduleDataJson;
+type ManagerSalesRow = { period: string; salesTotal: number; salesDelivery: number; salesCounter: number; salesEstore: number; salesMop: number; accessesTotal: number; accessesDelivery: number; accessesCounter: number; accessesEstore: number; accessesMop: number };
+const managerSalesData: ManagerSalesRow[] = (managerSalesDataJson as (string | number)[][]).map(([period, ...values]) => { const [salesTotal, salesDelivery, salesCounter, salesEstore, salesMop, accessesTotal, accessesDelivery, accessesCounter, accessesEstore, accessesMop] = values.map(Number); return { period: String(period), salesTotal, salesDelivery, salesCounter, salesEstore, salesMop, accessesTotal, accessesDelivery, accessesCounter, accessesEstore, accessesMop }; });
 type AppUser = { id: number; name: string; login: string; role: AppRole; department: UserDepartment; status: string };
 type ManagedUser = AppUser & { createdAt: string; approvedAt: string | null };
 type CleaningIntervention = {
@@ -707,26 +710,37 @@ function DeliveryDisputesPrototype() {
 }
 
 const imperialDashboardChannels = [
-  { id: "delivery", label: "Delivery", icon: "↗", description: "Vendas dos operadores delivery" },
-  { id: "mop", label: "MOP", icon: "▣", description: "Pedidos efetuados na aplicação" },
-  { id: "estore", label: "e-store", icon: "◎", description: "Vendas da loja digital" },
-  { id: "balcao", label: "Balcão", icon: "▤", description: "Vendas presenciais no restaurante" },
-  { id: "stock", label: "Stock", icon: "◇", description: "Posição e acompanhamento de stock" },
+  { id: "delivery", label: "Delivery", icon: "↗", description: "Operadores de entrega", sales: "salesDelivery", accesses: "accessesDelivery" },
+  { id: "mop", label: "MOP", icon: "▣", description: "Pedidos efetuados na aplicação", sales: "salesMop", accesses: "accessesMop" },
+  { id: "estore", label: "e-store", icon: "◎", description: "SOK / loja digital na fonte", sales: "salesEstore", accesses: "accessesEstore" },
+  { id: "balcao", label: "Balcão", icon: "▤", description: "Vendas presenciais", sales: "salesCounter", accesses: "accessesCounter" },
 ] as const;
 
 function ManagerSalesDashboard() {
-  const currentMonth = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Lisbon" }).slice(0, 7);
-  const [month, setMonth] = useState(currentMonth);
+  const latestMonth = managerSalesData.at(-1)?.period ?? "2026-07";
+  const [month, setMonth] = useState(latestMonth);
+  const row = managerSalesData.find((item) => item.period === month) ?? null;
+  const rowIndex = managerSalesData.findIndex((item) => item.period === month);
+  const previous = rowIndex > 0 ? managerSalesData[rowIndex - 1] : null;
   const monthLabel = new Date(`${month}-01T12:00:00`).toLocaleDateString("pt-PT", { month: "long", year: "numeric" });
   const daysInMonth = new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate();
+  const euro = (value: number | null | undefined) => value == null ? "—" : value.toLocaleString("pt-PT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  const integer = (value: number | null | undefined) => value == null ? "—" : value.toLocaleString("pt-PT");
+  const percent = (value: number, total: number) => total ? `${(value / total * 100).toLocaleString("pt-PT", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%` : "—";
+  const delta = (value: number, prior?: number) => prior ? (value - prior) / prior * 100 : null;
+  const salesDelta = row && previous ? delta(row.salesTotal, previous.salesTotal) : null;
+  const accessesDelta = row && previous ? delta(row.accessesTotal, previous.accessesTotal) : null;
+  const yearRows = managerSalesData.filter((item) => item.period.startsWith(`${month.slice(0, 4)}-`));
+  const maxSales = Math.max(...yearRows.map((item) => item.salesTotal), 1);
+  const channels = row ? imperialDashboardChannels.map((channel) => ({ ...channel, salesValue: row[channel.sales], accessValue: row[channel.accesses] })) : [];
   return <section className="manager-sales-dashboard" aria-labelledby="manager-dashboard-title">
-    <header className="manager-dashboard-heading"><div><span className="eyebrow">Gerente Loja · Imperial</span><h2 id="manager-dashboard-title">Dashboard</h2><p>Acompanhamento mensal de vendas, acessos, canais digitais, balcão e stock.</p></div><div className="manager-dashboard-heading-actions"><span className="manager-restaurant-badge"><b>Imperial</b><small>Restaurante selecionado</small></span><label>Mês<input type="month" value={month} max={currentMonth} onChange={(event) => setMonth(event.target.value)} /></label></div></header>
-    <div className="manager-dashboard-source"><span>i</span><div><strong>Estrutura preparada para receber os dados do Imperial</strong><p>Os indicadores serão preenchidos assim que for associada a fonte mensal de vendas, acessos e stock.</p></div><b>{monthLabel}</b></div>
-    <section className="manager-dashboard-kpis" aria-label="Indicadores principais"><article className="sales"><span>Vendas totais</span><strong>—</strong><small>Valor acumulado no mês</small></article><article className="accesses"><span>Acessos totais</span><strong>—</strong><small>Transações acumuladas no mês</small></article><article className="average"><span>Média diária de vendas</span><strong>—</strong><small>Calculada sobre {daysInMonth} dias</small></article><article className="ticket"><span>Ticket médio</span><strong>—</strong><small>Vendas ÷ acessos</small></article></section>
-    <section className="manager-dashboard-grid"><article className="manager-dashboard-panel channel-panel"><div className="manager-dashboard-panel-title"><div><span className="eyebrow">Mix mensal</span><h3>Vendas por plataforma</h3><p>Valor e peso de cada canal nas vendas totais.</p></div><span>{monthLabel}</span></div><div className="manager-channel-list">{imperialDashboardChannels.map((channel) => <div key={channel.id}><span className={`manager-channel-icon ${channel.id}`}>{channel.icon}</span><p><strong>{channel.label}</strong><small>{channel.description}</small></p><b>—</b><em>—%</em></div>)}</div></article>
-      <article className="manager-dashboard-panel trend-panel"><div className="manager-dashboard-panel-title"><div><span className="eyebrow">Evolução diária</span><h3>Vendas e acessos</h3><p>Leitura do desempenho ao longo do mês selecionado.</p></div><span>Imperial</span></div><div className="manager-empty-chart" aria-label="Gráfico a aguardar dados"><div className="manager-chart-grid"><i /><i /><i /><i /></div><span>Sem dados ligados para {monthLabel}</span><small>O gráfico será preenchido automaticamente após a ligação da fonte.</small></div></article>
+    <header className="manager-dashboard-heading"><div><span className="eyebrow">Gerente Loja · Imperial</span><h2 id="manager-dashboard-title">Dashboard</h2><p>Acompanhamento mensal de vendas, acessos e plataformas do restaurante Imperial.</p></div><div className="manager-dashboard-heading-actions"><span className="manager-restaurant-badge"><b>Imperial</b><small>Restaurante selecionado</small></span><label>Mês<input type="month" value={month} min={managerSalesData[0]?.period} max={latestMonth} onChange={(event) => setMonth(event.target.value)} /></label></div></header>
+    <div className="manager-dashboard-source"><span>✓</span><div><strong>Dados do Imperial ligados à folha partilhada</strong><p>Resumo mensal “Novo Resumo”. Último período disponível: julho de 2026.</p></div><b>{monthLabel}</b></div>
+    <section className="manager-dashboard-kpis" aria-label="Indicadores principais"><article className="sales"><span>Vendas totais</span><strong>{euro(row?.salesTotal)}</strong><small>{salesDelta == null ? "Sem comparação anterior" : `${salesDelta >= 0 ? "+" : ""}${salesDelta.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}% vs. mês anterior`}</small></article><article className="accesses"><span>Acessos totais</span><strong>{integer(row?.accessesTotal)}</strong><small>{accessesDelta == null ? "Sem comparação anterior" : `${accessesDelta >= 0 ? "+" : ""}${accessesDelta.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}% vs. mês anterior`}</small></article><article className="average"><span>Média diária de vendas</span><strong>{euro(row ? row.salesTotal / daysInMonth : null)}</strong><small>Calculada sobre {daysInMonth} dias</small></article><article className="ticket"><span>Ticket médio</span><strong>{euro(row?.accessesTotal ? row.salesTotal / row.accessesTotal : null)}</strong><small>Vendas ÷ acessos</small></article></section>
+    <section className="manager-dashboard-grid"><article className="manager-dashboard-panel channel-panel"><div className="manager-dashboard-panel-title"><div><span className="eyebrow">Mix mensal</span><h3>Vendas por plataforma</h3><p>Valor e peso de cada canal nas vendas totais.</p></div><span>{monthLabel}</span></div><div className="manager-channel-list">{channels.map((channel) => <div key={channel.id}><span className={`manager-channel-icon ${channel.id}`}>{channel.icon}</span><p><strong>{channel.label}</strong><small>{channel.description}</small></p><b>{euro(channel.salesValue)}</b><em>{percent(channel.salesValue, row?.salesTotal ?? 0)}</em></div>)}<div className="source-unavailable"><span className="manager-channel-icon stock">◇</span><p><strong>Stock</strong><small>Não existe uma medida de stock nesta fonte</small></p><b>—</b><em>Sem dados</em></div></div></article>
+      <article className="manager-dashboard-panel trend-panel"><div className="manager-dashboard-panel-title"><div><span className="eyebrow">Evolução mensal</span><h3>Vendas em {month.slice(0, 4)}</h3><p>Comparação entre os meses disponíveis do ano.</p></div><span>Imperial</span></div><div className="manager-year-chart">{yearRows.map((item) => <button key={item.period} className={item.period === month ? "active" : ""} onClick={() => setMonth(item.period)} title={`${new Date(`${item.period}-01T12:00:00`).toLocaleDateString("pt-PT", { month: "long" })}: ${euro(item.salesTotal)}`}><span style={{ height: `${Math.max(8, item.salesTotal / maxSales * 100)}%` }} /><small>{new Date(`${item.period}-01T12:00:00`).toLocaleDateString("pt-PT", { month: "short" }).replace(".", "")}</small></button>)}</div></article>
     </section>
-    <section className="manager-dashboard-panel manager-dashboard-table"><div className="manager-dashboard-panel-title"><div><span className="eyebrow">Detalhe por canal</span><h3>Resumo do mês</h3><p>A tabela ficará limitada ao restaurante Imperial.</p></div><span>0 registos</span></div><div className="manager-dashboard-table-row header"><span>Canal</span><span>Vendas</span><span>Acessos</span><span>% vendas</span><span>Ticket médio</span><span>Estado</span></div>{imperialDashboardChannels.map((channel) => <div className="manager-dashboard-table-row" key={`table-${channel.id}`}><strong>{channel.label}</strong><span>—</span><span>—</span><span>—</span><span>—</span><em>A aguardar fonte</em></div>)}</section>
+    <section className="manager-dashboard-panel manager-dashboard-table"><div className="manager-dashboard-panel-title"><div><span className="eyebrow">Detalhe por canal</span><h3>Resumo do mês</h3><p>Informação exclusivamente do restaurante Imperial.</p></div><span>{row ? "1 registo mensal" : "Sem registo"}</span></div><div className="manager-dashboard-table-row header"><span>Canal</span><span>Vendas</span><span>Acessos</span><span>% vendas</span><span>Ticket médio</span><span>Estado</span></div>{channels.map((channel) => <div className="manager-dashboard-table-row" key={`table-${channel.id}`}><strong>{channel.label}</strong><span>{euro(channel.salesValue)}</span><span>{integer(channel.accessValue)}</span><span>{percent(channel.salesValue, row?.salesTotal ?? 0)}</span><span>{euro(channel.accessValue ? channel.salesValue / channel.accessValue : null)}</span><em>Atualizado</em></div>)}<div className="manager-dashboard-table-row muted"><strong>Stock</strong><span>—</span><span>—</span><span>—</span><span>—</span><em>Não disponível</em></div></section>
   </section>;
 }
 
