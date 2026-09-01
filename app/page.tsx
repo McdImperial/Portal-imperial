@@ -10,7 +10,7 @@ import creditNotesDataJson from "./data/credit-notes-data.json";
 import managerScheduleDataJson from "./data/manager-schedule-data.json";
 import AlertsCenter from "./alerts-center";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "managerhours" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "managerdashboard" | "managerhours" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -171,6 +171,7 @@ const viewLabels: Record<View, string> = {
   talento: "Gestão Talento",
   haccp: "Portal HACCP",
   gerenteloja: "Gerente Loja",
+  managerdashboard: "Dashboard Gerente Loja",
   managerhours: "Horário Equipa Gestão",
   alertas: "Central de Alertas",
   desenvolvimento: "Em desenvolvimento",
@@ -705,6 +706,30 @@ function DeliveryDisputesPrototype() {
   </section>;
 }
 
+const imperialDashboardChannels = [
+  { id: "delivery", label: "Delivery", icon: "↗", description: "Vendas dos operadores delivery" },
+  { id: "mop", label: "MOP", icon: "▣", description: "Pedidos efetuados na aplicação" },
+  { id: "estore", label: "e-store", icon: "◎", description: "Vendas da loja digital" },
+  { id: "balcao", label: "Balcão", icon: "▤", description: "Vendas presenciais no restaurante" },
+  { id: "stock", label: "Stock", icon: "◇", description: "Posição e acompanhamento de stock" },
+] as const;
+
+function ManagerSalesDashboard() {
+  const currentMonth = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Lisbon" }).slice(0, 7);
+  const [month, setMonth] = useState(currentMonth);
+  const monthLabel = new Date(`${month}-01T12:00:00`).toLocaleDateString("pt-PT", { month: "long", year: "numeric" });
+  const daysInMonth = new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate();
+  return <section className="manager-sales-dashboard" aria-labelledby="manager-dashboard-title">
+    <header className="manager-dashboard-heading"><div><span className="eyebrow">Gerente Loja · Imperial</span><h2 id="manager-dashboard-title">Dashboard</h2><p>Acompanhamento mensal de vendas, acessos, canais digitais, balcão e stock.</p></div><div className="manager-dashboard-heading-actions"><span className="manager-restaurant-badge"><b>Imperial</b><small>Restaurante selecionado</small></span><label>Mês<input type="month" value={month} max={currentMonth} onChange={(event) => setMonth(event.target.value)} /></label></div></header>
+    <div className="manager-dashboard-source"><span>i</span><div><strong>Estrutura preparada para receber os dados do Imperial</strong><p>Os indicadores serão preenchidos assim que for associada a fonte mensal de vendas, acessos e stock.</p></div><b>{monthLabel}</b></div>
+    <section className="manager-dashboard-kpis" aria-label="Indicadores principais"><article className="sales"><span>Vendas totais</span><strong>—</strong><small>Valor acumulado no mês</small></article><article className="accesses"><span>Acessos totais</span><strong>—</strong><small>Transações acumuladas no mês</small></article><article className="average"><span>Média diária de vendas</span><strong>—</strong><small>Calculada sobre {daysInMonth} dias</small></article><article className="ticket"><span>Ticket médio</span><strong>—</strong><small>Vendas ÷ acessos</small></article></section>
+    <section className="manager-dashboard-grid"><article className="manager-dashboard-panel channel-panel"><div className="manager-dashboard-panel-title"><div><span className="eyebrow">Mix mensal</span><h3>Vendas por plataforma</h3><p>Valor e peso de cada canal nas vendas totais.</p></div><span>{monthLabel}</span></div><div className="manager-channel-list">{imperialDashboardChannels.map((channel) => <div key={channel.id}><span className={`manager-channel-icon ${channel.id}`}>{channel.icon}</span><p><strong>{channel.label}</strong><small>{channel.description}</small></p><b>—</b><em>—%</em></div>)}</div></article>
+      <article className="manager-dashboard-panel trend-panel"><div className="manager-dashboard-panel-title"><div><span className="eyebrow">Evolução diária</span><h3>Vendas e acessos</h3><p>Leitura do desempenho ao longo do mês selecionado.</p></div><span>Imperial</span></div><div className="manager-empty-chart" aria-label="Gráfico a aguardar dados"><div className="manager-chart-grid"><i /><i /><i /><i /></div><span>Sem dados ligados para {monthLabel}</span><small>O gráfico será preenchido automaticamente após a ligação da fonte.</small></div></article>
+    </section>
+    <section className="manager-dashboard-panel manager-dashboard-table"><div className="manager-dashboard-panel-title"><div><span className="eyebrow">Detalhe por canal</span><h3>Resumo do mês</h3><p>A tabela ficará limitada ao restaurante Imperial.</p></div><span>0 registos</span></div><div className="manager-dashboard-table-row header"><span>Canal</span><span>Vendas</span><span>Acessos</span><span>% vendas</span><span>Ticket médio</span><span>Estado</span></div>{imperialDashboardChannels.map((channel) => <div className="manager-dashboard-table-row" key={`table-${channel.id}`}><strong>{channel.label}</strong><span>—</span><span>—</span><span>—</span><span>—</span><em>A aguardar fonte</em></div>)}</section>
+  </section>;
+}
+
 export default function Home() {
   const objectivesExportRef = useRef<HTMLElement>(null);
   const [portalDate, setPortalDate] = useState("");
@@ -792,7 +817,7 @@ export default function Home() {
   }, [view, currentUser]);
 
   useEffect(() => {
-    const managerViews: View[] = ["gerenteloja", "objetivos", "areasglobais", "equipa", "managerhours", "alertas"];
+    const managerViews: View[] = ["gerenteloja", "managerdashboard", "objetivos", "areasglobais", "equipa", "managerhours", "alertas"];
     if (currentUser && currentUser.role !== "admin" && managerViews.includes(view)) setView("resumo");
   }, [view, currentUser]);
 
@@ -1513,7 +1538,7 @@ export default function Home() {
         {notice && <div className="toast" role="status">✓ {notice}</div>}
 
         <div className="content">
-          {currentUser.role === "admin" && (["gerenteloja", "objetivos", "areasglobais", "equipa", "managerhours", "alertas"] as View[]).includes(view) && <nav className="section-subnav" aria-label="Áreas do Gerente Loja"><button type="button" className={view === "gerenteloja" ? "active" : ""} onClick={() => setView("gerenteloja")}>Visão geral</button><button type="button" className={view === "objetivos" ? "active" : ""} onClick={() => { setDepartment("global"); setView("objetivos"); }}>Objetivos</button><button type="button" className={view === "areasglobais" ? "active" : ""} onClick={() => { setDepartment("global"); setView("areasglobais"); }}>Áreas</button><button type="button" className={view === "equipa" ? "active" : ""} onClick={() => { setDepartment("global"); setView("equipa"); }}>Equipa</button><button type="button" className={view === "managerhours" ? "active" : ""} onClick={() => setView("managerhours")}>Horário Equipa Gestão</button><button type="button" className={view === "alertas" ? "active" : ""} onClick={() => setView("alertas")}>Central de Alertas</button></nav>}
+          {currentUser.role === "admin" && (["gerenteloja", "managerdashboard", "objetivos", "areasglobais", "equipa", "managerhours", "alertas"] as View[]).includes(view) && <nav className="section-subnav" aria-label="Áreas do Gerente Loja"><button type="button" className={view === "gerenteloja" ? "active" : ""} onClick={() => setView("gerenteloja")}>Visão geral</button><button type="button" className={view === "managerdashboard" ? "active" : ""} onClick={() => setView("managerdashboard")}>Dashboard</button><button type="button" className={view === "objetivos" ? "active" : ""} onClick={() => { setDepartment("global"); setView("objetivos"); }}>Objetivos</button><button type="button" className={view === "areasglobais" ? "active" : ""} onClick={() => { setDepartment("global"); setView("areasglobais"); }}>Áreas</button><button type="button" className={view === "equipa" ? "active" : ""} onClick={() => { setDepartment("global"); setView("equipa"); }}>Equipa</button><button type="button" className={view === "managerhours" ? "active" : ""} onClick={() => setView("managerhours")}>Horário Equipa Gestão</button><button type="button" className={view === "alertas" ? "active" : ""} onClick={() => setView("alertas")}>Central de Alertas</button></nav>}
 
           {view === "financeiro" && <section className="finance-page" aria-labelledby="finance-title"><div className="finance-heading"><div><span className="eyebrow">Gestão financeira</span><h2 id="finance-title">Financeiro</h2><p>Controlo e acompanhamento dos movimentos financeiros do restaurante.</p></div></div><nav className="section-subnav" aria-label="Áreas financeiras"><button type="button" className="active">Controlo Cofre</button></nav><nav className="vault-subnav" aria-label="Áreas do Controlo Cofre"><button type="button" className={vaultSection === "resumo" ? "active" : ""} onClick={() => setVaultSection("resumo")}>Resumo Controlo Cofre</button><button type="button" className={vaultSection === "moedas" ? "active" : ""} onClick={() => setVaultSection("moedas")}>Pedido moedas</button><button type="button" className={vaultSection === "faturas" ? "active" : ""} onClick={() => setVaultSection("faturas")}>Faturas</button></nav>{vaultSection === "resumo" ? <VaultControlPrototype isAdmin={currentUser.role === "admin"} /> : vaultSection === "moedas" ? <CoinOrdersPrototype isAdmin={currentUser.role === "admin"} /> : <VaultInvoicesPrototype isAdmin={currentUser.role === "admin"} />}</section>}
 
@@ -1633,6 +1658,8 @@ export default function Home() {
               <div className="availability-frame"><iframe title="Análise de disponibilidades da equipa" src="https://analise-disponibilidades-equipa.tiagosoutelo.chatgpt.site/" /></div>
             </section>
           )}
+
+          {view === "managerdashboard" && currentUser.role === "admin" && <ManagerSalesDashboard />}
 
           {view === "managerhours" && currentUser.role === "admin" && <section className="manager-schedule-page" aria-labelledby="manager-schedule-title">
             <div className="manager-schedule-heading"><div><span className="eyebrow">Gerente Loja · Planeamento</span><h2 id="manager-schedule-title">Horário Equipa Gestão</h2><p>Planeamento anual e mensal, códigos de horário e controlo de horas da equipa de gestão.</p></div><span>Dados da folha partilhada</span></div>
