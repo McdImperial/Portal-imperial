@@ -10,7 +10,7 @@ import creditNotesDataJson from "./data/credit-notes-data.json";
 import managerScheduleDataJson from "./data/manager-schedule-data.json";
 import AlertsCenter from "./alerts-center";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "managerdashboard" | "managerhours" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "managerdashboard" | "managerhours" | "walkregistrations" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -173,6 +173,7 @@ const viewLabels: Record<View, string> = {
   gerenteloja: "Gerente Loja",
   managerdashboard: "Dashboard de Vendas & Transações",
   managerhours: "Horário Equipa Gestão",
+  walkregistrations: "Inscrições Caminhada",
   alertas: "Central de Alertas",
   desenvolvimento: "Em desenvolvimento",
   cofreform: "Formulário Controlo Cofre",
@@ -844,7 +845,7 @@ export default function Home() {
   }, [view, currentUser]);
 
   useEffect(() => {
-    const managerViews: View[] = ["gerenteloja", "managerdashboard", "objetivos", "areasglobais", "equipa", "managerhours", "alertas"];
+    const managerViews: View[] = ["gerenteloja", "managerdashboard", "objetivos", "areasglobais", "equipa", "managerhours", "walkregistrations", "alertas"];
     if (currentUser && currentUser.role !== "admin" && managerViews.includes(view)) setView("resumo");
   }, [view, currentUser]);
 
@@ -1010,15 +1011,22 @@ export default function Home() {
   }, [view, currentUser]);
 
   useEffect(() => {
-    if (view !== "talento" || department !== "pessoas" || !currentUser || !(currentUser.role === "admin" || currentUser.role === "editor" && currentUser.department === "pessoas")) return;
+    const canOpenTalent = view === "talento" && department === "pessoas" && (currentUser?.role === "admin" || currentUser?.role === "editor" && currentUser.department === "pessoas");
+    const canOpenWalk = view === "walkregistrations" && currentUser?.role === "admin";
+    if (!currentUser || (!canOpenTalent && !canOpenWalk)) return;
     let active = true;
     setTalentLoading(true);
-    Promise.all([fetch("/api/candidaturas"), fetch("/api/caminhada-natureza")]).then(async ([candidatesResponse, walkResponse]) => {
+    const requests = canOpenTalent ? Promise.all([fetch("/api/candidaturas"), fetch("/api/caminhada-natureza")]).then(async ([candidatesResponse, walkResponse]) => {
       if (!candidatesResponse.ok || !walkResponse.ok) throw new Error();
       const candidatesData = await candidatesResponse.json() as { candidates: TalentCandidate[] };
       const walkData = await walkResponse.json() as { registrations: NatureWalkRegistration[] };
       if (active) { setTalentCandidates(candidatesData.candidates); setNatureWalkRegistrations(walkData.registrations); }
-    }).catch(() => setNotice("Não foi possível carregar os registos de Gestão de Talento.")).finally(() => { if (active) setTalentLoading(false); });
+    }) : fetch("/api/caminhada-natureza").then(async (response) => {
+      if (!response.ok) throw new Error();
+      const data = await response.json() as { registrations: NatureWalkRegistration[] };
+      if (active) setNatureWalkRegistrations(data.registrations);
+    });
+    requests.catch(() => setNotice("Não foi possível carregar as inscrições da caminhada.")).finally(() => { if (active) setTalentLoading(false); });
     return () => { active = false; };
   }, [view, department, currentUser]);
 
@@ -1507,7 +1515,7 @@ export default function Home() {
         </div>
         <nav className="nav-list">
           {navItems.map((item) => (
-            <button key={item.id} className={view === item.id || item.id === "gerenteloja" && (["objetivos", "areasglobais", "equipa", "managerhours", "alertas"] as View[]).includes(view) ? "nav-item active" : "nav-item"} onClick={() => setView(item.id)}>
+            <button key={item.id} className={view === item.id || item.id === "gerenteloja" && (["objetivos", "areasglobais", "equipa", "managerhours", "walkregistrations", "alertas"] as View[]).includes(view) ? "nav-item active" : "nav-item"} onClick={() => setView(item.id)}>
               <span className="nav-glyph">{item.glyph}</span>{item.label}
             </button>
           ))}
@@ -1576,7 +1584,7 @@ export default function Home() {
         {notice && <div className="toast" role="status">✓ {notice}</div>}
 
         <div className="content">
-          {currentUser.role === "admin" && (["gerenteloja", "managerdashboard", "objetivos", "areasglobais", "equipa", "managerhours", "alertas"] as View[]).includes(view) && <nav className="section-subnav" aria-label="Áreas do Gerente Loja"><button type="button" className={view === "gerenteloja" ? "active" : ""} onClick={() => setView("gerenteloja")}>Visão geral</button><button type="button" className={view === "managerdashboard" ? "active" : ""} onClick={() => setView("managerdashboard")}>Dashboard Vendas</button><button type="button" className={view === "objetivos" ? "active" : ""} onClick={() => { setDepartment("global"); setView("objetivos"); }}>Objetivos</button><button type="button" className={view === "areasglobais" ? "active" : ""} onClick={() => { setDepartment("global"); setView("areasglobais"); }}>Áreas</button><button type="button" className={view === "equipa" ? "active" : ""} onClick={() => { setDepartment("global"); setView("equipa"); }}>Equipa</button><button type="button" className={view === "managerhours" ? "active" : ""} onClick={() => setView("managerhours")}>Horário Equipa Gestão</button><button type="button" className={view === "alertas" ? "active" : ""} onClick={() => setView("alertas")}>Central de Alertas</button></nav>}
+          {currentUser.role === "admin" && (["gerenteloja", "managerdashboard", "objetivos", "areasglobais", "equipa", "managerhours", "walkregistrations", "alertas"] as View[]).includes(view) && <nav className="section-subnav" aria-label="Áreas do Gerente Loja"><button type="button" className={view === "gerenteloja" ? "active" : ""} onClick={() => setView("gerenteloja")}>Visão geral</button><button type="button" className={view === "managerdashboard" ? "active" : ""} onClick={() => setView("managerdashboard")}>Dashboard Vendas</button><button type="button" className={view === "objetivos" ? "active" : ""} onClick={() => { setDepartment("global"); setView("objetivos"); }}>Objetivos</button><button type="button" className={view === "areasglobais" ? "active" : ""} onClick={() => { setDepartment("global"); setView("areasglobais"); }}>Áreas</button><button type="button" className={view === "equipa" ? "active" : ""} onClick={() => { setDepartment("global"); setView("equipa"); }}>Equipa</button><button type="button" className={view === "managerhours" ? "active" : ""} onClick={() => setView("managerhours")}>Horário Equipa Gestão</button><button type="button" className={view === "walkregistrations" ? "active" : ""} onClick={() => setView("walkregistrations")}>Inscrições Caminhada</button><button type="button" className={view === "alertas" ? "active" : ""} onClick={() => setView("alertas")}>Central de Alertas</button></nav>}
 
           {view === "financeiro" && <section className="finance-page" aria-labelledby="finance-title"><div className="finance-heading"><div><span className="eyebrow">Gestão financeira</span><h2 id="finance-title">Financeiro</h2><p>Controlo e acompanhamento dos movimentos financeiros do restaurante.</p></div></div><nav className="section-subnav" aria-label="Áreas financeiras"><button type="button" className="active">Controlo Cofre</button></nav><nav className="vault-subnav" aria-label="Áreas do Controlo Cofre"><button type="button" className={vaultSection === "resumo" ? "active" : ""} onClick={() => setVaultSection("resumo")}>Resumo Controlo Cofre</button><button type="button" className={vaultSection === "moedas" ? "active" : ""} onClick={() => setVaultSection("moedas")}>Pedido moedas</button><button type="button" className={vaultSection === "faturas" ? "active" : ""} onClick={() => setVaultSection("faturas")}>Faturas</button></nav>{vaultSection === "resumo" ? <VaultControlPrototype isAdmin={currentUser.role === "admin"} /> : vaultSection === "moedas" ? <CoinOrdersPrototype isAdmin={currentUser.role === "admin"} /> : <VaultInvoicesPrototype isAdmin={currentUser.role === "admin"} />}</section>}
 
@@ -1698,6 +1706,22 @@ export default function Home() {
           )}
 
           {view === "managerdashboard" && currentUser.role === "admin" && <ManagerSalesDashboard />}
+
+          {view === "walkregistrations" && currentUser.role === "admin" && <section className="talent-page walk-admin-page" aria-labelledby="walk-admin-title">
+            <div className="talent-heading">
+              <div><span className="eyebrow">Gerente Loja · Plano Motivacional</span><h2 id="walk-admin-title">Inscrições · Caminhada pela Natureza</h2><p>Acompanhe as respostas recebidas e aprove ou não aprove cada inscrição.</p></div>
+              <a className="talent-application-link walk" href="/caminhada-natureza" target="_blank" rel="noreferrer">Abrir formulário público ↗</a>
+            </div>
+            <div className="talent-board walk-management">
+              <div className="talent-board-heading"><div><span className="eyebrow">15 de setembro · 08h30–16h00</span><h3>Respostas recebidas</h3></div><span>{talentLoading ? "A carregar…" : `${natureWalkRegistrations.length} respostas`}</span></div>
+              <div className="walk-registration-summary"><span><b>{natureWalkRegistrations.filter((item) => item.interested).length}</b> interessados</span><span><b>{natureWalkRegistrations.filter((item) => item.status === "Aprovada").length}</b> aprovados</span><span><b>{natureWalkRegistrations.filter((item) => item.status === "Pendente").length}</b> pendentes</span><span><b>{natureWalkRegistrations.filter((item) => item.status === "Não aprovada").length}</b> não aprovados</span></div>
+              <div className="walk-registration-table" role="table" aria-label="Respostas da Caminhada pela Natureza">
+                <div className="walk-registration-row header" role="row"><span>Nome</span><span>Interesse</span><span>Leva para partilhar</span><span>Data da resposta</span><span>Validação</span></div>
+                {natureWalkRegistrations.map((registration) => <div className="walk-registration-row" role="row" key={registration.id}><strong>{registration.name}</strong><span className={registration.interested ? "walk-yes" : "walk-no"}>{registration.interested ? "Sim" : "Não"}</span><span>{registration.sharingItem || "—"}</span><small>{new Date(registration.createdAt).toLocaleString("pt-PT", { dateStyle: "short", timeStyle: "short" })}</small><select value={registration.status} className={`walk-status ${statusClass(registration.status)}`} onChange={(event) => void updateNatureWalkRegistration(registration, event.target.value as NatureWalkStatus)} aria-label={`Validação de ${registration.name}`}><option>Pendente</option><option>Aprovada</option><option>Não aprovada</option></select></div>)}
+                {!talentLoading && natureWalkRegistrations.length === 0 && <div className="talent-empty"><span>🥾</span><div><strong>Ainda não existem respostas</strong><small>As inscrições submetidas através do formulário aparecerão automaticamente aqui.</small></div></div>}
+              </div>
+            </div>
+          </section>}
 
           {view === "managerhours" && currentUser.role === "admin" && <section className="manager-schedule-page" aria-labelledby="manager-schedule-title">
             <div className="manager-schedule-heading"><div><span className="eyebrow">Gerente Loja · Planeamento</span><h2 id="manager-schedule-title">Horário Equipa Gestão</h2><p>Planeamento anual e mensal, códigos de horário e controlo de horas da equipa de gestão.</p></div><span>Dados da folha partilhada</span></div>

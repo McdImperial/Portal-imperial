@@ -11,13 +11,14 @@ export default function NatureWalkPage() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting) return;
+    const formElement = event.currentTarget;
     setSubmitting(true); setMessage(""); setSuccess(false);
-    const form = new FormData(event.currentTarget);
+    const form = new FormData(formElement);
     try {
       const response = await fetch("/api/caminhada-natureza", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: form.get("name"), interested: interested === "sim", sharingItem: form.get("sharingItem") }) });
       const data = await response.json() as { message?: string; error?: string };
       if (!response.ok) throw new Error(data.error || "Não foi possível enviar a inscrição.");
-      event.currentTarget.reset(); setInterested("sim"); setSuccess(true); setMessage(data.message || "Inscrição registada com sucesso.");
+      formElement.reset(); setInterested("sim"); setSuccess(true); setMessage(data.message || "Inscrição registada com sucesso.");
     } catch (error) { setMessage(error instanceof Error ? error.message : "Não foi possível enviar a inscrição."); }
     finally { setSubmitting(false); }
   }
