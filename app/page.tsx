@@ -297,6 +297,8 @@ type SharedFolder = { id: string; name: string; description: string; url: string
 type TalentCandidateStatus = "Recebida" | "Em análise" | "Entrevista" | "Admitido" | "Não selecionado";
 type TalentCandidateProfile = "Classificar" | "Curto prazo" | "Médio prazo" | "Longo prazo" | "Sem perfil";
 type TalentCandidate = { id: number; name: string; email: string; contact: string; admissionDate: string; jobTitle: string; profile: TalentCandidateProfile; status: TalentCandidateStatus; cvName: string; coverLetterName: string; createdAt: string; updatedAt: string };
+type NatureWalkStatus = "Pendente" | "Aprovada" | "Não aprovada";
+type NatureWalkRegistration = { id: number; name: string; interested: boolean; sharingItem: string; status: NatureWalkStatus; createdAt: string; updatedAt: string };
 
 const inventoryProducts = inventoryProductsData as InventoryProduct[];
 const inventoryCategoryLabels: Record<InventoryCategory, string> = { food: "Comida", paper: "Papel", ops: "OPS" };
@@ -820,6 +822,7 @@ export default function Home() {
   const [collapsedEvaluationDepartments, setCollapsedEvaluationDepartments] = useState<Partial<Record<EvaluationDepartment, boolean>>>({});
   const [talentCandidates, setTalentCandidates] = useState<TalentCandidate[]>([]);
   const [talentLoading, setTalentLoading] = useState(false);
+  const [natureWalkRegistrations, setNatureWalkRegistrations] = useState<NatureWalkRegistration[]>([]);
   const [managerScheduleTab, setManagerScheduleTab] = useState<"definitions" | "annual" | "monthly" | "hours">("monthly");
 
   useEffect(() => {
@@ -1010,9 +1013,12 @@ export default function Home() {
     if (view !== "talento" || department !== "pessoas" || !currentUser || !(currentUser.role === "admin" || currentUser.role === "editor" && currentUser.department === "pessoas")) return;
     let active = true;
     setTalentLoading(true);
-    fetch("/api/candidaturas").then((response) => response.ok ? response.json() : Promise.reject()).then((data: { candidates: TalentCandidate[] }) => {
-      if (active) setTalentCandidates(data.candidates);
-    }).catch(() => setNotice("Não foi possível carregar as candidaturas.")).finally(() => { if (active) setTalentLoading(false); });
+    Promise.all([fetch("/api/candidaturas"), fetch("/api/caminhada-natureza")]).then(async ([candidatesResponse, walkResponse]) => {
+      if (!candidatesResponse.ok || !walkResponse.ok) throw new Error();
+      const candidatesData = await candidatesResponse.json() as { candidates: TalentCandidate[] };
+      const walkData = await walkResponse.json() as { registrations: NatureWalkRegistration[] };
+      if (active) { setTalentCandidates(candidatesData.candidates); setNatureWalkRegistrations(walkData.registrations); }
+    }).catch(() => setNotice("Não foi possível carregar os registos de Gestão de Talento.")).finally(() => { if (active) setTalentLoading(false); });
     return () => { active = false; };
   }, [view, department, currentUser]);
 
@@ -1453,6 +1459,14 @@ export default function Home() {
     setNotice("Perfil da candidatura atualizado.");
   }
 
+  async function updateNatureWalkRegistration(registration: NatureWalkRegistration, status: NatureWalkStatus) {
+    const response = await fetch("/api/caminhada-natureza", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: registration.id, status }) });
+    const data = await response.json() as { registration?: NatureWalkRegistration; error?: string };
+    if (!response.ok || !data.registration) { setNotice(data.error || "Não foi possível validar a inscrição."); return; }
+    setNatureWalkRegistrations((current) => current.map((item) => item.id === registration.id ? data.registration! : item));
+    setNotice(status === "Aprovada" ? "Inscrição aprovada." : status === "Não aprovada" ? "Inscrição não aprovada." : "Inscrição devolvida a pendente.");
+  }
+
   const roleLabel = (role: AppRole) => role === "admin" ? "Administrador" : role === "editor" ? "Editor" : "Consulta";
   const canEdit = currentUser?.role === "admin" || currentUser?.role === "editor";
 
@@ -1708,9 +1722,18 @@ export default function Home() {
             <section className="talent-page" aria-labelledby="talent-title">
               <div className="talent-heading">
                 <div><span className="eyebrow">Pessoas · Recrutamento</span><h2 id="talent-title">Gestão Talento</h2><p>Acompanhe os candidatos e mantenha cada processo atualizado.</p></div>
-                <a className="talent-application-link" href="https://candidaturas-imperial.tiagosoutelo.chatgpt.site" target="_blank" rel="noreferrer">＋ Partilhar candidatura ↗</a>
+                <div className="talent-share-actions"><a className="talent-application-link walk" href="/caminhada-natureza" target="_blank" rel="noreferrer">Partilhar Caminhada ↗</a><a className="talent-application-link" href="https://candidaturas-imperial.tiagosoutelo.chatgpt.site" target="_blank" rel="noreferrer">＋ Partilhar candidatura ↗</a></div>
               </div>
               {currentUser?.role === "admin" || currentUser?.role === "editor" && currentUser.department === "pessoas" ? <>
+                <div className="talent-board walk-management">
+                  <div className="talent-board-heading"><div><span className="eyebrow">Plano Motivacional · 15 de setembro · 08h30–16h00</span><h3>Caminhada pela Natureza</h3></div><span>{talentLoading ? "A carregar…" : `${natureWalkRegistrations.length} inscrições`}</span></div>
+                  <div className="walk-registration-summary"><span><b>{natureWalkRegistrations.filter((item) => item.interested).length}</b> interessados</span><span><b>{natureWalkRegistrations.filter((item) => item.status === "Aprovada").length}</b> aprovados</span><span><b>{natureWalkRegistrations.filter((item) => item.status === "Pendente").length}</b> pendentes</span></div>
+                  <div className="walk-registration-table" role="table" aria-label="Inscrições na Caminhada pela Natureza">
+                    <div className="walk-registration-row header" role="row"><span>Nome</span><span>Interesse</span><span>Leva para partilhar</span><span>Inscrição</span><span>Validação</span></div>
+                    {natureWalkRegistrations.map((registration) => <div className="walk-registration-row" role="row" key={registration.id}><strong>{registration.name}</strong><span className={registration.interested ? "walk-yes" : "walk-no"}>{registration.interested ? "Sim" : "Não"}</span><span>{registration.sharingItem || "—"}</span><small>{new Date(registration.createdAt).toLocaleDateString("pt-PT")}</small><select value={registration.status} className={`walk-status ${statusClass(registration.status)}`} onChange={(event) => void updateNatureWalkRegistration(registration, event.target.value as NatureWalkStatus)} aria-label={`Validação de ${registration.name}`}><option>Pendente</option><option>Aprovada</option><option>Não aprovada</option></select></div>)}
+                    {!talentLoading && natureWalkRegistrations.length === 0 && <div className="talent-empty"><span>🥾</span><div><strong>Ainda não existem inscrições</strong><small>Partilhe o link da caminhada com a equipa.</small></div></div>}
+                  </div>
+                </div>
                 {(() => {
                   const uniqueCandidates = Array.from(new Map(talentCandidates.map((candidate) => [candidate.email.trim().toLowerCase(), candidate])).values());
                   const jobs = ["Relações Públicas", "Treinadores"] as const;

@@ -1,27 +1,36 @@
 export default {
-  "bootstrapScriptContent": "import(\"/assets/index-CIRv0QHJ.js\")",
+  "bootstrapScriptContent": "import(\"/assets/index-3mibZEIv.js\")",
   "clientReferenceDeps": {
-    "3dd901d9dc77": {
+    "a4ffd3fe094f": {
       "js": [
-        "/assets/page-CHxVjQQO.js",
+        "/assets/page-DTuamtIy.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js",
-        "/assets/index-CIRv0QHJ.js"
+        "/assets/index-3mibZEIv.js"
+      ],
+      "css": []
+    },
+    "3dd901d9dc77": {
+      "js": [
+        "/assets/page-CmBLb8JA.js",
+        "/assets/rolldown-runtime-S-ySWqyJ.js",
+        "/assets/framework-CXnKph_e.js",
+        "/assets/index-3mibZEIv.js"
       ],
       "css": []
     },
     "6efdf509a785": {
       "js": [
-        "/assets/page-CDzOcnNu.js",
+        "/assets/page-DHRuYEaR.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
-        "/assets/index-CIRv0QHJ.js",
+        "/assets/index-3mibZEIv.js",
         "/assets/framework-CXnKph_e.js"
       ],
       "css": []
     },
     "59fca594cf69": {
       "js": [
-        "/assets/index-CIRv0QHJ.js",
+        "/assets/index-3mibZEIv.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js"
       ],
@@ -29,16 +38,16 @@ export default {
     },
     "0267e74c1d52": {
       "js": [
-        "/assets/layout-segment-context-1-sXtow6.js",
+        "/assets/layout-segment-context-CLZ36_i1.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
-        "/assets/index-CIRv0QHJ.js",
+        "/assets/index-3mibZEIv.js",
         "/assets/framework-CXnKph_e.js"
       ],
       "css": []
     },
     "05b45acc03fd": {
       "js": [
-        "/assets/index-CIRv0QHJ.js",
+        "/assets/index-3mibZEIv.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js"
       ],
@@ -49,7 +58,7 @@ export default {
     "app/layout.tsx": {
       "js": [],
       "css": [
-        "/assets/index-BtAA4t2k.css"
+        "/assets/index-BwxFLXG9.css"
       ]
     }
   }

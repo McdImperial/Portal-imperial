@@ -118,6 +118,18 @@ export const billingAnalyses = sqliteTable("billing_analyses", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const natureWalkRegistrations = sqliteTable("nature_walk_registrations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  interested: integer("interested", { mode: "boolean" }).notNull().default(true),
+  sharingItem: text("sharing_item").notNull().default(""),
+  status: text("status").notNull().default("Pendente"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_nature_walk_registrations_status_created").on(table.status, table.createdAt),
+]);
+
 export const vaultControls = sqliteTable("vault_controls", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   controlDate: text("control_date").notNull(),

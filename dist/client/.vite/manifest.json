@@ -10,8 +10,18 @@
     "file": "assets/rolldown-runtime-S-ySWqyJ.js",
     "name": "rolldown-runtime"
   },
+  "app/caminhada-natureza/page.tsx": {
+    "file": "assets/page-DTuamtIy.js",
+    "name": "page",
+    "src": "app/caminhada-natureza/page.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-S-ySWqyJ.js",
+      "_framework-CXnKph_e.js"
+    ]
+  },
   "app/candidatura/page.tsx": {
-    "file": "assets/page-CHxVjQQO.js",
+    "file": "assets/page-CmBLb8JA.js",
     "name": "page",
     "src": "app/candidatura/page.tsx",
     "isDynamicEntry": true,
@@ -21,7 +31,7 @@
     ]
   },
   "app/page.tsx": {
-    "file": "assets/page-CDzOcnNu.js",
+    "file": "assets/page-DHRuYEaR.js",
     "name": "page",
     "src": "app/page.tsx",
     "isDynamicEntry": true,
@@ -35,7 +45,7 @@
     ]
   },
   "node_modules/.pnpm/html2canvas@1.4.1/node_modules/html2canvas/dist/html2canvas.js": {
-    "file": "assets/html2canvas-BsR1gdYy.js",
+    "file": "assets/html2canvas-a4DTzVGu.js",
     "name": "html2canvas",
     "src": "node_modules/.pnpm/html2canvas@1.4.1/node_modules/html2canvas/dist/html2canvas.js",
     "isDynamicEntry": true,
@@ -44,7 +54,7 @@
     ]
   },
   "node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/shims/layout-segment-context.js": {
-    "file": "assets/layout-segment-context-1-sXtow6.js",
+    "file": "assets/layout-segment-context-CLZ36_i1.js",
     "name": "layout-segment-context",
     "src": "node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/shims/layout-segment-context.js",
     "isDynamicEntry": true,
@@ -55,7 +65,7 @@
     ]
   },
   "virtual:vinext-app-browser-entry": {
-    "file": "assets/index-CIRv0QHJ.js",
+    "file": "assets/index-3mibZEIv.js",
     "name": "index",
     "src": "virtual:vinext-app-browser-entry",
     "isEntry": true,
@@ -67,7 +77,8 @@
       "node_modules/.pnpm/vinext@0.0.50_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild@0.28._67aa13a041cb340aa114f5f24aa08bf9/node_modules/vinext/dist/shims/layout-segment-context.js",
       "virtual:vinext-app-browser-entry",
       "app/candidatura/page.tsx",
-      "app/page.tsx"
+      "app/page.tsx",
+      "app/caminhada-natureza/page.tsx"
     ]
   }
 }
