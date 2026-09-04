@@ -2,7 +2,7 @@
 
 import { type FormEvent, useState } from "react";
 
-const managers = ["Tiago Soutelo", "Ricardo Teixeira", "Susana Torres", "Sara Sousa", "Miguel Matela", "Soraia Martins", "André Martins", "Liliana Pacheco", "Diogo Cabral", "Sílvia Tavares", "Ana Sousa"];
+const managers = ["Ricardo Teixeira", "Susana Torres", "Sara Sousa", "Miguel Matela", "Soraia Martins", "André Martins", "Liliana Pacheco", "Diogo Cabral", "Sílvia Tavares", "Ana Sousa"];
 const period = "2.º Quadrimestre 2026";
 const sections = [
   { id:"building", title:"Building Blocks", subtitle:"Qualidades que promovem uma alta performance", weight:37, criteria:["Ganha a confiança dos outros ajustando o seu estilo de comunicação e influenciando de forma positiva, demonstrando assertividade para dizer sim ou não, quando necessário.","Vivencia os valores da empresa no desempenho da sua função, assegurando e promovendo os padrões e normas da McDonald’s.","Mantém o controlo emocional e a produtividade em ambientes de grande pressão, conseguindo manter uma atitude positiva.","Demonstra respeito e compreensão pelos outros, adaptando-se ao grupo e construindo espírito de equipa.","Durante a execução da sua função, dá orientações claras e demonstra padrões de comportamento adequados."] },

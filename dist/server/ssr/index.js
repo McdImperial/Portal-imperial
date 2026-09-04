@@ -11675,13 +11675,13 @@ var client_references_default = {
 		};
 	},
 	"5c794cda32ba": async () => {
-		const m = await import("./assets/page-BH5JTpvv.js");
+		const m = await import("./assets/page-DZfucbsr.js");
 		return { get "default"() {
 			return m["default"];
 		} };
 	},
 	"6efdf509a785": async () => {
-		const m = await import("./assets/page-D_dx1wrg.js");
+		const m = await import("./assets/page-BH7LRpnd.js");
 		return { get "default"() {
 			return m["default"];
 		} };

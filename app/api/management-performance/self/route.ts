@@ -1,7 +1,7 @@
 import { getDb } from "../../../../db";
 import { managementPerformanceEvaluations } from "../../../../db/schema";
 
-const managers = ["Tiago Soutelo", "Ricardo Teixeira", "Susana Torres", "Sara Sousa", "Miguel Matela", "Soraia Martins", "André Martins", "Liliana Pacheco", "Diogo Cabral", "Sílvia Tavares", "Ana Sousa"];
+const managers = ["Ricardo Teixeira", "Susana Torres", "Sara Sousa", "Miguel Matela", "Soraia Martins", "André Martins", "Liliana Pacheco", "Diogo Cabral", "Sílvia Tavares", "Ana Sousa"];
 const period = "2.º Quadrimestre 2026";
 
 export async function POST(request: Request) {
