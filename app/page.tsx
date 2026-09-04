@@ -818,7 +818,7 @@ function ManagementPerformanceForm() {
   const summaryComplete = managementTeam.every(managerComplete);
   const selfEvaluation = (name:string) => history.find((evaluation)=>evaluation.managerName===name&&evaluation.period===summaryPeriod&&evaluation.evaluationType==="Autoavaliação");
   const comparativePeriods = performanceSheetHistory.slice(0, 6).toReversed();
-  const comparativeManagers = Array.from(new Set(comparativePeriods.flatMap((item) => item.managers.map(([name]) => name))));
+  const comparativeManagers = ["Ricardo Teixeira", "Susana Torres", "Sara Sousa", "Miguel Matela", "Soraia Martins", "André Martins", "Liliana Pacheco", "Diogo Cabral", "Sílvia Tavares", "Ana Sousa"];
 
   useEffect(() => { fetch("/api/management-performance").then((response) => response.ok ? response.json() : Promise.reject()).then((data:{evaluations:PerformanceEvaluation[]}) => setHistory(data.evaluations)).catch(() => undefined); }, []);
 
