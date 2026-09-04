@@ -149,6 +149,7 @@ export const managementPerformanceEvaluations = sqliteTable("management_performa
   scores: text("scores").notNull().default("{}"),
   quantitativeScore: real("quantitative_score").notNull().default(0),
   qualitativeRating: text("qualitative_rating").notNull(),
+  evaluationType: text("evaluation_type").notNull().default("Avaliação"),
   strengths: text("strengths").notNull().default(""),
   improvements: text("improvements").notNull().default(""),
   createdBy: integer("created_by").notNull(),

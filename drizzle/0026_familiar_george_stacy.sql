@@ -1,0 +1,1 @@
+ALTER TABLE `management_performance_evaluations` ADD `evaluation_type` text DEFAULT 'Avaliação' NOT NULL;

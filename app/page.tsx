@@ -786,7 +786,7 @@ const performanceSections = [
   ] },
 ] as const;
 
-type PerformanceEvaluation = { id:number; managerName:string; period:string; scores:string; quantitativeScore:number; qualitativeRating:string; strengths:string; improvements:string; createdAt:string };
+type PerformanceEvaluation = { id:number; managerName:string; period:string; scores:string; quantitativeScore:number; qualitativeRating:string; evaluationType:string; strengths:string; improvements:string; createdAt:string };
 
 function performanceRating(score: number) {
   if (score <= 1.2) return "Insuficiente";
@@ -798,11 +798,11 @@ function performanceRating(score: number) {
 
 function ManagementPerformanceForm() {
   const managementTeam = teamMilestonesData.organisation.managementLevels.flat().map((person) => person.name);
-  const [summaryPeriod, setSummaryPeriod] = useState("3.º Q 26");
+  const [summaryPeriod, setSummaryPeriod] = useState("2.º Quadrimestre 2026");
   const [summaryScores, setSummaryScores] = useState<Record<string, Record<string, number>>>({});
   const [summaryBusy, setSummaryBusy] = useState(false);
   const [managerName, setManagerName] = useState("");
-  const [period, setPeriod] = useState("3.º Q 26");
+  const [period, setPeriod] = useState("2.º Quadrimestre 2026");
   const [scores, setScores] = useState<Record<string, number>>({});
   const [strengths, setStrengths] = useState("");
   const [improvements, setImprovements] = useState("");
@@ -817,6 +817,7 @@ function ManagementPerformanceForm() {
   const managerScore = (name:string) => performanceSections.reduce((total, section) => { const values = section.criteria.map((_, index) => summaryScores[name]?.[`${section.id}-${index}`] || 0); return total + (values.reduce((sum, value) => sum + value, 0) / values.length) * section.weight / 100; }, 0);
   const managerComplete = (name:string) => performanceSections.every((section) => section.criteria.every((_, index) => summaryScores[name]?.[`${section.id}-${index}`]));
   const summaryComplete = managementTeam.every(managerComplete);
+  const selfEvaluation = (name:string) => history.find((evaluation)=>evaluation.managerName===name&&evaluation.period===summaryPeriod&&evaluation.evaluationType==="Autoavaliação");
 
   useEffect(() => { fetch("/api/management-performance").then((response) => response.ok ? response.json() : Promise.reject()).then((data:{evaluations:PerformanceEvaluation[]}) => setHistory(data.evaluations)).catch(() => undefined); }, []);
 
@@ -852,7 +853,7 @@ function ManagementPerformanceForm() {
   }
 
   return <section className="performance-page" aria-labelledby="performance-title">
-    <div className="performance-heading"><div><span className="eyebrow">Gerente Loja · Equipa de Gestão</span><h2 id="performance-title">Avaliações Desempenho EG</h2><p>Autoavaliação estruturada por competências, execução, estratégia e talento.</p></div><div className="performance-score"><small>Nota quantitativa</small><strong>{allAnswered ? quantitativeScore.toFixed(2).replace(".", ",") : "—"}</strong><span>{rating}</span></div></div>
+    <div className="performance-heading"><div><span className="eyebrow">Gerente Loja · Equipa de Gestão</span><h2 id="performance-title">Avaliações Desempenho EG</h2><p>Avaliação estruturada por competências, execução, estratégia e talento.</p></div><div className="performance-heading-actions"><a href="/autoavaliacao-eg" target="_blank" rel="noreferrer">Partilhar autoavaliação ↗</a><div className="performance-score"><small>Nota quantitativa</small><strong>{allAnswered ? quantitativeScore.toFixed(2).replace(".", ",") : "—"}</strong><span>{rating}</span></div></div></div>
     <section className="performance-summary-board" aria-labelledby="performance-summary-title">
       <div className="performance-summary-heading"><div><span className="eyebrow">Avaliação coletiva</span><h3 id="performance-summary-title">Resumo de avaliações</h3><p>Avalie toda a equipa de gestão na mesma grelha.</p></div><label>Período<input value={summaryPeriod} onChange={(event) => setSummaryPeriod(event.target.value)} /></label></div>
       <div className="performance-matrix-wrap"><div className="performance-matrix" style={{ gridTemplateColumns:`minmax(430px,2.5fr) repeat(${managementTeam.length},minmax(105px,1fr))` }}>
@@ -864,6 +865,7 @@ function ManagementPerformanceForm() {
         ])}
         <div className="performance-matrix-cell total-label">Nota quantitativa</div>{managementTeam.map((name)=><div className={`performance-matrix-cell total ${managerComplete(name)?statusClass(performanceRating(managerScore(name))):""}`} key={`total-${name}`}><strong>{managerComplete(name)?managerScore(name).toFixed(2).replace(".",","):"—"}</strong></div>)}
         <div className="performance-matrix-cell total-label">Nota qualitativa</div>{managementTeam.map((name)=><div className="performance-matrix-cell rating" key={`rating-${name}`}>{managerComplete(name)?performanceRating(managerScore(name)):"—"}</div>)}
+        <div className="performance-matrix-cell total-label">Autoavaliação</div>{managementTeam.map((name)=>{const evaluation=selfEvaluation(name);return <div className="performance-matrix-cell self-score" key={`self-${name}`}>{evaluation?<><strong>{Number(evaluation.quantitativeScore).toFixed(2).replace(".",",")}</strong><small>{evaluation.qualitativeRating}</small></>:"—"}</div>;})}
       </div></div>
       <div className="performance-summary-footer"><div className="performance-scale"><span>≤ 1,2 Insuficiente</span><span>≤ 2,6 Suficiente</span><span>≤ 3,2 Bom</span><span>≤ 3,6 Bom +</span><span>≤ 4 Muito Bom</span></div><button type="button" disabled={!summaryComplete||summaryBusy} onClick={()=>void saveSummary()}>{summaryBusy?"A guardar…":"Guardar avaliações da equipa"}</button></div>
     </section>
@@ -874,7 +876,7 @@ function ManagementPerformanceForm() {
       <div className="performance-notes"><label>Pontos fortes<textarea rows={4} value={strengths} onChange={(event) => setStrengths(event.target.value)} /></label><label>Pontos a melhorar<textarea rows={4} value={improvements} onChange={(event) => setImprovements(event.target.value)} /></label></div>
       <button className="performance-save" disabled={!allAnswered || busy}>{busy ? "A guardar…" : "Guardar avaliação"}</button>
     </form>
-    <section className="performance-history"><div className="performance-history-heading"><div><span className="eyebrow">Registos guardados</span><h3>Histórico de avaliações</h3></div><strong>{history.length}</strong></div><div className="performance-history-table"><div className="performance-history-row header"><span>Nome</span><span>Período</span><span>Nota</span><span>Classificação</span><span>Data</span><span>Ações</span></div>{history.map((evaluation) => <div className="performance-history-row" key={evaluation.id}><strong>{evaluation.managerName}</strong><span>{evaluation.period}</span><b>{Number(evaluation.quantitativeScore).toFixed(2).replace(".", ",")}</b><em>{evaluation.qualitativeRating}</em><span>{new Date(evaluation.createdAt).toLocaleDateString("pt-PT")}</span><button type="button" onClick={() => void remove(evaluation)}>Eliminar</button></div>)}{!history.length && <div className="performance-empty">Ainda não existem avaliações guardadas.</div>}</div></section>
+    <section className="performance-history"><div className="performance-history-heading"><div><span className="eyebrow">Registos guardados</span><h3>Histórico de avaliações</h3></div><strong>{history.length}</strong></div><div className="performance-history-table"><div className="performance-history-row header"><span>Nome</span><span>Período</span><span>Tipo</span><span>Nota</span><span>Classificação</span><span>Data</span><span>Ações</span></div>{history.map((evaluation) => <div className="performance-history-row" key={evaluation.id}><strong>{evaluation.managerName}</strong><span>{evaluation.period}</span><span>{evaluation.evaluationType||"Avaliação"}</span><b>{Number(evaluation.quantitativeScore).toFixed(2).replace(".", ",")}</b><em>{evaluation.qualitativeRating}</em><span>{new Date(evaluation.createdAt).toLocaleDateString("pt-PT")}</span><button type="button" onClick={() => void remove(evaluation)}>Eliminar</button></div>)}{!history.length && <div className="performance-empty">Ainda não existem avaliações guardadas.</div>}</div></section>
   </section>;
 }
 

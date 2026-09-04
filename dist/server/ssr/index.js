@@ -11629,7 +11629,7 @@ function createFromReadableStream(stream, options = {}) {
 //#region \0virtual:vite-rsc/client-references
 var client_references_default = {
 	"0267e74c1d52": async () => {
-		const m = await import("./assets/layout-segment-context-qy1VVp5G.js");
+		const m = await import("./assets/layout-segment-context-h5HG7BF8.js");
 		return { get "LayoutSegmentProvider"() {
 			return m["LayoutSegmentProvider"];
 		} };
@@ -11649,13 +11649,13 @@ var client_references_default = {
 		};
 	},
 	"3dd901d9dc77": async () => {
-		const m = await import("./assets/page-Te7A_d38.js");
+		const m = await import("./assets/page-B4Kdedzz.js");
 		return { get "default"() {
 			return m["default"];
 		} };
 	},
 	"59fca594cf69": async () => {
-		const m = await import("./assets/error-boundary-kFy6URuy.js");
+		const m = await import("./assets/error-boundary-BRFLKUE_.js");
 		return {
 			get "ErrorBoundary"() {
 				return m["ErrorBoundary"];
@@ -11674,14 +11674,20 @@ var client_references_default = {
 			}
 		};
 	},
+	"5c794cda32ba": async () => {
+		const m = await import("./assets/page-BH5JTpvv.js");
+		return { get "default"() {
+			return m["default"];
+		} };
+	},
 	"6efdf509a785": async () => {
-		const m = await import("./assets/page-DeqBdgrq.js");
+		const m = await import("./assets/page-D_dx1wrg.js");
 		return { get "default"() {
 			return m["default"];
 		} };
 	},
 	"a4ffd3fe094f": async () => {
-		const m = await import("./assets/page-DhR61VcD.js");
+		const m = await import("./assets/page-B3fa5QVo.js");
 		return { get "default"() {
 			return m["default"];
 		} };
