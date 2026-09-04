@@ -130,6 +130,18 @@ export const natureWalkRegistrations = sqliteTable("nature_walk_registrations", 
   index("idx_nature_walk_registrations_status_created").on(table.status, table.createdAt),
 ]);
 
+export const natureWalkShoppingItems = sqliteTable("nature_walk_shopping_items", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  product: text("product").notNull(),
+  quantity: text("quantity").notNull(),
+  createdBy: integer("created_by").notNull(),
+  createdByName: text("created_by_name").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_nature_walk_shopping_items_created").on(table.createdAt),
+]);
+
 export const vaultControls = sqliteTable("vault_controls", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   controlDate: text("control_date").notNull(),

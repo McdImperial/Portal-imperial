@@ -300,6 +300,7 @@ type TalentCandidateProfile = "Classificar" | "Curto prazo" | "Médio prazo" | "
 type TalentCandidate = { id: number; name: string; email: string; contact: string; admissionDate: string; jobTitle: string; profile: TalentCandidateProfile; status: TalentCandidateStatus; cvName: string; coverLetterName: string; createdAt: string; updatedAt: string };
 type NatureWalkStatus = "Pendente" | "Aprovada" | "Não aprovada";
 type NatureWalkRegistration = { id: number; name: string; interested: boolean; sharingItem: string; status: NatureWalkStatus; createdAt: string; updatedAt: string };
+type NatureWalkShoppingItem = { id: number; product: string; quantity: string; createdByName: string; createdAt: string; updatedAt: string };
 
 const inventoryProducts = inventoryProductsData as InventoryProduct[];
 const inventoryCategoryLabels: Record<InventoryCategory, string> = { food: "Comida", paper: "Papel", ops: "OPS" };
@@ -824,6 +825,9 @@ export default function Home() {
   const [talentCandidates, setTalentCandidates] = useState<TalentCandidate[]>([]);
   const [talentLoading, setTalentLoading] = useState(false);
   const [natureWalkRegistrations, setNatureWalkRegistrations] = useState<NatureWalkRegistration[]>([]);
+  const [natureWalkShoppingItems, setNatureWalkShoppingItems] = useState<NatureWalkShoppingItem[]>([]);
+  const [walkShoppingDraft, setWalkShoppingDraft] = useState({ product: "", quantity: "" });
+  const [walkShoppingBusy, setWalkShoppingBusy] = useState(false);
   const [managerScheduleTab, setManagerScheduleTab] = useState<"definitions" | "annual" | "monthly" | "hours">("monthly");
 
   useEffect(() => {
@@ -1021,10 +1025,11 @@ export default function Home() {
       const candidatesData = await candidatesResponse.json() as { candidates: TalentCandidate[] };
       const walkData = await walkResponse.json() as { registrations: NatureWalkRegistration[] };
       if (active) { setTalentCandidates(candidatesData.candidates); setNatureWalkRegistrations(walkData.registrations); }
-    }) : fetch("/api/caminhada-natureza").then(async (response) => {
-      if (!response.ok) throw new Error();
-      const data = await response.json() as { registrations: NatureWalkRegistration[] };
-      if (active) setNatureWalkRegistrations(data.registrations);
+    }) : Promise.all([fetch("/api/caminhada-natureza"), fetch("/api/caminhada-natureza/compras")]).then(async ([registrationsResponse, shoppingResponse]) => {
+      if (!registrationsResponse.ok || !shoppingResponse.ok) throw new Error();
+      const data = await registrationsResponse.json() as { registrations: NatureWalkRegistration[] };
+      const shoppingData = await shoppingResponse.json() as { items: NatureWalkShoppingItem[] };
+      if (active) { setNatureWalkRegistrations(data.registrations); setNatureWalkShoppingItems(shoppingData.items); }
     });
     requests.catch(() => setNotice("Não foi possível carregar as inscrições da caminhada.")).finally(() => { if (active) setTalentLoading(false); });
     return () => { active = false; };
@@ -1475,6 +1480,36 @@ export default function Home() {
     setNotice(status === "Aprovada" ? "Inscrição aprovada." : status === "Não aprovada" ? "Inscrição não aprovada." : "Inscrição devolvida a pendente.");
   }
 
+  async function addNatureWalkShoppingItem(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (walkShoppingBusy) return;
+    setWalkShoppingBusy(true);
+    try {
+      const response = await fetch("/api/caminhada-natureza/compras", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(walkShoppingDraft) });
+      const data = await response.json() as { item?: NatureWalkShoppingItem; error?: string };
+      if (!response.ok || !data.item) throw new Error(data.error || "Não foi possível acrescentar o produto.");
+      setNatureWalkShoppingItems((current) => [...current, data.item!]);
+      setWalkShoppingDraft({ product: "", quantity: "" });
+      setNotice("Produto acrescentado à lista de compras.");
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Não foi possível acrescentar o produto."); }
+    finally { setWalkShoppingBusy(false); }
+  }
+
+  async function updateNatureWalkShoppingItem(item: NatureWalkShoppingItem, changes: Partial<Pick<NatureWalkShoppingItem, "product" | "quantity">>) {
+    const next = { ...item, ...changes };
+    setNatureWalkShoppingItems((current) => current.map((entry) => entry.id === item.id ? next : entry));
+    const response = await fetch("/api/caminhada-natureza/compras", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: item.id, product: next.product, quantity: next.quantity }) });
+    const data = await response.json() as { item?: NatureWalkShoppingItem; error?: string };
+    if (!response.ok || !data.item) { setNatureWalkShoppingItems((current) => current.map((entry) => entry.id === item.id ? item : entry)); setNotice(data.error || "Não foi possível atualizar o produto."); }
+  }
+
+  async function deleteNatureWalkShoppingItem(item: NatureWalkShoppingItem) {
+    const response = await fetch(`/api/caminhada-natureza/compras?id=${item.id}`, { method: "DELETE" });
+    if (!response.ok) { setNotice("Não foi possível eliminar o produto."); return; }
+    setNatureWalkShoppingItems((current) => current.filter((entry) => entry.id !== item.id));
+    setNotice("Produto retirado da lista de compras.");
+  }
+
   const roleLabel = (role: AppRole) => role === "admin" ? "Administrador" : role === "editor" ? "Editor" : "Consulta";
   const canEdit = currentUser?.role === "admin" || currentUser?.role === "editor";
 
@@ -1720,6 +1755,27 @@ export default function Home() {
                 {natureWalkRegistrations.map((registration) => <div className="walk-registration-row" role="row" key={registration.id}><strong>{registration.name}</strong><span className={registration.interested ? "walk-yes" : "walk-no"}>{registration.interested ? "Sim" : "Não"}</span><span>{registration.sharingItem || "—"}</span><small>{new Date(registration.createdAt).toLocaleString("pt-PT", { dateStyle: "short", timeStyle: "short" })}</small><select value={registration.status} className={`walk-status ${statusClass(registration.status)}`} onChange={(event) => void updateNatureWalkRegistration(registration, event.target.value as NatureWalkStatus)} aria-label={`Validação de ${registration.name}`}><option>Pendente</option><option>Aprovada</option><option>Não aprovada</option></select></div>)}
                 {!talentLoading && natureWalkRegistrations.length === 0 && <div className="talent-empty"><span>🥾</span><div><strong>Ainda não existem respostas</strong><small>As inscrições submetidas através do formulário aparecerão automaticamente aqui.</small></div></div>}
               </div>
+            </div>
+            <div className="walk-planning-grid">
+              <section className="walk-planning-card" aria-labelledby="walk-contributions-title">
+                <div className="walk-planning-heading"><div><span className="eyebrow">Partilhas da equipa</span><h3 id="walk-contributions-title">O que cada pessoa leva</h3></div><strong>{natureWalkRegistrations.filter((item) => item.interested && item.sharingItem.trim()).length} produtos</strong></div>
+                <div className="walk-contribution-list">
+                  {natureWalkRegistrations.filter((item) => item.interested && item.sharingItem.trim()).map((registration) => <div key={registration.id}><span className="walk-contribution-icon">✓</span><p><strong>{registration.sharingItem}</strong><small>{registration.name}</small></p><em className={statusClass(registration.status)}>{registration.status}</em></div>)}
+                  {natureWalkRegistrations.filter((item) => item.interested && item.sharingItem.trim()).length === 0 && <div className="walk-list-empty">Ainda ninguém indicou o que vai levar.</div>}
+                </div>
+              </section>
+              <section className="walk-planning-card" aria-labelledby="walk-shopping-title">
+                <div className="walk-planning-heading"><div><span className="eyebrow">Preparação da atividade</span><h3 id="walk-shopping-title">Lista de compras</h3></div><strong>{natureWalkShoppingItems.length} produtos</strong></div>
+                <form className="walk-shopping-form" onSubmit={addNatureWalkShoppingItem}>
+                  <label>Produto<input value={walkShoppingDraft.product} onChange={(event) => setWalkShoppingDraft((current) => ({ ...current, product: event.target.value }))} placeholder="Ex.: Água" required /></label>
+                  <label>Quantidade<input value={walkShoppingDraft.quantity} onChange={(event) => setWalkShoppingDraft((current) => ({ ...current, quantity: event.target.value }))} placeholder="Ex.: 24 garrafas" required /></label>
+                  <button type="submit" disabled={walkShoppingBusy}>{walkShoppingBusy ? "A acrescentar…" : "+ Acrescentar"}</button>
+                </form>
+                <div className="walk-shopping-list">
+                  {natureWalkShoppingItems.map((item) => <div key={item.id}><input aria-label={`Produto ${item.product}`} value={item.product} onChange={(event) => setNatureWalkShoppingItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, product: event.target.value } : entry))} onBlur={(event) => void updateNatureWalkShoppingItem(item, { product: event.target.value })} /><input aria-label={`Quantidade de ${item.product}`} value={item.quantity} onChange={(event) => setNatureWalkShoppingItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, quantity: event.target.value } : entry))} onBlur={(event) => void updateNatureWalkShoppingItem(item, { quantity: event.target.value })} /><button type="button" onClick={() => void deleteNatureWalkShoppingItem(item)} aria-label={`Eliminar ${item.product}`}>Eliminar</button></div>)}
+                  {natureWalkShoppingItems.length === 0 && <div className="walk-list-empty">A lista de compras ainda está vazia.</div>}
+                </div>
+              </section>
             </div>
           </section>}
 

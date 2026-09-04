@@ -169,6 +169,13 @@
       "when": 1788454325011,
       "tag": "0023_chunky_deathstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1788523172303,
+      "tag": "0024_vengeful_vin_gonzales",
+      "breakpoints": true
     }
   ]
 }
