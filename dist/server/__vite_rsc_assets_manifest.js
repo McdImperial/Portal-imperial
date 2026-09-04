@@ -1,12 +1,12 @@
 export default {
-  "bootstrapScriptContent": "import(\"/assets/index-CQQAUe-O.js\")",
+  "bootstrapScriptContent": "import(\"/assets/index-Ce2s137Q.js\")",
   "clientReferenceDeps": {
     "5c794cda32ba": {
       "js": [
         "/assets/page-tQzcL4mk.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js",
-        "/assets/index-CQQAUe-O.js"
+        "/assets/index-Ce2s137Q.js"
       ],
       "css": []
     },
@@ -15,7 +15,7 @@ export default {
         "/assets/page-ChLjLMmd.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js",
-        "/assets/index-CQQAUe-O.js"
+        "/assets/index-Ce2s137Q.js"
       ],
       "css": []
     },
@@ -24,22 +24,22 @@ export default {
         "/assets/page-lK2_pXRB.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js",
-        "/assets/index-CQQAUe-O.js"
+        "/assets/index-Ce2s137Q.js"
       ],
       "css": []
     },
     "6efdf509a785": {
       "js": [
-        "/assets/page-Cpjcsbl3.js",
+        "/assets/page-CVg8Ohj4.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
-        "/assets/index-CQQAUe-O.js",
+        "/assets/index-Ce2s137Q.js",
         "/assets/framework-CXnKph_e.js"
       ],
       "css": []
     },
     "59fca594cf69": {
       "js": [
-        "/assets/index-CQQAUe-O.js",
+        "/assets/index-Ce2s137Q.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js"
       ],
@@ -47,16 +47,16 @@ export default {
     },
     "0267e74c1d52": {
       "js": [
-        "/assets/layout-segment-context-BStFlAHU.js",
+        "/assets/layout-segment-context-Hor9prDd.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
-        "/assets/index-CQQAUe-O.js",
+        "/assets/index-Ce2s137Q.js",
         "/assets/framework-CXnKph_e.js"
       ],
       "css": []
     },
     "05b45acc03fd": {
       "js": [
-        "/assets/index-CQQAUe-O.js",
+        "/assets/index-Ce2s137Q.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js"
       ],
@@ -67,7 +67,7 @@ export default {
     "app/layout.tsx": {
       "js": [],
       "css": [
-        "/assets/index-BFfEPo3b.css"
+        "/assets/index-DcJrd0kK.css"
       ]
     }
   }
