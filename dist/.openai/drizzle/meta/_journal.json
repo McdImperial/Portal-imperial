@@ -176,6 +176,13 @@
       "when": 1788523172303,
       "tag": "0024_vengeful_vin_gonzales",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1788538571374,
+      "tag": "0025_military_zzzax",
+      "breakpoints": true
     }
   ]
 }

@@ -142,6 +142,23 @@ export const natureWalkShoppingItems = sqliteTable("nature_walk_shopping_items",
   index("idx_nature_walk_shopping_items_created").on(table.createdAt),
 ]);
 
+export const managementPerformanceEvaluations = sqliteTable("management_performance_evaluations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  managerName: text("manager_name").notNull(),
+  period: text("period").notNull(),
+  scores: text("scores").notNull().default("{}"),
+  quantitativeScore: real("quantitative_score").notNull().default(0),
+  qualitativeRating: text("qualitative_rating").notNull(),
+  strengths: text("strengths").notNull().default(""),
+  improvements: text("improvements").notNull().default(""),
+  createdBy: integer("created_by").notNull(),
+  createdByName: text("created_by_name").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_management_performance_manager_period").on(table.managerName, table.period),
+]);
+
 export const vaultControls = sqliteTable("vault_controls", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   controlDate: text("control_date").notNull(),

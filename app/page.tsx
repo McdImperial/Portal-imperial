@@ -10,7 +10,7 @@ import creditNotesDataJson from "./data/credit-notes-data.json";
 import managerScheduleDataJson from "./data/manager-schedule-data.json";
 import AlertsCenter from "./alerts-center";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "managerdashboard" | "managerhours" | "walkregistrations" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
+type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "managerdashboard" | "managerhours" | "performance" | "walkregistrations" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -173,6 +173,7 @@ const viewLabels: Record<View, string> = {
   gerenteloja: "Gerente Loja",
   managerdashboard: "Dashboard de Vendas & Transações",
   managerhours: "Horário Equipa Gestão",
+  performance: "Avaliações Desempenho EG",
   walkregistrations: "Inscrições Caminhada",
   alertas: "Central de Alertas",
   desenvolvimento: "Em desenvolvimento",
@@ -758,6 +759,91 @@ function ManagerSalesDashboard() {
   </section>;
 }
 
+const performanceSections = [
+  { id: "building", title: "Building Blocks", subtitle: "Qualidades que promovem uma alta performance", weight: 37, tone: "gold", criteria: [
+    "Ganha a confiança dos outros ajustando o seu estilo de comunicação e influenciando de forma positiva, demonstrando assertividade para dizer sim ou não, quando necessário.",
+    "Vivencia os valores da empresa no desempenho da sua função, assegurando e promovendo os padrões e normas da McDonald’s.",
+    "Mantém o controlo emocional e a produtividade em ambientes de grande pressão, conseguindo manter uma atitude positiva.",
+    "Demonstra respeito e compreensão pelos outros, adaptando-se ao grupo e construindo espírito de equipa.",
+    "Durante a execução da sua função, dá orientações claras e demonstra padrões de comportamento adequados.",
+  ] },
+  { id: "execution", title: "Execução", subtitle: "Cumpre o desempenho da função", weight: 25, tone: "blue", criteria: [
+    "Responsabiliza-se a si e à sua equipa no cumprimento de procedimentos de forma rigorosa e com foco na obtenção de resultados alinhados com as métricas da McDonald’s.",
+    "Faz uma gestão eficaz durante o turno (pessoas, equipamentos, qualidade e serviço), reavaliando continuamente as prioridades e antecipando problemas.",
+    "Tem domínio sobre a sua função, atuando com autonomia e segurança no cumprimento das suas responsabilidades.",
+    "Faz uma gestão eficaz das suas responsabilidades extra turnos (tarefas secundárias), de forma a atingir os objetivos estabelecidos para o restaurante.",
+  ] },
+  { id: "strategy", title: "Orientação Estratégia", subtitle: "Desenvolve uma visão estratégica alinhada com os objetivos da empresa", weight: 16, tone: "green", criteria: [
+    "Orienta a equipa e é um exemplo na priorização do cliente como o centro de tudo, antecipando necessidades e expectativas dos mesmos (internos e externos).",
+    "Demonstra comportamentos de um verdadeiro embaixador McDonald’s, elevando a imagem do restaurante e da marca.",
+    "Conhece, entende e contribui para o alcance dos objetivos gerais do restaurante.",
+  ] },
+  { id: "talent", title: "Talento", subtitle: "Inspirar e promover o talento", weight: 22, tone: "red", criteria: [
+    "Identifica as suas áreas de oportunidades e da equipa e apoia o desenvolvimento.",
+    "Comunica de forma transparente e revela continuamente uma escuta ativa, promovendo o crescimento dos outros.",
+    "Reconhece o desempenho individual e de equipa.",
+    "Mantém-se constantemente atento na identificação de potencial na equipa.",
+  ] },
+] as const;
+
+type PerformanceEvaluation = { id:number; managerName:string; period:string; scores:string; quantitativeScore:number; qualitativeRating:string; strengths:string; improvements:string; createdAt:string };
+
+function performanceRating(score: number) {
+  if (score <= 1.2) return "Insuficiente";
+  if (score <= 2.6) return "Suficiente";
+  if (score <= 3.2) return "Bom";
+  if (score <= 3.6) return "Bom +";
+  return "Muito Bom";
+}
+
+function ManagementPerformanceForm() {
+  const managementTeam = teamMilestonesData.organisation.managementLevels.flat().map((person) => person.name);
+  const [managerName, setManagerName] = useState("");
+  const [period, setPeriod] = useState("3.º Q 26");
+  const [scores, setScores] = useState<Record<string, number>>({});
+  const [strengths, setStrengths] = useState("");
+  const [improvements, setImprovements] = useState("");
+  const [history, setHistory] = useState<PerformanceEvaluation[]>([]);
+  const [busy, setBusy] = useState(false);
+  const allAnswered = performanceSections.every((section) => section.criteria.every((_, index) => scores[`${section.id}-${index}`]));
+  const quantitativeScore = performanceSections.reduce((total, section) => {
+    const values = section.criteria.map((_, index) => scores[`${section.id}-${index}`] || 0);
+    return total + (values.reduce((sum, value) => sum + value, 0) / values.length) * section.weight / 100;
+  }, 0);
+  const rating = allAnswered ? performanceRating(quantitativeScore) : "Por calcular";
+
+  useEffect(() => { fetch("/api/management-performance").then((response) => response.ok ? response.json() : Promise.reject()).then((data:{evaluations:PerformanceEvaluation[]}) => setHistory(data.evaluations)).catch(() => undefined); }, []);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!allAnswered || busy) return;
+    setBusy(true);
+    const response = await fetch("/api/management-performance", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ managerName, period, scores, quantitativeScore, qualitativeRating:rating, strengths, improvements }) });
+    const data = await response.json() as { evaluation?:PerformanceEvaluation; error?:string };
+    if (response.ok && data.evaluation) { setHistory((current) => [data.evaluation!, ...current]); setScores({}); setStrengths(""); setImprovements(""); }
+    else window.alert(data.error || "Não foi possível guardar a avaliação.");
+    setBusy(false);
+  }
+
+  async function remove(evaluation: PerformanceEvaluation) {
+    if (!window.confirm(`Eliminar a avaliação de ${evaluation.managerName}?`)) return;
+    const response = await fetch(`/api/management-performance?id=${evaluation.id}`, { method:"DELETE" });
+    if (response.ok) setHistory((current) => current.filter((item) => item.id !== evaluation.id));
+  }
+
+  return <section className="performance-page" aria-labelledby="performance-title">
+    <div className="performance-heading"><div><span className="eyebrow">Gerente Loja · Equipa de Gestão</span><h2 id="performance-title">Avaliações Desempenho EG</h2><p>Autoavaliação estruturada por competências, execução, estratégia e talento.</p></div><div className="performance-score"><small>Nota quantitativa</small><strong>{allAnswered ? quantitativeScore.toFixed(2).replace(".", ",") : "—"}</strong><span>{rating}</span></div></div>
+    <form className="performance-form" onSubmit={submit}>
+      <div className="performance-basics"><label>Nome<select value={managerName} onChange={(event) => setManagerName(event.target.value)} required><option value="">Selecionar gerente</option>{managementTeam.map((name) => <option key={name}>{name}</option>)}</select></label><label>Período<input value={period} onChange={(event) => setPeriod(event.target.value)} required /></label></div>
+      {performanceSections.map((section) => <section className={`performance-section ${section.tone}`} key={section.id}><header><div><h3>{section.title}</h3><p>{section.subtitle}</p></div><strong>{section.weight}%</strong></header><div>{section.criteria.map((criterion, index) => { const key = `${section.id}-${index}`; return <label className="performance-criterion" key={key}><span>{criterion}</span><select aria-label={`Nota: ${criterion}`} value={scores[key] || ""} onChange={(event) => setScores((current) => ({ ...current, [key]: Number(event.target.value) }))} required><option value="">Nota</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>; })}</div></section>)}
+      <div className="performance-scale"><span>≤ 1,2 Insuficiente</span><span>≤ 2,6 Suficiente</span><span>≤ 3,2 Bom</span><span>≤ 3,6 Bom +</span><span>≤ 4 Muito Bom</span></div>
+      <div className="performance-notes"><label>Pontos fortes<textarea rows={4} value={strengths} onChange={(event) => setStrengths(event.target.value)} /></label><label>Pontos a melhorar<textarea rows={4} value={improvements} onChange={(event) => setImprovements(event.target.value)} /></label></div>
+      <button className="performance-save" disabled={!allAnswered || busy}>{busy ? "A guardar…" : "Guardar avaliação"}</button>
+    </form>
+    <section className="performance-history"><div className="performance-history-heading"><div><span className="eyebrow">Registos guardados</span><h3>Histórico de avaliações</h3></div><strong>{history.length}</strong></div><div className="performance-history-table"><div className="performance-history-row header"><span>Nome</span><span>Período</span><span>Nota</span><span>Classificação</span><span>Data</span><span>Ações</span></div>{history.map((evaluation) => <div className="performance-history-row" key={evaluation.id}><strong>{evaluation.managerName}</strong><span>{evaluation.period}</span><b>{Number(evaluation.quantitativeScore).toFixed(2).replace(".", ",")}</b><em>{evaluation.qualitativeRating}</em><span>{new Date(evaluation.createdAt).toLocaleDateString("pt-PT")}</span><button type="button" onClick={() => void remove(evaluation)}>Eliminar</button></div>)}{!history.length && <div className="performance-empty">Ainda não existem avaliações guardadas.</div>}</div></section>
+  </section>;
+}
+
 export default function Home() {
   const objectivesExportRef = useRef<HTMLElement>(null);
   const [portalDate, setPortalDate] = useState("");
@@ -849,7 +935,7 @@ export default function Home() {
   }, [view, currentUser]);
 
   useEffect(() => {
-    const managerViews: View[] = ["gerenteloja", "managerdashboard", "objetivos", "areasglobais", "equipa", "managerhours", "walkregistrations", "alertas"];
+    const managerViews: View[] = ["gerenteloja", "managerdashboard", "objetivos", "areasglobais", "equipa", "managerhours", "performance", "walkregistrations", "alertas"];
     if (currentUser && currentUser.role !== "admin" && managerViews.includes(view)) setView("resumo");
   }, [view, currentUser]);
 
@@ -1559,7 +1645,7 @@ export default function Home() {
         </div>
         <nav className="nav-list">
           {navItems.map((item) => (
-            <button key={item.id} className={view === item.id || item.id === "gerenteloja" && (["objetivos", "areasglobais", "equipa", "managerhours", "walkregistrations", "alertas"] as View[]).includes(view) ? "nav-item active" : "nav-item"} onClick={() => setView(item.id)}>
+            <button key={item.id} className={view === item.id || item.id === "gerenteloja" && (["objetivos", "areasglobais", "equipa", "managerhours", "performance", "walkregistrations", "alertas"] as View[]).includes(view) ? "nav-item active" : "nav-item"} onClick={() => setView(item.id)}>
               <span className="nav-glyph">{item.glyph}</span>{item.label}
             </button>
           ))}
@@ -1628,7 +1714,7 @@ export default function Home() {
         {notice && <div className="toast" role="status">✓ {notice}</div>}
 
         <div className="content">
-          {currentUser.role === "admin" && (["gerenteloja", "managerdashboard", "objetivos", "areasglobais", "equipa", "managerhours", "walkregistrations", "alertas"] as View[]).includes(view) && <nav className="section-subnav" aria-label="Áreas do Gerente Loja"><button type="button" className={view === "gerenteloja" ? "active" : ""} onClick={() => setView("gerenteloja")}>Visão geral</button><button type="button" className={view === "managerdashboard" ? "active" : ""} onClick={() => setView("managerdashboard")}>Dashboard Vendas</button><button type="button" className={view === "objetivos" ? "active" : ""} onClick={() => { setDepartment("global"); setView("objetivos"); }}>Objetivos</button><button type="button" className={view === "areasglobais" ? "active" : ""} onClick={() => { setDepartment("global"); setView("areasglobais"); }}>Áreas</button><button type="button" className={view === "equipa" ? "active" : ""} onClick={() => { setDepartment("global"); setView("equipa"); }}>Equipa</button><button type="button" className={view === "managerhours" ? "active" : ""} onClick={() => setView("managerhours")}>Horário Equipa Gestão</button><button type="button" className={view === "walkregistrations" ? "active" : ""} onClick={() => setView("walkregistrations")}>Inscrições Caminhada</button><button type="button" className={view === "alertas" ? "active" : ""} onClick={() => setView("alertas")}>Central de Alertas</button></nav>}
+          {currentUser.role === "admin" && (["gerenteloja", "managerdashboard", "objetivos", "areasglobais", "equipa", "managerhours", "performance", "walkregistrations", "alertas"] as View[]).includes(view) && <nav className="section-subnav" aria-label="Áreas do Gerente Loja"><button type="button" className={view === "gerenteloja" ? "active" : ""} onClick={() => setView("gerenteloja")}>Visão geral</button><button type="button" className={view === "managerdashboard" ? "active" : ""} onClick={() => setView("managerdashboard")}>Dashboard Vendas</button><button type="button" className={view === "objetivos" ? "active" : ""} onClick={() => { setDepartment("global"); setView("objetivos"); }}>Objetivos</button><button type="button" className={view === "areasglobais" ? "active" : ""} onClick={() => { setDepartment("global"); setView("areasglobais"); }}>Áreas</button><button type="button" className={view === "equipa" ? "active" : ""} onClick={() => { setDepartment("global"); setView("equipa"); }}>Equipa</button><button type="button" className={view === "managerhours" ? "active" : ""} onClick={() => setView("managerhours")}>Horário Equipa Gestão</button><button type="button" className={view === "performance" ? "active" : ""} onClick={() => setView("performance")}>Avaliações Desempenho EG</button><button type="button" className={view === "walkregistrations" ? "active" : ""} onClick={() => setView("walkregistrations")}>Inscrições Caminhada</button><button type="button" className={view === "alertas" ? "active" : ""} onClick={() => setView("alertas")}>Central de Alertas</button></nav>}
 
           {view === "financeiro" && <section className="finance-page" aria-labelledby="finance-title"><div className="finance-heading"><div><span className="eyebrow">Gestão financeira</span><h2 id="finance-title">Financeiro</h2><p>Controlo e acompanhamento dos movimentos financeiros do restaurante.</p></div></div><nav className="section-subnav" aria-label="Áreas financeiras"><button type="button" className="active">Controlo Cofre</button></nav><nav className="vault-subnav" aria-label="Áreas do Controlo Cofre"><button type="button" className={vaultSection === "resumo" ? "active" : ""} onClick={() => setVaultSection("resumo")}>Resumo Controlo Cofre</button><button type="button" className={vaultSection === "moedas" ? "active" : ""} onClick={() => setVaultSection("moedas")}>Pedido moedas</button><button type="button" className={vaultSection === "faturas" ? "active" : ""} onClick={() => setVaultSection("faturas")}>Faturas</button></nav>{vaultSection === "resumo" ? <VaultControlPrototype isAdmin={currentUser.role === "admin"} /> : vaultSection === "moedas" ? <CoinOrdersPrototype isAdmin={currentUser.role === "admin"} /> : <VaultInvoicesPrototype isAdmin={currentUser.role === "admin"} />}</section>}
 
@@ -1750,6 +1836,8 @@ export default function Home() {
           )}
 
           {view === "managerdashboard" && currentUser.role === "admin" && <ManagerSalesDashboard />}
+
+          {view === "performance" && currentUser.role === "admin" && <ManagementPerformanceForm />}
 
           {view === "walkregistrations" && currentUser.role === "admin" && <section className="talent-page walk-admin-page" aria-labelledby="walk-admin-title">
             <div className="talent-heading">
