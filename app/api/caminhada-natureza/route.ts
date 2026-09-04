@@ -41,3 +41,13 @@ export async function PATCH(request: Request) {
   const [registration] = await getDb().update(natureWalkRegistrations).set({ status: body.status, updatedAt: new Date().toISOString() }).where(eq(natureWalkRegistrations.id, body.id)).returning();
   return registration ? Response.json({ registration }) : Response.json({ error: "Inscrição não encontrada." }, { status: 404 });
 }
+
+export async function DELETE(request: Request) {
+  const auth = await requireUser(request);
+  if (auth.error) return auth.error;
+  if (auth.user.role !== "admin") return Response.json({ error: "Apenas o administrador pode eliminar inscrições." }, { status: 403 });
+  const id = Number(new URL(request.url).searchParams.get("id"));
+  if (!id) return Response.json({ error: "Inscrição inválida." }, { status: 400 });
+  const [registration] = await getDb().delete(natureWalkRegistrations).where(eq(natureWalkRegistrations.id, id)).returning();
+  return registration ? Response.json({ ok: true }) : Response.json({ error: "Inscrição não encontrada." }, { status: 404 });
+}

@@ -1480,6 +1480,15 @@ export default function Home() {
     setNotice(status === "Aprovada" ? "Inscrição aprovada." : status === "Não aprovada" ? "Inscrição não aprovada." : "Inscrição devolvida a pendente.");
   }
 
+  async function deleteNatureWalkRegistration(registration: NatureWalkRegistration) {
+    if (!window.confirm(`Eliminar a inscrição de ${registration.name}?`)) return;
+    const response = await fetch(`/api/caminhada-natureza?id=${registration.id}`, { method: "DELETE" });
+    const data = await response.json() as { error?: string };
+    if (!response.ok) { setNotice(data.error || "Não foi possível eliminar a inscrição."); return; }
+    setNatureWalkRegistrations((current) => current.filter((item) => item.id !== registration.id));
+    setNotice("Inscrição eliminada.");
+  }
+
   async function addNatureWalkShoppingItem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (walkShoppingBusy) return;
@@ -1751,8 +1760,8 @@ export default function Home() {
               <div className="talent-board-heading"><div><span className="eyebrow">15 de setembro · 08h30–16h00</span><h3>Respostas recebidas</h3></div><span>{talentLoading ? "A carregar…" : `${natureWalkRegistrations.length} respostas`}</span></div>
               <div className="walk-registration-summary"><span><b>{natureWalkRegistrations.filter((item) => item.interested).length}</b> interessados</span><span><b>{natureWalkRegistrations.filter((item) => item.status === "Aprovada").length}</b> aprovados</span><span><b>{natureWalkRegistrations.filter((item) => item.status === "Pendente").length}</b> pendentes</span><span><b>{natureWalkRegistrations.filter((item) => item.status === "Não aprovada").length}</b> não aprovados</span></div>
               <div className="walk-registration-table" role="table" aria-label="Respostas da Caminhada pela Natureza">
-                <div className="walk-registration-row header" role="row"><span>Nome</span><span>Interesse</span><span>Leva para partilhar</span><span>Data da resposta</span><span>Validação</span></div>
-                {natureWalkRegistrations.map((registration) => <div className="walk-registration-row" role="row" key={registration.id}><strong>{registration.name}</strong><span className={registration.interested ? "walk-yes" : "walk-no"}>{registration.interested ? "Sim" : "Não"}</span><span>{registration.sharingItem || "—"}</span><small>{new Date(registration.createdAt).toLocaleString("pt-PT", { dateStyle: "short", timeStyle: "short" })}</small><select value={registration.status} className={`walk-status ${statusClass(registration.status)}`} onChange={(event) => void updateNatureWalkRegistration(registration, event.target.value as NatureWalkStatus)} aria-label={`Validação de ${registration.name}`}><option>Pendente</option><option>Aprovada</option><option>Não aprovada</option></select></div>)}
+                <div className="walk-registration-row header with-actions" role="row"><span>Nome</span><span>Interesse</span><span>Leva para partilhar</span><span>Data da resposta</span><span>Validação</span><span>Ações</span></div>
+                {natureWalkRegistrations.map((registration) => <div className="walk-registration-row with-actions" role="row" key={registration.id}><strong>{registration.name}</strong><span className={registration.interested ? "walk-yes" : "walk-no"}>{registration.interested ? "Sim" : "Não"}</span><span>{registration.sharingItem || "—"}</span><small>{new Date(registration.createdAt).toLocaleString("pt-PT", { dateStyle: "short", timeStyle: "short" })}</small><select value={registration.status} className={`walk-status ${statusClass(registration.status)}`} onChange={(event) => void updateNatureWalkRegistration(registration, event.target.value as NatureWalkStatus)} aria-label={`Validação de ${registration.name}`}><option>Pendente</option><option>Aprovada</option><option>Não aprovada</option></select><button type="button" className="walk-delete-registration" onClick={() => void deleteNatureWalkRegistration(registration)}>Eliminar</button></div>)}
                 {!talentLoading && natureWalkRegistrations.length === 0 && <div className="talent-empty"><span>🥾</span><div><strong>Ainda não existem respostas</strong><small>As inscrições submetidas através do formulário aparecerão automaticamente aqui.</small></div></div>}
               </div>
             </div>
