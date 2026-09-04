@@ -798,6 +798,9 @@ function performanceRating(score: number) {
 
 function ManagementPerformanceForm() {
   const managementTeam = teamMilestonesData.organisation.managementLevels.flat().map((person) => person.name);
+  const [summaryPeriod, setSummaryPeriod] = useState("3.º Q 26");
+  const [summaryScores, setSummaryScores] = useState<Record<string, Record<string, number>>>({});
+  const [summaryBusy, setSummaryBusy] = useState(false);
   const [managerName, setManagerName] = useState("");
   const [period, setPeriod] = useState("3.º Q 26");
   const [scores, setScores] = useState<Record<string, number>>({});
@@ -811,6 +814,9 @@ function ManagementPerformanceForm() {
     return total + (values.reduce((sum, value) => sum + value, 0) / values.length) * section.weight / 100;
   }, 0);
   const rating = allAnswered ? performanceRating(quantitativeScore) : "Por calcular";
+  const managerScore = (name:string) => performanceSections.reduce((total, section) => { const values = section.criteria.map((_, index) => summaryScores[name]?.[`${section.id}-${index}`] || 0); return total + (values.reduce((sum, value) => sum + value, 0) / values.length) * section.weight / 100; }, 0);
+  const managerComplete = (name:string) => performanceSections.every((section) => section.criteria.every((_, index) => summaryScores[name]?.[`${section.id}-${index}`]));
+  const summaryComplete = managementTeam.every(managerComplete);
 
   useEffect(() => { fetch("/api/management-performance").then((response) => response.ok ? response.json() : Promise.reject()).then((data:{evaluations:PerformanceEvaluation[]}) => setHistory(data.evaluations)).catch(() => undefined); }, []);
 
@@ -831,8 +837,36 @@ function ManagementPerformanceForm() {
     if (response.ok) setHistory((current) => current.filter((item) => item.id !== evaluation.id));
   }
 
+  async function saveSummary() {
+    if (!summaryComplete || summaryBusy) return;
+    setSummaryBusy(true);
+    const responses = await Promise.all(managementTeam.map(async (name) => {
+      const score = managerScore(name);
+      const response = await fetch("/api/management-performance", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ managerName:name, period:summaryPeriod, scores:summaryScores[name], quantitativeScore:score, qualitativeRating:performanceRating(score), strengths:"", improvements:"" }) });
+      return response.ok ? (await response.json() as { evaluation:PerformanceEvaluation }).evaluation : null;
+    }));
+    const saved = responses.filter((item):item is PerformanceEvaluation => Boolean(item));
+    setHistory((current) => [...saved, ...current]);
+    if (saved.length === managementTeam.length) { setSummaryScores({}); window.alert("Avaliações de toda a equipa guardadas."); } else window.alert(`${saved.length} de ${managementTeam.length} avaliações foram guardadas.`);
+    setSummaryBusy(false);
+  }
+
   return <section className="performance-page" aria-labelledby="performance-title">
     <div className="performance-heading"><div><span className="eyebrow">Gerente Loja · Equipa de Gestão</span><h2 id="performance-title">Avaliações Desempenho EG</h2><p>Autoavaliação estruturada por competências, execução, estratégia e talento.</p></div><div className="performance-score"><small>Nota quantitativa</small><strong>{allAnswered ? quantitativeScore.toFixed(2).replace(".", ",") : "—"}</strong><span>{rating}</span></div></div>
+    <section className="performance-summary-board" aria-labelledby="performance-summary-title">
+      <div className="performance-summary-heading"><div><span className="eyebrow">Avaliação coletiva</span><h3 id="performance-summary-title">Resumo de avaliações</h3><p>Avalie toda a equipa de gestão na mesma grelha.</p></div><label>Período<input value={summaryPeriod} onChange={(event) => setSummaryPeriod(event.target.value)} /></label></div>
+      <div className="performance-matrix-wrap"><div className="performance-matrix" style={{ gridTemplateColumns:`minmax(430px,2.5fr) repeat(${managementTeam.length},minmax(105px,1fr))` }}>
+        <div className="performance-matrix-cell corner">Critérios de avaliação</div>{managementTeam.map((name) => <div className="performance-matrix-cell manager" key={`head-${name}`}>{name}</div>)}
+        {performanceSections.flatMap((section) => [
+          <div className={`performance-matrix-cell section ${section.tone}`} key={`${section.id}-title`}><strong>{section.title}</strong><small>{section.subtitle}</small></div>,
+          ...managementTeam.map((name) => { const values=section.criteria.map((_,index)=>summaryScores[name]?.[`${section.id}-${index}`]||0); const filled=values.filter(Boolean); const subtotal=filled.length===values.length ? values.reduce((sum,value)=>sum+value,0)/values.length*section.weight/100 : null; return <div className={`performance-matrix-cell subtotal ${section.tone}`} key={`${section.id}-${name}-subtotal`}><small>{section.weight}%</small><strong>{subtotal===null ? "—" : subtotal.toFixed(2).replace(".",",")}</strong></div>; }),
+          ...section.criteria.flatMap((criterion,index) => [<div className="performance-matrix-cell criterion" key={`${section.id}-${index}-criterion`}>{criterion}</div>,...managementTeam.map((name) => { const key=`${section.id}-${index}`; return <div className="performance-matrix-cell score" key={`${key}-${name}`}><select value={summaryScores[name]?.[key]||""} aria-label={`${name}: ${criterion}`} onChange={(event)=>setSummaryScores((current)=>({...current,[name]:{...current[name],[key]:Number(event.target.value)}}))}><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>; })])
+        ])}
+        <div className="performance-matrix-cell total-label">Nota quantitativa</div>{managementTeam.map((name)=><div className={`performance-matrix-cell total ${managerComplete(name)?statusClass(performanceRating(managerScore(name))):""}`} key={`total-${name}`}><strong>{managerComplete(name)?managerScore(name).toFixed(2).replace(".",","):"—"}</strong></div>)}
+        <div className="performance-matrix-cell total-label">Nota qualitativa</div>{managementTeam.map((name)=><div className="performance-matrix-cell rating" key={`rating-${name}`}>{managerComplete(name)?performanceRating(managerScore(name)):"—"}</div>)}
+      </div></div>
+      <div className="performance-summary-footer"><div className="performance-scale"><span>≤ 1,2 Insuficiente</span><span>≤ 2,6 Suficiente</span><span>≤ 3,2 Bom</span><span>≤ 3,6 Bom +</span><span>≤ 4 Muito Bom</span></div><button type="button" disabled={!summaryComplete||summaryBusy} onClick={()=>void saveSummary()}>{summaryBusy?"A guardar…":"Guardar avaliações da equipa"}</button></div>
+    </section>
     <form className="performance-form" onSubmit={submit}>
       <div className="performance-basics"><label>Nome<select value={managerName} onChange={(event) => setManagerName(event.target.value)} required><option value="">Selecionar gerente</option>{managementTeam.map((name) => <option key={name}>{name}</option>)}</select></label><label>Período<input value={period} onChange={(event) => setPeriod(event.target.value)} required /></label></div>
       {performanceSections.map((section) => <section className={`performance-section ${section.tone}`} key={section.id}><header><div><h3>{section.title}</h3><p>{section.subtitle}</p></div><strong>{section.weight}%</strong></header><div>{section.criteria.map((criterion, index) => { const key = `${section.id}-${index}`; return <label className="performance-criterion" key={key}><span>{criterion}</span><select aria-label={`Nota: ${criterion}`} value={scores[key] || ""} onChange={(event) => setScores((current) => ({ ...current, [key]: Number(event.target.value) }))} required><option value="">Nota</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>; })}</div></section>)}
