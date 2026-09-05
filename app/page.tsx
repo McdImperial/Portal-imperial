@@ -1737,7 +1737,34 @@ export default function Home() {
         {notice && <div className="toast" role="status">✓ {notice}</div>}
 
         <div className="content">
-          {currentUser.role === "admin" && (["gerenteloja", "managerdashboard", "objetivos", "areasglobais", "equipa", "managerhours", "performance", "walkregistrations", "alertas"] as View[]).includes(view) && <nav className="section-subnav" aria-label="Áreas do Gerente Loja"><button type="button" className={view === "gerenteloja" ? "active" : ""} onClick={() => setView("gerenteloja")}>Visão geral</button><button type="button" className={view === "managerdashboard" ? "active" : ""} onClick={() => setView("managerdashboard")}>Dashboard Vendas</button><button type="button" className={view === "objetivos" ? "active" : ""} onClick={() => { setDepartment("global"); setView("objetivos"); }}>Objetivos</button><button type="button" className={view === "areasglobais" ? "active" : ""} onClick={() => { setDepartment("global"); setView("areasglobais"); }}>Áreas</button><button type="button" className={view === "equipa" ? "active" : ""} onClick={() => { setDepartment("global"); setView("equipa"); }}>Equipa</button><button type="button" className={view === "managerhours" ? "active" : ""} onClick={() => setView("managerhours")}>Horário Equipa Gestão</button><button type="button" className={view === "performance" ? "active" : ""} onClick={() => setView("performance")}>Avaliações Desempenho EG</button><button type="button" className={view === "walkregistrations" ? "active" : ""} onClick={() => setView("walkregistrations")}>Inscrições Caminhada</button><button type="button" className={view === "alertas" ? "active" : ""} onClick={() => setView("alertas")}>Central de Alertas</button></nav>}
+          {currentUser.role === "admin" && (["gerenteloja", "managerdashboard", "objetivos", "areasglobais", "equipa", "managerhours", "performance", "walkregistrations", "alertas"] as View[]).includes(view) && (
+            <nav className="manager-topic-nav" aria-label="Áreas do Gerente Loja por tema">
+              <div className="manager-topic-group operations">
+                <span className="manager-topic-label"><i aria-hidden="true">◫</i> Operações</span>
+                <div className="manager-topic-links">
+                  <button type="button" className={view === "gerenteloja" ? "active" : ""} onClick={() => setView("gerenteloja")}>Visão geral</button>
+                  <button type="button" className={view === "managerdashboard" ? "active" : ""} onClick={() => setView("managerdashboard")}>Dashboard Vendas</button>
+                  <button type="button" className={view === "objetivos" ? "active" : ""} onClick={() => { setDepartment("global"); setView("objetivos"); }}>Objetivos</button>
+                  <button type="button" className={view === "areasglobais" ? "active" : ""} onClick={() => { setDepartment("global"); setView("areasglobais"); }}>Áreas</button>
+                </div>
+              </div>
+              <div className="manager-topic-group hr">
+                <span className="manager-topic-label"><i aria-hidden="true">♟</i> RH</span>
+                <div className="manager-topic-links">
+                  <button type="button" className={view === "equipa" ? "active" : ""} onClick={() => { setDepartment("global"); setView("equipa"); }}>Equipa</button>
+                  <button type="button" className={view === "managerhours" ? "active" : ""} onClick={() => setView("managerhours")}>Horário Equipa Gestão</button>
+                  <button type="button" className={view === "performance" ? "active" : ""} onClick={() => setView("performance")}>Avaliações Desempenho EG</button>
+                  <button type="button" className={view === "walkregistrations" ? "active" : ""} onClick={() => setView("walkregistrations")}>Inscrições Caminhada</button>
+                </div>
+              </div>
+              <div className="manager-topic-group it">
+                <span className="manager-topic-label"><i aria-hidden="true">⌁</i> IT</span>
+                <div className="manager-topic-links">
+                  <button type="button" className={view === "alertas" ? "active" : ""} onClick={() => setView("alertas")}>Central de Alertas</button>
+                </div>
+              </div>
+            </nav>
+          )}
 
           {view === "financeiro" && <section className="finance-page" aria-labelledby="finance-title"><div className="finance-heading"><div><span className="eyebrow">Gestão financeira</span><h2 id="finance-title">Financeiro</h2><p>Controlo e acompanhamento dos movimentos financeiros do restaurante.</p></div></div><nav className="section-subnav" aria-label="Áreas financeiras"><button type="button" className="active">Controlo Cofre</button></nav><nav className="vault-subnav" aria-label="Áreas do Controlo Cofre"><button type="button" className={vaultSection === "resumo" ? "active" : ""} onClick={() => setVaultSection("resumo")}>Resumo Controlo Cofre</button><button type="button" className={vaultSection === "moedas" ? "active" : ""} onClick={() => setVaultSection("moedas")}>Pedido moedas</button><button type="button" className={vaultSection === "faturas" ? "active" : ""} onClick={() => setVaultSection("faturas")}>Faturas</button></nav>{vaultSection === "resumo" ? <VaultControlPrototype isAdmin={currentUser.role === "admin"} /> : vaultSection === "moedas" ? <CoinOrdersPrototype isAdmin={currentUser.role === "admin"} /> : <VaultInvoicesPrototype isAdmin={currentUser.role === "admin"} />}</section>}
 
