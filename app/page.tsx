@@ -10,7 +10,7 @@ import creditNotesDataJson from "./data/credit-notes-data.json";
 import managerScheduleDataJson from "./data/manager-schedule-data.json";
 import AlertsCenter from "./alerts-center";
 
-type View = "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "managerdashboard" | "managerhours" | "performance" | "walkregistrations" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
+type View = "diario" | "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "managerdashboard" | "managerhours" | "performance" | "walkregistrations" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -157,6 +157,7 @@ const departmentProfiles = {
 } satisfies Record<Department, { objectives: { label: string; value: number; display?: string; target: string; tone: string }[]; zones: { name: string; status: string; detail: string; percent: number; tone: string }[] }>;
 
 const viewLabels: Record<View, string> = {
+  diario: "Acessos diários",
   resumo: "Visão geral",
   tarefas: "Todas as tarefas",
   objetivos: "Objetivos mensais",
@@ -870,7 +871,7 @@ function ManagementPerformanceForm() {
 export default function Home() {
   const objectivesExportRef = useRef<HTMLElement>(null);
   const [portalDate, setPortalDate] = useState("");
-  const [view, setView] = useState<View>("resumo");
+  const [view, setView] = useState<View>("diario");
   const [developmentSection, setDevelopmentSection] = useState<DevelopmentSection>("deposito");
   const [vaultSection, setVaultSection] = useState<"resumo" | "moedas" | "faturas">("resumo");
   const [department, setDepartment] = useState<Department>("global");
@@ -954,13 +955,12 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (view === "desenvolvimento" && currentUser && currentUser.role !== "admin") setView("resumo");
-  }, [view, currentUser]);
-
-  useEffect(() => {
-    const managerViews: View[] = ["gerenteloja", "managerdashboard", "objetivos", "areasglobais", "equipa", "managerhours", "performance", "walkregistrations", "alertas"];
-    if (currentUser && currentUser.role !== "admin" && managerViews.includes(view)) setView("resumo");
-  }, [view, currentUser]);
+    if (!currentUser || currentUser.role === "admin") return;
+    const permittedDepartment = departments.some((item) => item.id === currentUser.department) ? currentUser.department as Department : "qualidade";
+    if (department !== permittedDepartment) setDepartment(permittedDepartment);
+    const restrictedViews: View[] = ["financeiro", "faturacao", "desenvolvimento", "configuracoes", "gerenteloja", "managerdashboard", "areasglobais", "equipa", "managerhours", "performance", "walkregistrations", "alertas"];
+    if (restrictedViews.includes(view)) setView("diario");
+  }, [view, currentUser, department]);
 
   useEffect(() => {
     if (!notice.startsWith("Descarga validada")) return;
@@ -1488,7 +1488,7 @@ export default function Home() {
   async function logout() {
     await fetch("/api/auth/logout/", { method: "POST" });
     setCurrentUser(null);
-    setView("resumo");
+    setView("diario");
     setDataReady(false);
     setAuthMessage("");
     setAuthMode("login");
@@ -1629,10 +1629,9 @@ export default function Home() {
   const canEdit = currentUser?.role === "admin" || currentUser?.role === "editor";
 
   const navItems: { id: View; label: string; glyph: string }[] = [
-    { id: "resumo", label: "Resumo", glyph: "▦" },
+    { id: "diario", label: "Acessos diários", glyph: "◉" },
     ...(currentUser?.role === "admin" ? [{ id: "gerenteloja" as View, label: "Gerente Loja", glyph: "♛" }] : []),
-    { id: "financeiro" as View, label: "Financeiro", glyph: "€" },
-    { id: "faturacao" as View, label: "Controlo faturação", glyph: "€" },
+    ...(currentUser?.role === "admin" ? [{ id: "financeiro" as View, label: "Financeiro", glyph: "€" }, { id: "faturacao" as View, label: "Controlo faturação", glyph: "€" }] : []),
     ...(currentUser?.role === "admin" ? [{ id: "desenvolvimento" as View, label: "Em desenvolvimento", glyph: "◇" }, { id: "configuracoes" as View, label: "Configurações", glyph: "⚙" }] : []),
   ];
 
@@ -1673,7 +1672,7 @@ export default function Home() {
         <div className="sidebar-departments" aria-label="Departamentos">
           <div className="sidebar-section-title"><span>Departamentos</span></div>
           <div className="department-list">
-            {departments.map((item) => (
+            {(currentUser.role === "admin" ? departments : departments.filter((item) => item.id === currentUser.department)).map((item) => (
               <div className="department-entry" key={item.id}>
                 <button
                   className={department === item.id ? "department-tab selected" : "department-tab"}
@@ -1761,6 +1760,23 @@ export default function Home() {
                 </div>
               </div>
             </nav>
+          )}
+
+          {view === "diario" && (
+            <section className="daily-access-page" aria-labelledby="daily-access-title">
+              <header className="daily-access-heading">
+                <div><span className="eyebrow">Área comum da equipa</span><h2 id="daily-access-title">Acessos diários</h2><p>Ferramentas operacionais disponíveis para toda a equipa Imperial.</p></div>
+                <span className="daily-access-user">{currentUser.name || currentUser.login}<small>{currentUser.role === "admin" ? "Administrador" : activeDepartment?.label || "Utilizador"}</small></span>
+              </header>
+              <div className="daily-access-grid">
+                <button type="button" className="daily-access-card vault" onClick={() => setView("cofreform")}>
+                  <span className="daily-access-icon">💰</span>
+                  <span className="daily-access-copy"><strong>Controlo Cofre</strong><small>Registar e consultar a contagem do cofre.</small></span>
+                  <span className="daily-access-arrow" aria-hidden="true">→</span>
+                </button>
+              </div>
+              <p className="daily-access-note">Novos acessos comuns serão acrescentados aqui à medida que forem disponibilizados.</p>
+            </section>
           )}
 
           {view === "financeiro" && <section className="finance-page" aria-labelledby="finance-title"><div className="finance-heading"><div><span className="eyebrow">Gestão financeira</span><h2 id="finance-title">Financeiro</h2><p>Controlo e acompanhamento dos movimentos financeiros do restaurante.</p></div></div><nav className="section-subnav" aria-label="Áreas financeiras"><button type="button" className="active">Controlo Cofre</button></nav><nav className="vault-subnav" aria-label="Áreas do Controlo Cofre"><button type="button" className={vaultSection === "resumo" ? "active" : ""} onClick={() => setVaultSection("resumo")}>Resumo Controlo Cofre</button><button type="button" className={vaultSection === "moedas" ? "active" : ""} onClick={() => setVaultSection("moedas")}>Pedido moedas</button><button type="button" className={vaultSection === "faturas" ? "active" : ""} onClick={() => setVaultSection("faturas")}>Faturas</button></nav>{vaultSection === "resumo" ? <VaultControlPrototype isAdmin={currentUser.role === "admin"} /> : vaultSection === "moedas" ? <CoinOrdersPrototype isAdmin={currentUser.role === "admin"} /> : <VaultInvoicesPrototype isAdmin={currentUser.role === "admin"} />}</section>}
