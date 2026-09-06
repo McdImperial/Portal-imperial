@@ -1,12 +1,12 @@
 export default {
-  "bootstrapScriptContent": "import(\"/assets/index-D8YzpTBq.js\")",
+  "bootstrapScriptContent": "import(\"/assets/index-BDiaYqfx.js\")",
   "clientReferenceDeps": {
     "5c794cda32ba": {
       "js": [
         "/assets/page-tQzcL4mk.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js",
-        "/assets/index-D8YzpTBq.js"
+        "/assets/index-BDiaYqfx.js"
       ],
       "css": []
     },
@@ -15,7 +15,7 @@ export default {
         "/assets/page-ChLjLMmd.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js",
-        "/assets/index-D8YzpTBq.js"
+        "/assets/index-BDiaYqfx.js"
       ],
       "css": []
     },
@@ -24,22 +24,22 @@ export default {
         "/assets/page-lK2_pXRB.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js",
-        "/assets/index-D8YzpTBq.js"
+        "/assets/index-BDiaYqfx.js"
       ],
       "css": []
     },
     "6efdf509a785": {
       "js": [
-        "/assets/page-CHVDfeGN.js",
+        "/assets/page-ANI55sOX.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
-        "/assets/index-D8YzpTBq.js",
+        "/assets/index-BDiaYqfx.js",
         "/assets/framework-CXnKph_e.js"
       ],
       "css": []
     },
     "59fca594cf69": {
       "js": [
-        "/assets/index-D8YzpTBq.js",
+        "/assets/index-BDiaYqfx.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js"
       ],
@@ -47,16 +47,16 @@ export default {
     },
     "0267e74c1d52": {
       "js": [
-        "/assets/layout-segment-context-CJ-qnSEm.js",
+        "/assets/layout-segment-context-BeQiVaYl.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
-        "/assets/index-D8YzpTBq.js",
+        "/assets/index-BDiaYqfx.js",
         "/assets/framework-CXnKph_e.js"
       ],
       "css": []
     },
     "05b45acc03fd": {
       "js": [
-        "/assets/index-D8YzpTBq.js",
+        "/assets/index-BDiaYqfx.js",
         "/assets/rolldown-runtime-S-ySWqyJ.js",
         "/assets/framework-CXnKph_e.js"
       ],
