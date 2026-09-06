@@ -238,6 +238,7 @@ export const vaultInvoices = sqliteTable("vault_invoices", {
   verified: integer("verified", { mode: "boolean" }).notNull().default(false),
   pettyCash: integer("petty_cash", { mode: "boolean" }).notNull().default(false),
   imageName: text("image_name").notNull().default(""),
+  manager: text("manager").notNull().default(""),
   createdBy: integer("created_by").notNull(),
   createdByName: text("created_by_name").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),

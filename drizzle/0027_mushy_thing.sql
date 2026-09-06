@@ -1,0 +1,1 @@
+ALTER TABLE `vault_invoices` ADD `manager` text DEFAULT '' NOT NULL;

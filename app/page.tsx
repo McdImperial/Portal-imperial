@@ -10,7 +10,7 @@ import creditNotesDataJson from "./data/credit-notes-data.json";
 import managerScheduleDataJson from "./data/manager-schedule-data.json";
 import AlertsCenter from "./alerts-center";
 
-type View = "diario" | "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "managerdashboard" | "managerhours" | "performance" | "walkregistrations" | "alertas" | "desenvolvimento" | "cofreform" | "configuracoes";
+type View = "diario" | "resumo" | "tarefas" | "objetivos" | "areas" | "areasglobais" | "equipa" | "custos" | "faturacao" | "financeiro" | "r2p" | "tellarches" | "talento" | "haccp" | "gerenteloja" | "managerdashboard" | "managerhours" | "performance" | "walkregistrations" | "alertas" | "desenvolvimento" | "cofreform" | "invoiceform" | "configuracoes";
 type Department = "global" | "qualidade" | "pessoas" | "cliente" | "manutencao";
 type EvaluationDepartment = Exclude<Department, "global">;
 type UserDepartment = Exclude<Department, "global"> | "";
@@ -179,6 +179,7 @@ const viewLabels: Record<View, string> = {
   alertas: "Central de Alertas",
   desenvolvimento: "Em desenvolvimento",
   cofreform: "Formulário Controlo Cofre",
+  invoiceform: "Registo de faturas",
   configuracoes: "Configurações",
 };
 
@@ -533,7 +534,7 @@ function VaultControlPrototype({ isAdmin, autoOpen = false }: { isAdmin: boolean
 
 type CoinOrder = { id: number; orderDate: string; quantities: Record<string, number>; totalAmount: number; noOrderNeeded: boolean; depositAt: string | null; orderManager: string; depositManager: string; createdByName: string; createdAt: string };
 
-type VaultInvoice = { id: number; invoiceDate: string; entity: string; items: string[]; totalAmount: number; rubric: string; tag: string; beneficiary: string; verified: boolean; pettyCash: boolean; imageName: string; createdByName: string };
+type VaultInvoice = { id: number; invoiceDate: string; entity: string; items: string[]; totalAmount: number; rubric: string; tag: string; beneficiary: string; verified: boolean; pettyCash: boolean; imageName: string; manager: string; createdByName: string };
 const invoiceRubrics = ["Outros Gastos Controláveis", "Combustível"];
 const invoiceTags = ["Equipamento Pequeno", "Combustível", "Correios", "Farmácia", "Formação", "Plano LRM", "Plano Motivacional", "Outros"];
 const invoiceBeneficiaries = ["Restaurante", "Escritório"];
@@ -554,6 +555,24 @@ function VaultInvoicesPrototype({ isAdmin }: { isAdmin: boolean }) {
     {message && !modalOpen && <p className="vault-form-message" role="alert">{message}</p>}<div className="vault-records-table-wrap invoice-table-wrap"><table className="vault-records-table invoice-table"><thead><tr><th>Data</th><th>Entidade</th><th>Artigos</th><th>Total</th><th>Rúbrica</th><th>Etiquetas</th><th>Beneficiário</th><th>Verificação</th><th>Petty Cash</th><th>Ações</th></tr></thead><tbody>{records.map((record) => <tr key={record.id}><td>{new Date(`${record.invoiceDate}T00:00:00`).toLocaleDateString("pt-PT")}</td><td><strong>{record.entity}</strong></td><td><span className="invoice-items" title={record.items.join("\n")}>{record.items.slice(0, 2).join(" · ")}{record.items.length > 2 ? ` +${record.items.length - 2}` : ""}</span></td><td><strong>{euro(record.totalAmount)}</strong></td><td>{record.rubric}</td><td><span className="invoice-tag">{record.tag}</span></td><td>{record.beneficiary}</td><td><label className="invoice-checkbox"><input type="checkbox" checked={record.verified} onChange={() => void toggle(record, "verified")}/><span /></label></td><td><label className="invoice-checkbox"><input type="checkbox" checked={record.pettyCash} onChange={() => void toggle(record, "pettyCash")}/><span /></label></td><td><div className="vault-row-actions"><button type="button" onClick={() => openEdit(record)}>Editar</button>{isAdmin && <button type="button" className="delete" onClick={() => void remove(record)}>Eliminar</button>}</div></td></tr>)}</tbody></table>{!loading && !records.length && <div className="vault-empty">Ainda não existem faturas registadas.</div>}</div>
     {modalOpen && <div className="vault-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setModalOpen(false); }}><section className="vault-modal invoice-modal" role="dialog" aria-modal="true" aria-labelledby="invoice-form-title"><header><div><span className="eyebrow">{editingId ? "Editar fatura" : reading ? "A ler fotografia" : "Nova fatura"}</span><h3 id="invoice-form-title">{reading ? "A extrair os dados da fatura…" : "Registo de fatura"}</h3><p>A leitura automática é uma ajuda. Reveja sempre entidade, artigos e total.</p></div><button type="button" onClick={() => setModalOpen(false)} aria-label="Fechar">×</button></header>{reading ? <div className="invoice-reading"><span>◌</span><strong>A analisar a imagem</strong><p>A fotografia é descartada no fim da leitura.</p></div> : <><div className="invoice-form-grid"><label>Data<input type="date" value={draft.invoiceDate} onChange={(event) => setDraft({ ...draft, invoiceDate: event.target.value })}/></label><label>Entidade<input value={draft.entity} onChange={(event) => setDraft({ ...draft, entity: event.target.value })} placeholder="Nome do fornecedor"/></label><label className="wide">Artigos da fatura<textarea rows={5} value={draft.items} onChange={(event) => setDraft({ ...draft, items: event.target.value })} placeholder="Um artigo por linha"/></label><label>Total da fatura<input inputMode="decimal" value={draft.totalAmount} onChange={(event) => setDraft({ ...draft, totalAmount: event.target.value })} placeholder="0,00"/></label><label>Rúbrica<select value={draft.rubric} onChange={(event) => setDraft({ ...draft, rubric: event.target.value })}><option value="">Selecionar</option>{invoiceRubrics.map((item) => <option key={item}>{item}</option>)}</select></label><label>Etiqueta<select value={draft.tag} onChange={(event) => setDraft({ ...draft, tag: event.target.value })}><option value="">Selecionar</option>{invoiceTags.map((item) => <option key={item}>{item}</option>)}</select></label><label>Beneficiário<select value={draft.beneficiary} onChange={(event) => setDraft({ ...draft, beneficiary: event.target.value })}><option value="">Selecionar</option>{invoiceBeneficiaries.map((item) => <option key={item}>{item}</option>)}</select></label><label className="invoice-check-field"><input type="checkbox" checked={draft.verified} onChange={(event) => setDraft({ ...draft, verified: event.target.checked })}/><span>Verificação concluída</span></label><label className="invoice-check-field"><input type="checkbox" checked={draft.pettyCash} onChange={(event) => setDraft({ ...draft, pettyCash: event.target.checked })}/><span>Petty Cash</span></label></div>{draft.imageName && <p className="invoice-image-note">Fotografia analisada: <strong>{draft.imageName}</strong> · a imagem não é guardada.</p>}{message && <p className="vault-form-message" role="alert">{message}</p>}<div className="development-actions"><button type="button" onClick={() => setModalOpen(false)}>Cancelar</button><button type="button" className="primary" onClick={() => void save()} disabled={busy}>{busy ? "A guardar…" : editingId ? "Guardar alterações" : "Guardar fatura"}</button></div></>}</section></div>}
   </section>;
+}
+
+function QuickInvoiceRegistration() {
+  const [draft, setDraft] = useState({ invoiceDate: new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Lisbon" }), entity: "", totalAmount: "", manager: "" });
+  const [message, setMessage] = useState("");
+  const [saving, setSaving] = useState(false);
+  const save = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); setSaving(true); setMessage("");
+    try {
+      const response = await fetch("/api/vault-invoices", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...draft, totalAmount: moneyValue(draft.totalAmount), items: [], quickRegistration: true }) });
+      const body = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(body.error || "Não foi possível guardar a fatura.");
+      setMessage("Fatura registada com sucesso.");
+      setDraft({ invoiceDate: new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Lisbon" }), entity: "", totalAmount: "", manager: "" });
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Não foi possível guardar a fatura."); }
+    finally { setSaving(false); }
+  };
+  return <section className="quick-invoice-page" aria-labelledby="quick-invoice-title"><header><span className="eyebrow">Controlo Cofre · Faturas</span><h2 id="quick-invoice-title">Registo de fatura</h2><p>Preencha os dados essenciais da fatura e guarde o registo.</p></header><form className="quick-invoice-form" onSubmit={save}><label>Data<input type="date" value={draft.invoiceDate} onChange={(event) => setDraft({ ...draft, invoiceDate: event.target.value })} required /></label><label className="wide">Fornecedor · descrição<input value={draft.entity} onChange={(event) => setDraft({ ...draft, entity: event.target.value })} placeholder="Ex.: Fornecedor — descrição da despesa" maxLength={180} required /></label><label>Valor<input inputMode="decimal" value={draft.totalAmount} onChange={(event) => setDraft({ ...draft, totalAmount: event.target.value })} placeholder="0,00 €" required /></label><label>Gerente<select value={draft.manager} onChange={(event) => setDraft({ ...draft, manager: event.target.value })} required><option value="">Selecionar gerente</option>{managementTeam.map((name) => <option key={name} value={name}>{name}</option>)}</select></label>{message && <p className="quick-invoice-message" role="status">{message}</p>}<button type="submit" className="primary" disabled={saving}>{saving ? "A guardar…" : "Guardar registo"}</button></form></section>;
 }
 
 function CoinOrdersPrototype({ isAdmin }: { isAdmin: boolean }) {
@@ -951,7 +970,9 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("form") === "controlo-cofre") setView("cofreform");
+    const form = new URLSearchParams(window.location.search).get("form");
+    if (form === "controlo-cofre") setView("cofreform");
+    if (form === "registo-faturas") setView("invoiceform");
   }, []);
 
   useEffect(() => {
@@ -1774,6 +1795,11 @@ export default function Home() {
                   <span className="daily-access-copy"><strong>Controlo Cofre</strong><small>Registar e consultar a contagem do cofre.</small></span>
                   <span className="daily-access-arrow" aria-hidden="true">→</span>
                 </button>
+                <button type="button" className="daily-access-card invoices" onClick={() => setView("invoiceform")}>
+                  <span className="daily-access-icon">▤</span>
+                  <span className="daily-access-copy"><strong>Registo de faturas</strong><small>Registar data, fornecedor, descrição, valor e gerente.</small></span>
+                  <span className="daily-access-arrow" aria-hidden="true">→</span>
+                </button>
               </div>
               <p className="daily-access-note">Novos acessos comuns serão acrescentados aqui à medida que forem disponibilizados.</p>
             </section>
@@ -1787,6 +1813,8 @@ export default function Home() {
               <VaultControlPrototype isAdmin={currentUser.role === "admin"} autoOpen />
             </section>
           )}
+
+          {view === "invoiceform" && <QuickInvoiceRegistration />}
           {view === "resumo" && (
             <section className="summary-grid" aria-label="Indicadores principais">
               <article className="metric-card feature">

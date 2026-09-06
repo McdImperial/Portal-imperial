@@ -10,17 +10,20 @@ const beneficiaries = ["Restaurante", "Escritório"];
 const serialize = (record: typeof vaultInvoices.$inferSelect) => ({ ...record, items: JSON.parse(record.items) as string[] });
 
 function values(payload: Record<string, unknown>) {
+  const quickRegistration = Boolean(payload.quickRegistration);
   const invoiceDate = String(payload.invoiceDate || "").trim();
   const entity = String(payload.entity || "").trim();
   const items = Array.isArray(payload.items) ? payload.items.map(String).map((item) => item.trim()).filter(Boolean) : [];
   const totalAmount = Math.round(Number(payload.totalAmount) * 100) / 100;
-  const rubric = String(payload.rubric || ""); const tag = String(payload.tag || ""); const beneficiary = String(payload.beneficiary || "");
+  const rubric = quickRegistration ? "Outros Gastos Controláveis" : String(payload.rubric || ""); const tag = quickRegistration ? "Outros" : String(payload.tag || ""); const beneficiary = quickRegistration ? "Restaurante" : String(payload.beneficiary || "");
+  const manager = String(payload.manager || "").trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(invoiceDate)) throw new Error("Selecione a data da fatura.");
   if (!entity) throw new Error("Indique a entidade.");
-  if (!items.length) throw new Error("Indique pelo menos um artigo da fatura.");
+  if (!items.length && !quickRegistration) throw new Error("Indique pelo menos um artigo da fatura.");
   if (!Number.isFinite(totalAmount) || totalAmount < 0) throw new Error("Indique um total válido.");
   if (!rubrics.includes(rubric) || !tags.includes(tag) || !beneficiaries.includes(beneficiary)) throw new Error("Complete a classificação da fatura.");
-  return { invoiceDate, entity, items: JSON.stringify(items), totalAmount, rubric, tag, beneficiary, verified: Boolean(payload.verified), pettyCash: Boolean(payload.pettyCash), imageName: String(payload.imageName || "").slice(0, 180), updatedAt: new Date().toISOString() };
+  if (quickRegistration && !manager) throw new Error("Selecione o gerente responsável.");
+  return { invoiceDate, entity, items: JSON.stringify(items.length ? items : [entity]), totalAmount, rubric, tag, beneficiary, verified: Boolean(payload.verified), pettyCash: Boolean(payload.pettyCash), imageName: String(payload.imageName || "").slice(0, 180), manager, updatedAt: new Date().toISOString() };
 }
 
 export async function GET(request: Request) {
