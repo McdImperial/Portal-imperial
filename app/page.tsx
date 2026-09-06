@@ -1238,12 +1238,9 @@ export default function Home() {
   const selectedObjectives = department === "global"
     ? allSelectedObjectives
     : allSelectedObjectives.filter((objective) => objectiveDepartments[objective.theme]?.name === activeDepartment?.label);
-  const objectivePointGroups = useMemo(() => [...new Set(selectedObjectives.map((item) => item.possiblePoints))]
-    .sort((a, b) => (b ?? -1) - (a ?? -1))
-    .map((points) => ({
-      points,
-      objectives: selectedObjectives.filter((item) => item.possiblePoints === points).sort((a, b) => objectiveResultOrder.indexOf(getObjectiveResult(a)) - objectiveResultOrder.indexOf(getObjectiveResult(b))),
-    })), [selectedObjectives]);
+  const weightedObjectives = useMemo(() => [...selectedObjectives].sort((a, b) =>
+    (b.possiblePoints ?? 0) - (a.possiblePoints ?? 0) || objectiveResultOrder.indexOf(getObjectiveResult(a)) - objectiveResultOrder.indexOf(getObjectiveResult(b))
+  ), [selectedObjectives]);
   const objectiveStats = useMemo(() => {
     const total = selectedObjectives.length;
     const possiblePoints = selectedObjectives.reduce((sum, item) => sum + (item.possiblePoints ?? 0), 0);
@@ -2385,9 +2382,9 @@ export default function Home() {
               </section>
               <div className="objective-topic-grid" aria-label="Objetivos agrupados por tema">
                 {!selectedObjectives.length && <div className="objective-empty"><span>◷</span><div><strong>Sem objetivos importados</strong><p>Ainda não existem dados para {selectedObjectiveMonth.label}. Selecione outro mês.</p></div></div>}
-                {objectivePointGroups.map((group) => <section className="objective-score-row" key={group.points ?? "sem-pontos"}>
-                  <div className="objective-score-heading"><span>{group.points === undefined ? "Sem pontuação definida" : `Objetivos com ${group.points} pontos possíveis`}</span><small>{group.objectives.length} {group.objectives.length === 1 ? "objetivo" : "objetivos"}</small></div>
-                  <div className="objective-score-cards">{group.objectives.map((item) => { const result = getObjectiveResult(item); const visual = objectiveVisuals[item.theme] ?? { icon: "◎", label: item.theme, tone: "mint" }; const owner = objectiveDepartments[item.theme]; return <article className={`objective-topic-card result-${statusClass(result)}`} key={item.theme}>
+                {!!weightedObjectives.length && <section className="objective-weighted-section">
+                  <div className="objective-weighted-heading"><div><span className="eyebrow">Peso na avaliação mensal</span><strong>O tamanho de cada mosaico representa os pontos possíveis</strong></div><small>{weightedObjectives.length} objetivos</small></div>
+                  <div className="objective-score-cards objective-weighted-grid">{weightedObjectives.map((item) => { const result = getObjectiveResult(item); const visual = objectiveVisuals[item.theme] ?? { icon: "◎", label: item.theme, tone: "mint" }; const owner = objectiveDepartments[item.theme]; const weightClass = (item.possiblePoints ?? 0) >= 80 ? "weight-high" : (item.possiblePoints ?? 0) >= 40 ? "weight-medium" : "weight-standard"; return <article className={`objective-topic-card ${weightClass} result-${statusClass(result)}`} key={item.theme}>
                   <div className="objective-topic-head"><span className={`objective-topic-image visual-${visual.tone}`} role="img" aria-label={visual.label}>{visual.icon}</span><div><h3>{item.theme}</h3></div>{owner && <div className="objective-topic-corner"><span className={`objective-department-corner department-${owner.tone}`} role="img" aria-label={`Departamento responsável: ${owner.name}`}>{owner.icon}</span><strong>{owner.name}</strong></div>}</div>
                   <div className="objective-topic-values">
                     <div><small>Objetivo</small><strong>{item.target ?? "—"}</strong></div>
@@ -2402,7 +2399,7 @@ export default function Home() {
                     <i><em style={{ width: `${Math.min(100, item.achievedPercent ?? 0)}%` }} /></i>
                   </div>
                 </article>; })}</div>
-                </section>)}
+                </section>}
               </div>
               <p className="inventory-note">Fonte: folha “BD Mês” do ficheiro de seguimento de objetivos. Os campos sem resultado permanecem assinalados como “Por atualizar”. <a href={objectivesSourceUrl} target="_blank" rel="noreferrer">Abrir ficheiro fonte ↗</a></p>
             </section>
