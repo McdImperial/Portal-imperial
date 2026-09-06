@@ -2358,12 +2358,23 @@ export default function Home() {
                   <button type="button" className="objective-export" onClick={exportObjectives} disabled={!selectedObjectives.length}><span>⇩</span> Exportar PNG</button>
                 </div>
               </div>
-              <div className="objectives-kpi-grid" aria-label="Resumo dos objetivos">
-                <article className="objective-kpi objective-kpi-month"><span>◎</span><div><small>Percentagem mensal</small><strong>{objectiveStats.monthlyPercent}%</strong><p>{objectiveStats.achievedPoints} de {objectiveStats.possiblePoints} pontos</p></div></article>
-                <article className="objective-kpi objective-kpi-superado"><span>★</span><div><small>Superados</small><div className="objective-kpi-value"><strong>{objectiveStats.superados.count}</strong><b>{objectiveStats.superados.percent}%</b></div><p>do total de objetivos</p></div></article>
-                <article className="objective-kpi objective-kpi-atingido"><span>✓</span><div><small>Atingidos</small><div className="objective-kpi-value"><strong>{objectiveStats.atingidos.count}</strong><b>{objectiveStats.atingidos.percent}%</b></div><p>do total de objetivos</p></div></article>
-                <article className="objective-kpi objective-kpi-proximo"><span>↗</span><div><small>Próximos</small><div className="objective-kpi-value"><strong>{objectiveStats.proximos.count}</strong><b>{objectiveStats.proximos.percent}%</b></div><p>do total de objetivos</p></div></article>
-                <article className="objective-kpi objective-kpi-nao"><span>!</span><div><small>Não atingidos</small><div className="objective-kpi-value"><strong>{objectiveStats.naoAtingidos.count}</strong><b>{objectiveStats.naoAtingidos.percent}%</b></div><p>do total de objetivos</p></div></article>
+              <div className="objectives-dashboard-overview" aria-label="Resumo dos objetivos">
+                <article className={`objective-main-score analysis-${objectiveAnalysis.tone}`}>
+                  <div className="objective-score-ring" style={{ "--objective-score": `${Math.min(100, objectiveStats.monthlyPercent) * 3.6}deg` } as React.CSSProperties}><span><strong>{objectiveStats.monthlyPercent}%</strong><small>resultado mensal</small></span></div>
+                  <div className="objective-main-score-copy"><span className="eyebrow">Desempenho do mês</span><h3>{objectiveAnalysis.label}</h3><p><strong>{objectiveStats.achievedPoints}</strong> de {objectiveStats.possiblePoints} pontos conquistados</p><div className="objective-score-balance"><span>{objectiveStats.total} objetivos</span><span>{objectiveAnalysis.remainingPoints} pontos por conquistar</span></div></div>
+                </article>
+                <div className="objective-status-board">
+                  <article className="objective-status-tile superado"><span>★</span><div><small>Superados</small><strong>{objectiveStats.superados.count}</strong><p>{objectiveStats.superados.percent}% do total</p></div></article>
+                  <article className="objective-status-tile atingido"><span>✓</span><div><small>Atingidos</small><strong>{objectiveStats.atingidos.count}</strong><p>{objectiveStats.atingidos.percent}% do total</p></div></article>
+                  <article className="objective-status-tile proximo"><span>↗</span><div><small>Próximos da meta</small><strong>{objectiveStats.proximos.count}</strong><p>{objectiveStats.proximos.percent}% do total</p></div></article>
+                  <article className="objective-status-tile nao"><span>!</span><div><small>Não atingidos</small><strong>{objectiveStats.naoAtingidos.count}</strong><p>{objectiveStats.naoAtingidos.percent}% do total</p></div></article>
+                </div>
+              </div>
+              <div className="objective-distribution" aria-label="Distribuição dos estados dos objetivos">
+                <span className="superado" style={{ width: `${objectiveStats.superados.percent}%` }} title={`${objectiveStats.superados.count} superados`} />
+                <span className="atingido" style={{ width: `${objectiveStats.atingidos.percent}%` }} title={`${objectiveStats.atingidos.count} atingidos`} />
+                <span className="proximo" style={{ width: `${objectiveStats.proximos.percent}%` }} title={`${objectiveStats.proximos.count} próximos`} />
+                <span className="nao" style={{ width: `${objectiveStats.naoAtingidos.percent}%` }} title={`${objectiveStats.naoAtingidos.count} não atingidos`} />
               </div>
               <section className={`objective-analysis analysis-${objectiveAnalysis.tone}`} aria-labelledby="objective-analysis-title">
                 <div className="objective-analysis-heading"><div><span className="analysis-icon">✦</span><div><span className="eyebrow">Análise do mês</span><h3 id="objective-analysis-title">Leitura dos resultados</h3></div></div><span className="analysis-status">{selectedObjectives.length ? objectiveAnalysis.label : "Sem dados"}</span></div>
@@ -2375,7 +2386,7 @@ export default function Home() {
               <div className="objective-topic-grid" aria-label="Objetivos agrupados por tema">
                 {!selectedObjectives.length && <div className="objective-empty"><span>◷</span><div><strong>Sem objetivos importados</strong><p>Ainda não existem dados para {selectedObjectiveMonth.label}. Selecione outro mês.</p></div></div>}
                 {objectivePointGroups.map((group) => <section className="objective-score-row" key={group.points ?? "sem-pontos"}>
-                  <div className="objective-score-heading"><span>{group.points === undefined ? "Sem pontuação definida" : `${group.points} pontos possíveis`}</span><small>{group.objectives.length} {group.objectives.length === 1 ? "objetivo" : "objetivos"}</small></div>
+                  <div className="objective-score-heading"><span>{group.points === undefined ? "Sem pontuação definida" : `Objetivos com ${group.points} pontos possíveis`}</span><small>{group.objectives.length} {group.objectives.length === 1 ? "objetivo" : "objetivos"}</small></div>
                   <div className="objective-score-cards">{group.objectives.map((item) => { const result = getObjectiveResult(item); const visual = objectiveVisuals[item.theme] ?? { icon: "◎", label: item.theme, tone: "mint" }; const owner = objectiveDepartments[item.theme]; return <article className={`objective-topic-card result-${statusClass(result)}`} key={item.theme}>
                   <div className="objective-topic-head"><span className={`objective-topic-image visual-${visual.tone}`} role="img" aria-label={visual.label}>{visual.icon}</span><div><h3>{item.theme}</h3></div>{owner && <div className="objective-topic-corner"><span className={`objective-department-corner department-${owner.tone}`} role="img" aria-label={`Departamento responsável: ${owner.name}`}>{owner.icon}</span><strong>{owner.name}</strong></div>}</div>
                   <div className="objective-topic-values">
