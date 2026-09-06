@@ -1232,7 +1232,7 @@ export default function Home() {
       };
     }).sort((a, b) => b.month.localeCompare(a.month));
   }, [areaEvaluationHistory, selectedCleaningAreas.length]);
-  const selectedObjectiveMonth = objectiveMonthOptions.find((item) => item.value === objectiveMonth) ?? objectiveMonthOptions[6];
+  const selectedObjectiveMonth = objectiveMonthOptions.find((item) => item.value === objectiveMonth) ?? { value: objectiveMonth, label: new Date(`${objectiveMonth}-01T12:00:00`).toLocaleDateString("pt-PT", { month: "long", year: "numeric" }).replace(/^./, (letter) => letter.toUpperCase()) };
   const selectedObjectiveSnapshot = objectivesByMonth[objectiveMonth];
   const allSelectedObjectives = selectedObjectiveSnapshot?.objectives ?? [];
   const selectedObjectives = department === "global"
@@ -2354,7 +2354,7 @@ export default function Home() {
               <div className="restaurant-objectives-heading">
                 <div><span className="eyebrow">{selectedObjectiveMonth.label} · {department === "global" ? "Todos os departamentos" : activeDepartment?.label}</span><h2 id="restaurant-objectives-title">Objetivos mensais</h2><p>{department === "global" ? "Leitura rápida das metas, resultados e pontuação." : `Indicadores acompanhados por ${activeDepartment?.label}.`}</p></div>
                 <div className="objective-toolbar" data-export-exclude>
-                  <label><span>Mês</span><select value={objectiveMonth} onChange={(event) => setObjectiveMonth(event.target.value)} aria-label="Filtrar objetivos por mês">{objectiveMonthOptions.map((month) => <option value={month.value} key={month.value}>{month.label}</option>)}</select></label>
+                  <label><span>Consultar mês</span><input className="objective-month-filter" type="month" value={objectiveMonth} min={objectiveMonthOptions[0].value} max={objectiveMonthOptions[objectiveMonthOptions.length - 1].value} onChange={(event) => setObjectiveMonth(event.target.value)} aria-label="Filtrar objetivos por mês" /></label>
                   <button type="button" className="objective-export" onClick={exportObjectives} disabled={!selectedObjectives.length}><span>⇩</span> Exportar PNG</button>
                 </div>
               </div>
@@ -2398,8 +2398,8 @@ export default function Home() {
                     <span><small>Pontos atingidos</small><strong>{item.achievedPoints ?? "—"}</strong></span>
                   </div>
                   <div className="objective-topic-progress">
-                    <div><small>Resultado</small><strong>{result}</strong></div>
-                    <i><em style={{ width: `${item.achievedPercent ?? 0}%` }} /></i>
+                    <div><small>Estado</small><strong>{result}</strong><b>{item.achievedPercent === undefined ? "—" : `${Math.round(item.achievedPercent)}%`}</b></div>
+                    <i><em style={{ width: `${Math.min(100, item.achievedPercent ?? 0)}%` }} /></i>
                   </div>
                 </article>; })}</div>
                 </section>)}
