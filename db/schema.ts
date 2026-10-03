@@ -1,5 +1,7 @@
 import { sql } from "drizzle-orm";
 import { index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import * as shifts from "./shifts";
+import * as audit from "./audit";
 
 export const healthRecords = sqliteTable("health_records", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -43,3 +45,6 @@ export const financeExpenses = sqliteTable("finance_expenses", {
   paymentType: text("payment_type").notNull(), entity: text("entity"), reference: text("reference"), dueDate: text("due_date"),
   status: text("status").notNull().default("Pendente"), bank: text("bank").notNull(), createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [index("idx_finance_expenses_month_due").on(table.month, table.dueDate)]);
+
+export { shifts, audit };
+export const shiftTables = { ...shifts, ...audit };
