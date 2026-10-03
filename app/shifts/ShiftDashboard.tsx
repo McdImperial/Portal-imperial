@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import TaskCompleteModal from "./TaskCompleteModal";
+import QSLRoundsPanel from "./QSLRoundsPanel";
 
 interface ShiftDetail {
   id: number;
@@ -35,6 +36,7 @@ export default function ShiftDashboard({ shiftId }: ShiftDashboardProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<any | null>(null);
+  const [activeTab, setActiveTab] = useState<"tasks" | "qsl">("tasks");
 
   useEffect(() => {
     const fetchShift = async () => {
@@ -151,18 +153,48 @@ export default function ShiftDashboard({ shiftId }: ShiftDashboardProps) {
         </div>
       </div>
 
-      {/* Lista de Tarefas */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Tarefas do Turno</h3>
-        <div className="space-y-2">
-          {shift.tasks.map((task) => (
-            <TaskRow
-              key={task.id}
-              task={task}
-              shiftId={shiftId}
-              onClick={() => setSelectedTask(task)}
-            />
-          ))}
+      {/* Tabs */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="border-b border-slate-200 flex">
+          <button
+            onClick={() => setActiveTab("tasks")}
+            className={`flex-1 py-4 px-6 font-medium text-center transition ${
+              activeTab === "tasks"
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            Tarefas ({shift.tasks.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("qsl")}
+            className={`flex-1 py-4 px-6 font-medium text-center transition ${
+              activeTab === "qsl"
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            Voltas QSL
+          </button>
+        </div>
+
+        <div className="p-6">
+          {activeTab === "tasks" && (
+            <div className="space-y-2">
+              {shift.tasks.map((task) => (
+                <TaskRow
+                  key={task.id}
+                  task={task}
+                  shiftId={shiftId}
+                  onClick={() => setSelectedTask(task)}
+                />
+              ))}
+            </div>
+          )}
+
+          {activeTab === "qsl" && (
+            <QSLRoundsPanel shiftId={shiftId} />
+          )}
         </div>
       </div>
 

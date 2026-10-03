@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { requireChatGPTUser } from "../../../app/chatgpt-auth";
 import { ensureShiftsSchema } from "../../../db/shifts";
 import { ensureAuditSchema } from "../../../db/audit";
+import { ensureQslSchema } from "../../../db/qsl";
 
 interface StartShiftRequest {
   shiftTypeId: number;
@@ -28,6 +29,7 @@ export async function POST(request: Request) {
 
     await ensureShiftsSchema();
     await ensureAuditSchema();
+    await ensureQslSchema();
 
     // Validate shift type exists
     const shiftType = await env.DB.prepare(
@@ -110,6 +112,73 @@ export async function POST(request: Request) {
       // Batch in groups of 50
       for (let i = 0; i < taskInserts.length; i += 50) {
         await env.DB.batch(taskInserts.slice(i, i + 50));
+      }
+    }
+
+    // Pre-create QSL rounds based on shift type frequency
+    if (expectedQslRounds > 0) {
+      const getShiftTypeDetails = await env.DB.prepare(
+        "SELECT start_time, end_time FROM shift_types WHERE id = ?"
+      )
+        .bind(input.shiftTypeId)
+        .first<{ start_time: string; end_time: string }>();
+
+      if (getShiftTypeDetails) {
+        const [startHour, startMin] = getShiftTypeDetails.start_time.split(":").map(Number);
+        const [endHour, endMin] = getShiftTypeDetails.end_time.split(":").map(Number);
+
+        const shiftStart = new Date(now);
+        shiftStart.setHours(startHour, startMin, 0, 0);
+
+        const shiftEnd = new Date(now);
+        shiftEnd.setHours(endHour, endMin, 0, 0);
+
+        const roundInserts = [];
+        let roundNumber = 1;
+        let currentTime = new Date(shiftStart);
+
+        while (currentTime <= shiftEnd && roundNumber <= expectedQslRounds) {
+          roundInserts.push(
+            env.DB.prepare(
+              `INSERT INTO qsl_rounds (shift_id, round_number, scheduled_time, status)
+               VALUES (?, ?, ?, 'pending')`
+            ).bind(shiftId, roundNumber, currentTime.toISOString())
+          );
+          currentTime.setMinutes(currentTime.getMinutes() + qslFrequencyMinutes);
+          roundNumber++;
+        }
+
+        // Get all QSL points to pre-create checkpoints
+        const qslPoints = await env.DB.prepare(
+          "SELECT id FROM qsl_points WHERE enabled = 1 ORDER BY order_index"
+        ).all<{ id: number }>();
+
+        // Create checkpoints for the first round
+        if (roundInserts.length > 0 && qslPoints.results) {
+          for (const insert of roundInserts) {
+            await insert.run();
+          }
+
+          // Create checkpoints for each round
+          const firstRoundResult = await env.DB.prepare(
+            "SELECT id FROM qsl_rounds WHERE shift_id = ? ORDER BY round_number LIMIT 1"
+          )
+            .bind(shiftId)
+            .first<{ id: number }>();
+
+          if (firstRoundResult) {
+            const checkpointInserts = qslPoints.results.map((point) =>
+              env.DB.prepare(
+                `INSERT INTO qsl_checkpoints (qsl_round_id, qsl_point_id, status)
+                 VALUES (?, ?, 'pending')`
+              ).bind(firstRoundResult.id, point.id)
+            );
+
+            for (let i = 0; i < checkpointInserts.length; i += 50) {
+              await env.DB.batch(checkpointInserts.slice(i, i + 50));
+            }
+          }
+        }
       }
     }
 
