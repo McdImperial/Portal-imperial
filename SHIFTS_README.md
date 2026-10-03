@@ -162,11 +162,26 @@ db/
 
 ## Próximas Fases
 
-### FASE 2 — Volta QSL (PRÓXIMA)
-- Cronograma automático de voltas (1/hora para abertura)
-- Scanner QR code
-- Verificações por ponto
-- Registro de problemas encontrados
+### FASE 2 — Volta QSL (✅ IMPLEMENTADA)
+
+**O que está incluído:**
+- ✅ 2 tabelas: `qsl_rounds` (voltas) e `qsl_checkpoints` (verificações)
+- ✅ 5 API endpoints para gerenciar voltas e checkpoints
+- ✅ Dashboard "Voltas QSL" no shift dashboard com progresso visual
+- ✅ Modal interativo para verificar pontos com QR code
+- ✅ Pré-criação automática de voltas quando turno é iniciado
+- ✅ Validação de QR codes contra configuração do ponto
+- ✅ Status: pending → em_curso → concluida (ou atrasada/nao_realizada)
+- ✅ Cada volta tem 5 pontos (Sala, Balcão, Produção, Áreas Internas, Sanitários)
+- ✅ Cronograma automático baseado em tipo de turno e frequência QSL
+
+**Como usar:**
+1. Iniciar turno → voltas são automaticamente agendadas
+2. Dashboard mostra aba "Voltas QSL" com lista de voltas
+3. Clicar numa volta → modal mostra 5 pontos a verificar
+4. Escanear QR code em cada ponto (ou digitar código manualmente)
+5. Adicionar notas opcionais
+6. Quando 100% dos pontos verificados, voltar "Completar Volta"
 
 ### FASE 3 — Não Conformidades
 - Criar ocorrência quando marcar NC
