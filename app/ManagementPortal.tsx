@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 
-type Section = "acessos-diarios" | "vendas" | "rh" | "projetos" | "operacoes" | "financeiro";
+type Section = "acessos-diarios" | "vendas" | "rh" | "projetos" | "operacoes" | "financeiro" | "arquitetura";
 type UserRole = "Administrador" | "Gerente" | "Colaborador";
 
 type MetricCard = { label: string; value: string; detail: string; tone: string; icon: string };
@@ -19,6 +19,7 @@ const sections = [
   { id: "projetos", label: "Projetos", icon: "▢" },
   { id: "operacoes", label: "Operações", icon: "⚙" },
   { id: "financeiro", label: "Financeiro", icon: "€" },
+  { id: "arquitetura", label: "Arquitetura", icon: "🏗" },
 ] as const;
 
 const salesData: SalesData[] = [
@@ -119,6 +120,7 @@ export default function ManagementPortal() {
         {currentSection === "projetos" && <ProjetosView projects={projects} activeProjects={activeProjects} />}
         {currentSection === "operacoes" && <OperacoesView operations={operations} pendingOperations={pendingOperations} />}
         {currentSection === "financeiro" && <FinanceiroView financialData={financialData} totalBalance={totalBalance} />}
+        {currentSection === "arquitetura" && <ArquiteturaView />}
 
         <footer>
           <span>Plataforma Imperial · Gestão Corporativa</span>
@@ -423,6 +425,117 @@ function FinanceiroView({ financialData, totalBalance }: { financialData: Financ
                 ))}
               </tbody>
             </table>
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function ArquiteturaView() {
+  const stack = [
+    { category: "Framework", items: ["Next.js 16.2.6", "React 19.2.6", "Vite 8.0.13"] },
+    { category: "Styling", items: ["Tailwind CSS 4.2.1", "CSS Custom Properties"] },
+    { category: "Database", items: ["Drizzle ORM 0.45.2", "SQLite", "Cloudflare D1"] },
+    { category: "Deployment", items: ["Cloudflare Workers", "GitHub Pages", "Vinext 0.0.50"] },
+  ];
+
+  const folders = [
+    { name: "app/", description: "Componentes React e páginas Next.js", items: ["ManagementPortal.tsx", "page.tsx", "layout.tsx", "globals.css", "api/"] },
+    { name: "db/", description: "Schema Drizzle e helpers de database", items: ["schema.ts", "index.ts", "records.ts", "metrics.ts"] },
+    { name: "worker/", description: "Entry point do Cloudflare Worker", items: ["index.ts"] },
+    { name: "build/", description: "Configuração de build customizada", items: ["sites-vite-plugin.ts"] },
+    { name: "public/", description: "Assets estáticos (imagens, SVGs)", items: ["favicon.svg", "og-portal.png"] },
+    { name: "drizzle/", description: "Database migrations", items: ["0000_*.sql", "0001_*.sql", "meta/"] },
+  ];
+
+  return (
+    <section className="page-section">
+      <div className="section-header">
+        <div>
+          <p className="eyebrow">Estrutura do Projeto</p>
+          <h2>Dashboard de Arquitetura</h2>
+          <p>Exploração completa da estrutura, stack tecnológico e componentes do repositório.</p>
+        </div>
+      </div>
+
+      <div className="content-grid">
+        <article className="panel">
+          <div className="panel-heading">
+            <p className="eyebrow">Stack Tecnológico</p>
+            <h3>Tecnologias Utilizadas</h3>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px", padding: "16px" }}>
+            {stack.map((section) => (
+              <div key={section.category} style={{ padding: "12px", border: "1px solid var(--line)", borderRadius: "8px", backgroundColor: "var(--cream)" }}>
+                <strong style={{ display: "block", marginBottom: "8px", color: "var(--teal)" }}>{section.category}</strong>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  {section.items.map((item) => (
+                    <li key={item} style={{ fontSize: "14px", padding: "4px 0", color: "var(--muted)" }}>
+                      → {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </article>
+      </div>
+
+      <div className="content-grid">
+        <article className="panel">
+          <div className="panel-heading">
+            <p className="eyebrow">Organização</p>
+            <h3>Estrutura de Pastas</h3>
+          </div>
+          <div style={{ padding: "16px" }}>
+            {folders.map((folder) => (
+              <div key={folder.name} style={{ marginBottom: "16px", paddingBottom: "16px", borderBottom: "1px solid var(--line)" }}>
+                <div style={{ display: "flex", alignItems: "center", marginBottom: "8px", gap: "8px" }}>
+                  <span style={{ fontSize: "18px" }}>📁</span>
+                  <strong style={{ fontFamily: "monospace", color: "var(--teal)" }}>{folder.name}</strong>
+                </div>
+                <p style={{ fontSize: "14px", color: "var(--muted)", margin: "0 0 8px 26px" }}>{folder.description}</p>
+                <div style={{ margin: "0 0 0 26px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                  {folder.items.map((item) => (
+                    <span key={item} style={{ fontSize: "12px", padding: "4px 8px", backgroundColor: "var(--cream)", borderRadius: "4px", fontFamily: "monospace", color: "var(--ink)" }}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+      </div>
+
+      <div className="content-grid">
+        <article className="panel">
+          <div className="panel-heading">
+            <p className="eyebrow">Informação</p>
+            <h3>Detalhes do Projeto</h3>
+          </div>
+          <div style={{ padding: "16px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+            <div style={{ padding: "12px", backgroundColor: "var(--cream)", borderRadius: "8px" }}>
+              <span style={{ display: "block", fontSize: "12px", color: "var(--muted)", marginBottom: "4px" }}>Repositório</span>
+              <strong style={{ display: "block", color: "var(--ink)" }}>Portal Imperial</strong>
+              <span style={{ fontSize: "12px", color: "var(--muted)" }}>Management Dashboard</span>
+            </div>
+            <div style={{ padding: "12px", backgroundColor: "var(--cream)", borderRadius: "8px" }}>
+              <span style={{ display: "block", fontSize: "12px", color: "var(--muted)", marginBottom: "4px" }}>Branch Atual</span>
+              <strong style={{ display: "block", color: "var(--ink)" }}>claude/management-portal</strong>
+              <span style={{ fontSize: "12px", color: "var(--muted)" }}>Feature branch</span>
+            </div>
+            <div style={{ padding: "12px", backgroundColor: "var(--cream)", borderRadius: "8px" }}>
+              <span style={{ display: "block", fontSize: "12px", color: "var(--muted)", marginBottom: "4px" }}>Node.js</span>
+              <strong style={{ display: "block", color: "var(--ink)" }}>22.13.0+</strong>
+              <span style={{ fontSize: "12px", color: "var(--muted)" }}>Versão mínima</span>
+            </div>
+            <div style={{ padding: "12px", backgroundColor: "var(--cream)", borderRadius: "8px" }}>
+              <span style={{ display: "block", fontSize: "12px", color: "var(--muted)", marginBottom: "4px" }}>Deployment</span>
+              <strong style={{ display: "block", color: "var(--ink)" }}>GitHub Pages</strong>
+              <span style={{ fontSize: "12px", color: "var(--muted)" }}>Automático via Actions</span>
+            </div>
           </div>
         </article>
       </div>
