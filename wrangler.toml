@@ -1,0 +1,15 @@
+name = "portal-imperial"
+type = "javascript"
+account_id = ""
+workers_dev = true
+route = ""
+zone_id = ""
+main = "dist/server/index.js"
+build = { command = "npm run build" }
+
+[env.production]
+name = "portal-imperial"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "site-creator-d1"
