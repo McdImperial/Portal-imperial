@@ -10,8 +10,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "localhost:3000";
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   const image = `${protocol}://${host}/og-portal.png`;
-  const title = "Portal Soutelo — Espaço familiar privado";
-  const description = "Portal privado com áreas separadas para informação financeira e registos de saúde da família Soutelo.";
+  const title = "Portal Imperial — Espaço familiar privado";
+  const description = "Portal privado com áreas separadas para informação financeira e registos de saúde da família Imperial.";
   return {
     title,
     description,

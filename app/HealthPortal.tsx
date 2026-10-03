@@ -253,7 +253,7 @@ export default function HealthPortal() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand"><span className="brand-mark">◇</span><span>Portal Soutelo</span></div>
+        <div className="brand"><span className="brand-mark">◇</span><span>Portal Imperial</span></div>
         <p className="side-label">Áreas</p>
         <div className="area-list">
           <button className={`area-button ${area === "Financeiro" ? "selected" : ""}`} onClick={() => setArea("Financeiro")}>
@@ -350,7 +350,7 @@ export default function HealthPortal() {
         {activeNav === "Health Manager" && <HealthManagerView metrics={personMetrics} profile={profile} />}
         </>}
 
-        <footer><span>Portal Soutelo · Espaço familiar privado</span><span>{area === "Saúde" ? "Os registos organizam informação e não substituem aconselhamento médico." : "Área financeira reservada para desenvolvimento futuro."}</span></footer>
+        <footer><span>Portal Imperial · Espaço familiar privado</span><span>{area === "Saúde" ? "Os registos organizam informação e não substituem aconselhamento médico." : "Área financeira reservada para desenvolvimento futuro."}</span></footer>
       </main>
 
       {loading && <div className="loading-pill">A atualizar os seus dados…</div>}
