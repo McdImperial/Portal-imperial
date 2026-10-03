@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import TaskCompleteModal from "./TaskCompleteModal";
 
 interface ShiftDetail {
   id: number;
@@ -33,6 +34,7 @@ export default function ShiftDashboard({ shiftId }: ShiftDashboardProps) {
   const [shift, setShift] = useState<ShiftDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = useState<any | null>(null);
 
   useEffect(() => {
     const fetchShift = async () => {
@@ -154,15 +156,40 @@ export default function ShiftDashboard({ shiftId }: ShiftDashboardProps) {
         <h3 className="text-lg font-semibold text-slate-900 mb-4">Tarefas do Turno</h3>
         <div className="space-y-2">
           {shift.tasks.map((task) => (
-            <TaskRow key={task.id} task={task} shiftId={shiftId} />
+            <TaskRow
+              key={task.id}
+              task={task}
+              shiftId={shiftId}
+              onClick={() => setSelectedTask(task)}
+            />
           ))}
         </div>
       </div>
+
+      {/* Modal de Completar Tarefa */}
+      {selectedTask && (
+        <TaskCompleteModal
+          taskId={selectedTask.id}
+          taskName={selectedTask.name}
+          area={selectedTask.area}
+          responseType={selectedTask.responseType}
+          requiresPhoto={selectedTask.requiresPhoto}
+          allowNa={selectedTask.allowNa}
+          onClose={() => setSelectedTask(null)}
+          onComplete={() => {
+            setSelectedTask(null);
+            // Refresh shift data
+            fetch(`/api/shifts/${shiftId}`)
+              .then(r => r.json())
+              .then(data => setShift(data));
+          }}
+        />
+      )}
     </div>
   );
 }
 
-function TaskRow({ task, shiftId }: { task: any; shiftId: number }) {
+function TaskRow({ task, shiftId, onClick }: { task: any; shiftId: number; onClick?: () => void }) {
   const statusColors = {
     pending: "bg-amber-100 text-amber-800",
     completed: "bg-green-100 text-green-800",
@@ -185,7 +212,9 @@ function TaskRow({ task, shiftId }: { task: any; shiftId: number }) {
   };
 
   return (
-    <div className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition">
+    <div
+      onClick={onClick}
+      className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition cursor-pointer">
       <div className="flex-1">
         <div className="flex items-center gap-3">
           <span>{criticalityColors[task.criticality as keyof typeof criticalityColors] || "○"}</span>
