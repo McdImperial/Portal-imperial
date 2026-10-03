@@ -1,9 +1,10 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import BillingControl from "./BillingControl";
 
 type Profile = "Tiago Soutelo" | "Marlene Soutelo";
-type Area = "Financeiro" | "Saúde";
+type Area = "Financeiro" | "Saúde" | "Controlo de Faturação";
 type RecordKind = "weight" | "blood_pressure" | "activity" | "medical";
 type HealthRecord = {
   id: number;
@@ -259,6 +260,9 @@ export default function HealthPortal() {
           <button className={`area-button ${area === "Financeiro" ? "selected" : ""}`} onClick={() => setArea("Financeiro")}>
             <span className="area-icon finance">€</span><span><strong>Financeiro</strong><small>Documentos e despesas</small></span>
           </button>
+          <button className={`area-button ${area === "Controlo de Faturação" ? "selected" : ""}`} onClick={() => setArea("Controlo de Faturação")}>
+            <span className="area-icon billing">📋</span><span><strong>Controlo de Faturação</strong><small>Validação de fornecedores</small></span>
+          </button>
           <button className={`area-button ${area === "Saúde" ? "selected" : ""}`} onClick={() => setArea("Saúde")}>
             <span className="area-icon health">♡</span><span><strong>Saúde</strong><small>Registos e evolução</small></span>
           </button>
@@ -289,7 +293,7 @@ export default function HealthPortal() {
       </aside>
 
       <main>
-        {area === "Financeiro" ? <FinanceDashboard section={financeSection} category={financeCategory} selectedBank={selectedBank} onCategoryChange={setFinanceCategory} /> : <>
+        {area === "Financeiro" ? <FinanceDashboard section={financeSection} category={financeCategory} selectedBank={selectedBank} onCategoryChange={setFinanceCategory} /> : area === "Controlo de Faturação" ? <BillingControl /> : <>
         <header className="topbar">
           <div>
             <p className="eyebrow">{activeNav}</p>
