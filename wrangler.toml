@@ -1,0 +1,12 @@
+name = "portal-imperial"
+type = "javascript"
+compatibility_date = "2024-10-21"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+name = "portal-imperial-prod"
+
+[build]
+command = "npm run build"
+cwd = "."
+outdir = "dist"
