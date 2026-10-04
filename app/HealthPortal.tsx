@@ -285,6 +285,12 @@ export default function HealthPortal() {
             {financeSection === "Bancos" && <div className="finance-subnav">{bankFolders.map((bank) => <button key={bank.name} className={selectedBank === bank.name ? "active" : ""} onClick={() => { setFinanceSection("Bancos"); setSelectedBank(bank.name); }}><span>{bank.icon}</span>{bank.name}</button>)}</div>}
           </nav>
         </div>}
+        <div className="nav-divider" style={{ margin: "24px 0", borderTop: "1px solid var(--border-color, rgba(0,0,0,0.1))" }} />
+        <div style={{ padding: "0 16px" }}>
+          <a href="/gestao-imperial" className="area-button" style={{ textDecoration: "none", display: "block", textAlign: "left" }}>
+            <span className="area-icon" style={{ background: "#C8102E", color: "white", fontSize: "18px" }}>⚙</span><span><strong>Gestão Imperial</strong><small>Gerenciamento operacional</small></span>
+          </a>
+        </div>
         <div className="privacy-note"><span>Espaço privado</span><small>Apenas as pessoas autorizadas podem aceder a este portal.</small></div>
       </aside>
 

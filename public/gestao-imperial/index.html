@@ -1,0 +1,1179 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gestão Imperial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F4F6; --surface:#FFFFFF; --surface-2:#EEF0F2; --ink:#1B1F24; --muted:#5D6670; --line:#E1E4E8;
+  --yellow:#F4BE41; --yellow-ink:#1B1F24; --red:#C8102E; --navy:#1F4E8C;
+  --accent:#1F4E8C; --accent-ink:#FFFFFF;
+  --ok:#1F7A49; --warn:#8F6400; --bad:#C8102E;
+  --ok-bg:#E1F1E7; --warn-bg:#FCEFC9; --bad-bg:#FBE0E3;
+  --shadow:0 1px 2px rgba(20,25,30,.06),0 2px 8px rgba(20,25,30,.04);
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121518; --surface:#1B2025; --surface-2:#252B31; --ink:#E8EBEE; --muted:#9AA3AC; --line:#2C333A;
+    --yellow:#E8B33C; --navy:#7FA8E0; --accent:#7FA8E0; --accent-ink:#0E1620;
+    --ok:#5CC48A; --warn:#E6B54A; --bad:#F2707F;
+    --ok-bg:#16301F; --warn-bg:#33290D; --bad-bg:#3B171C;
+    --shadow:none; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121518; --surface:#1B2025; --surface-2:#252B31; --ink:#E8EBEE; --muted:#9AA3AC; --line:#2C333A;
+  --yellow:#E8B33C; --navy:#7FA8E0; --accent:#7FA8E0; --accent-ink:#0E1620;
+  --ok:#5CC48A; --warn:#E6B54A; --bad:#F2707F;
+  --ok-bg:#16301F; --warn-bg:#33290D; --bad-bg:#3B171C;
+  --shadow:none; color-scheme:dark;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 80px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.cond{font-stretch:75%;font-weight:700}
+
+/* Header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:1240px;margin:0 auto;padding:0 20px;height:68px;display:flex;align-items:center;gap:24px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex:none}
+.mark{width:36px;height:36px;border-radius:10px;background:var(--red);display:grid;place-items:center}
+.mark svg{width:22px;height:22px}
+.brand b{font-size:1.15rem;font-weight:800;letter-spacing:-.01em}
+.nav{display:flex;gap:4px;flex:1;justify-content:center;overflow-x:auto;scrollbar-width:none;min-width:0}
+.nav::-webkit-scrollbar{display:none}
+.nav a{flex:none;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--muted);font-weight:500;white-space:nowrap}
+.nav a:hover{color:var(--ink);background:var(--surface-2)}
+.nav a[aria-current="page"]{color:var(--ink);font-weight:700;box-shadow:inset 0 -3px 0 var(--dc,var(--yellow))}
+.me{display:flex;align-items:center;gap:10px;flex:none}
+.store{padding:6px 14px;border:1px solid var(--line);border-radius:999px;font-weight:600;font-size:.9rem}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700}
+@media (max-width:860px){
+  .top-in{height:auto;flex-wrap:wrap;padding:10px 16px 0;gap:10px}
+  .nav{order:3;flex-basis:100%;justify-content:flex-start;padding-bottom:6px}
+  .me{margin-left:auto}
+  .store{display:none}
+}
+
+main{max-width:1240px;margin:0 auto;padding:24px 20px 48px}
+
+/* Hero */
+.hero{background:var(--yellow);color:var(--yellow-ink);border-radius:20px;padding:44px 40px;display:flex;align-items:center;gap:24px;position:relative;overflow:hidden}
+.hero .txt{flex:1;min-width:0}
+.hero .date{font-size:.9rem;font-weight:600;text-transform:capitalize;opacity:.8}
+.hero h1{margin:6px 0 8px;font-size:clamp(2.2rem,5.5vw,3.4rem);font-weight:800;letter-spacing:-.025em;line-height:1}
+.hero p{margin:0;font-size:1.08rem;max-width:56ch}
+.hero .art{flex:none;width:150px;height:150px}
+@media (max-width:640px){.hero{padding:28px 22px}.hero .art{display:none}}
+
+/* Home layout */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start;margin-top:20px}
+@media (max-width:980px){.layout{grid-template-columns:1fr}}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
+.card{position:relative;display:flex;flex-direction:column;gap:8px;padding:22px 22px 18px;background:var(--surface);border-radius:16px;border-top:5px solid var(--dc);box-shadow:var(--shadow);text-decoration:none;min-height:230px;transition:transform .15s}
+.card:hover{transform:translateY(-2px)}
+.ico{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--dc) 13%,transparent);color:var(--dc);margin-bottom:6px}
+.ico svg{width:22px;height:22px}
+.card h3{margin:0;font-size:1.45rem;font-stretch:75%;font-weight:700;line-height:1.1}
+.card .desc{color:var(--muted);font-size:.96rem;margin:0}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:10px}
+.tag{padding:3px 10px;border-radius:7px;background:var(--surface-2);font-size:.84rem;font-weight:500}
+.tag.bad{background:var(--bad-bg);color:var(--bad);font-weight:600}
+.tag.ok{background:var(--ok-bg);color:var(--ok);font-weight:600}
+.card.add{border-top-color:var(--line);border-style:dashed;border-width:1.5px 1.5px 1.5px;border-top-width:5px;background:transparent;box-shadow:none;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;font-weight:600}
+
+/* To-do panel */
+.todo{background:var(--surface);border-radius:16px;border-top:5px solid var(--navy);box-shadow:var(--shadow);display:flex;flex-direction:column;max-height:640px}
+.todo-head{display:flex;align-items:baseline;gap:10px;padding:18px 20px 10px}
+.todo-head h2{margin:0;font-size:1.35rem;font-stretch:75%;font-weight:700;flex:1}
+.todo-head span{color:var(--muted);font-size:.88rem}
+.seg{display:flex;gap:4px;padding:0 20px 10px}
+.todo-list{overflow:auto;padding:0 12px;flex:1}
+.td{display:flex;gap:12px;align-items:flex-start;padding:12px 8px;border-top:1px solid var(--line)}
+.td:first-child{border-top:none}
+.td .b{flex:1;min-width:0;cursor:pointer}
+.td .t{font-weight:500;line-height:1.35}
+.td .m{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font-size:.82rem;color:var(--muted)}
+.td .due{font-weight:700;color:var(--ink);white-space:nowrap}
+.td .due.late{color:var(--bad)}
+.rep{display:inline-block;padding:1px 8px;border-radius:999px;background:var(--yellow);color:var(--yellow-ink);font-size:.78rem;font-weight:700;margin-right:6px;vertical-align:1px}
+.todo-foot{display:flex;gap:16px;padding:12px 20px 16px;border-top:1px solid var(--line)}
+.link{background:none;border:none;padding:0;color:var(--accent);font-weight:600;cursor:pointer;text-decoration:none;font-size:.92rem}
+
+/* Recents */
+.recent h2{margin:40px 0 2px;font-size:1.2rem;font-weight:700}
+.recent > p{margin:0 0 14px;color:var(--muted);font-size:.92rem}
+.rec{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.rec a{display:block;padding:14px 16px;background:var(--surface);border-radius:12px;border-left:4px solid var(--dc);text-decoration:none;box-shadow:var(--shadow)}
+.rec small{display:block;color:var(--muted);font-size:.84rem}
+.rec b{display:block;font-size:1.02rem;margin:2px 0}
+
+footer{text-align:center;color:var(--muted);font-size:.86rem;padding:28px 16px 40px;border-top:1px solid var(--line)}
+
+/* Shared */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:.94rem;cursor:pointer;text-decoration:none}
+.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+:root[data-theme="dark"] .btn.primary{color:var(--accent-ink)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:var(--accent-ink)}}
+.btn.ghost{background:transparent}
+.btn.small{min-height:34px;padding:0 12px;font-size:.86rem;border-radius:8px}
+.btn.danger-ghost{background:transparent;color:var(--bad);border-color:transparent}
+.btn.danger-ghost.armed{background:var(--bad);color:#fff}
+.icon-btn{width:40px;height:40px;border-radius:10px;border:none;background:transparent;cursor:pointer;font-size:1.05rem;color:var(--muted)}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sp{flex:1}
+.muted{color:var(--muted)}
+.chip{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;font-size:.86rem;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:.8rem;font-weight:600;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.warn{background:var(--warn-bg);color:var(--warn)} .pill.bad{background:var(--bad-bg);color:var(--bad)} .pill.none{background:var(--surface-2);color:var(--muted)}
+.empty{padding:28px 20px;border:1.5px dashed var(--line);border-radius:14px;text-align:center;color:var(--muted)}
+.empty p{margin:0 0 14px}
+.empty.sm{padding:18px;margin:8px}
+.note{padding:10px 14px;border-radius:10px;background:var(--warn-bg);color:var(--warn);font-size:.9rem;margin-bottom:16px}
+
+/* Department page */
+.crumb{font-size:.9rem;color:var(--muted);margin-bottom:12px}
+.crumb a{color:var(--accent);text-decoration:none;font-weight:600}
+.dhead{background:var(--surface);border-radius:18px;border-top:6px solid var(--dc);box-shadow:var(--shadow);padding:26px 26px 0;margin-bottom:20px}
+.dhead .top-row{display:flex;gap:16px;align-items:flex-start}
+.dhead h1{margin:0;font-size:clamp(2rem,5vw,2.8rem);font-stretch:72%;font-weight:800;line-height:1}
+.dhead .desc{color:var(--muted);margin:6px 0 0;max-width:65ch}
+.dhead .lead{font-size:.9rem;margin-top:6px}
+.tabs{display:flex;gap:4px;margin-top:20px;overflow-x:auto}
+.tabs a{padding:12px 14px;text-decoration:none;font-weight:600;color:var(--muted);white-space:nowrap;border-bottom:3px solid transparent}
+.tabs a span{font-weight:500}
+.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--dc)}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+
+.objs{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.obj{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:10px}
+.obj h3{margin:0;font-size:1.05rem;font-weight:700;line-height:1.25}
+.obj .period{font-size:.82rem;color:var(--muted)}
+.obj .val{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.obj .cur{font-size:2.4rem;font-weight:800;font-stretch:72%;line-height:1}
+.obj .unit{font-weight:600;color:var(--muted)}
+.obj .tgt{font-size:.9rem;color:var(--muted)}
+.bar{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:99px}
+.bar.ok > i{background:var(--ok)} .bar.warn > i{background:var(--warn)} .bar.bad > i{background:var(--bad)}
+.obj .meta{font-size:.8rem;color:var(--muted)}
+.obj .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+
+.list{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.item{display:flex;gap:12px;align-items:flex-start;padding:13px 16px;border-top:1px solid var(--line)}
+.item:first-child{border-top:none}
+.item .body{flex:1;min-width:0;cursor:pointer}
+.item .title{font-weight:600}
+.item .sub{font-size:.84rem;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;margin-top:3px;align-items:center}
+.item .sub .late{color:var(--bad);font-weight:600}
+.item.done .title{text-decoration:line-through;color:var(--muted);font-weight:500}
+.check{flex:none;width:26px;height:26px;border-radius:7px;border:2px solid #9AA3AC;background:var(--surface);cursor:pointer;display:grid;place-items:center;margin-top:-1px;padding:0}
+.check svg{width:15px;height:15px;opacity:0}
+.check.on{background:var(--ok);border-color:var(--ok)}
+.check.on svg{opacity:1}
+.check.mid{border-color:var(--warn)}
+.st{font-size:.76rem;font-weight:700;padding:2px 8px;border-radius:6px}
+.st.aberta{background:var(--surface-2);color:var(--muted)}
+.st.em_curso{background:var(--warn-bg);color:var(--warn)}
+.st.concluida{background:var(--ok-bg);color:var(--ok)}
+.area{margin-bottom:18px}
+.area-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.area-head h3{margin:0;font-size:1.15rem;font-stretch:80%;font-weight:700}
+.area-head .count{font-size:.85rem;color:var(--muted)}
+.freq{font-size:.74rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--muted)}
+.add-row{padding:8px 16px;border-top:1px solid var(--line)}
+
+.set-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line)}
+.set-row:first-child{border-top:none}
+.set-row .ico{width:36px;height:36px;margin:0}
+.set-row .nm{flex:1;min-width:0}
+.set-row .nm small{display:block;color:var(--muted)}
+
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.lk{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:8px;background:var(--surface-2);text-decoration:none;font-size:.86rem;font-weight:600}
+.lk svg{width:15px;height:15px}
+.evrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px}
+.evrow .lbl{font-size:.88rem;font-weight:600;margin-right:4px}
+.evb{padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:transparent;font-size:.84rem;font-weight:600;cursor:pointer}
+.evb[aria-pressed="true"].ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.evb[aria-pressed="true"].melhorar{background:var(--warn);border-color:var(--warn);color:#fff}
+.evb[aria-pressed="true"].nok{background:var(--bad);border-color:var(--bad);color:#fff}
+.hist{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.hist span{font-size:.74rem;font-weight:700;padding:3px 7px;border-radius:6px;background:var(--surface-2);color:var(--muted)}
+.hist span.ok{background:var(--ok-bg);color:var(--ok)} .hist span.melhorar{background:var(--warn-bg);color:var(--warn)} .hist span.nok{background:var(--bad-bg);color:var(--bad)}
+.area .owner{font-size:.85rem;color:var(--muted)}
+.team{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.person{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:8px}
+.person .who{display:flex;align-items:center;gap:12px}
+.person .av{width:42px;height:42px;border-radius:50%;background:var(--dc);color:#fff;display:grid;place-items:center;font-weight:700;flex:none}
+.person h3{margin:0;font-size:1.08rem}
+.person .role{font-size:.84rem;color:var(--muted)}
+.person ul{margin:4px 0 0;padding-left:18px;font-size:.92rem}
+.person li{margin:3px 0}
+.person .foot{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:8px;font-size:.85rem;color:var(--muted)}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px}
+.kpi .n{font-size:1.9rem;font-weight:800;font-stretch:72%;line-height:1.05;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:.85rem;color:var(--muted);margin-top:3px}
+.kpi .n.neg{color:var(--bad)} .kpi .n.pos{color:var(--ok)}
+.tbl-wrap{overflow-x:auto;background:var(--surface);border-radius:14px;box-shadow:var(--shadow);margin-bottom:18px}
+table.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th{text-align:left;font-weight:600;color:var(--muted);font-size:.8rem;padding:11px 12px;white-space:nowrap}
+.tbl td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:middle}
+.tbl .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl tr.click{cursor:pointer}
+.tbl tr.click:hover td{background:var(--surface-2)}
+.tbl tfoot td{font-weight:700;border-top:2px solid var(--line)}
+.tbl .neg{color:var(--bad);font-weight:600} .tbl .pos{color:var(--ok);font-weight:600}
+.tbl .check{width:24px;height:24px}
+.tbl small{display:block;color:var(--muted);font-size:.8rem}
+h2.sec{font-size:1.15rem;font-weight:700;margin:26px 0 10px}
+
+/* Dialog */
+dialog{border:none;padding:0;background:transparent;max-width:none;max-height:none;width:100%;height:100%;margin:0}
+dialog::backdrop{background:rgba(15,20,25,.5)}
+.sheet{position:absolute;left:50%;transform:translateX(-50%);bottom:0;width:min(560px,100%);max-height:92%;display:flex;flex-direction:column;background:var(--surface);color:var(--ink);border-radius:18px 18px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (min-width:640px){.sheet{top:50%;bottom:auto;transform:translate(-50%,-50%);border-radius:18px;padding-bottom:0}}
+.sheet-head{display:flex;align-items:center;padding:16px 12px 6px 22px}
+.sheet-head h2{margin:0;font-size:1.35rem;font-weight:700;font-stretch:78%;flex:1}
+.sheet-body{padding:6px 22px 12px;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fld{grid-column:1 / -1;display:flex;flex-direction:column;gap:5px}
+.fld.half{grid-column:auto}
+.fld > label,.fld > .lbl{font-size:.86rem;font-weight:600}
+.fld input,.fld select,.fld textarea{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.fld textarea{min-height:76px;resize:vertical}
+.fld .hint{font-size:.78rem;color:var(--muted)}
+.picks{display:flex;gap:8px;flex-wrap:wrap}
+.picks label{position:relative;cursor:pointer}
+.picks input{position:absolute;opacity:0;width:1px;height:1px}
+.picks span{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--c,var(--surface-2));border:3px solid transparent;color:var(--ink)}
+.picks span svg{width:20px;height:20px}
+.picks input:checked + span{border-color:var(--ink)}
+.picks input:focus-visible + span{outline:3px solid var(--accent);outline-offset:2px}
+.sheet-foot{display:flex;gap:8px;align-items:center;padding:12px 22px 16px;border-top:1px solid var(--line)}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:10px;font-size:.92rem;z-index:50;max-width:calc(100% - 32px);opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a class="brand" href="#/"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#F4BE41" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span><b>Gestão Imperial</b></a>
+  <nav class="nav" id="nav" aria-label="Departamentos"></nav>
+  <div class="me"><span class="store">Imperial</span><span class="avatar" id="avatar" aria-hidden="true">·</span></div>
+</div></header>
+<main id="app"><p class="muted">A carregar…</p></main>
+<footer>Gestão Imperial, ferramenta interna da equipa de gestão</footer>
+<dialog id="dlg"></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+const COLS = ['departments','objectives','actions','areas','tasks','cofre','moedas','depositos','difcx','config'];
+const COLORS = ['#C8102E','#E5A812','#2F5D3A','#1F4E8C','#2B2F33','#B08A5A','#7A4FA0','#1B8A8A'];
+const ICONS = {
+  clipboard:'<rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9.5 3h5v3h-5zM9 11h6M9 15h4"/>',
+  people:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c2.9.4 5 2.7 5 5.8"/>',
+  coins:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
+  target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4"/>',
+  wrench:'<path d="M15 3.5a5 5 0 0 0-4.6 6.9L3.5 17.3V20.5h3.2l6.9-6.9A5 5 0 0 0 20.5 9l-3 1.2-2.7-2.7L16 4.5z"/>',
+  megaphone:'<path d="M3.5 10v4h3l8 4.5v-13l-8 4.5h-3z"/><path d="M18 9a4 4 0 0 1 0 6"/>',
+  utensils:'<path d="M7 3v8M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 11v10M17.5 3C15.5 5 14.5 8 14.5 11h3v10"/>',
+  shield:'<path d="M12 3l7.5 3v5c0 5-3.2 8.6-7.5 10-4.3-1.4-7.5-5-7.5-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  bag:'<path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+  dots:'<circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/>'
+};
+const svg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k] || ICONS.clipboard}</svg>`;
+const SUGGESTED = [
+  ['Operações','Avaliações operacionais, tempos de serviço, reclamações e auditorias.','clipboard'],
+  ['Recursos Humanos','Recrutamento, acolhimento, integração, talento e desempenho.','people'],
+  ['Financeiro','Vendas, inventários, mão de obra e resultados.','coins'],
+  ['Plano de Negócios','Objetivos mensais do restaurante e reunião mensal.','target'],
+  ['Manutenção','Equipamentos, instalações e limpezas profundas.','wrench'],
+  ['Marketing','Campanhas, promoções e comunicação local.','megaphone']
+];
+const FREQ = {diaria:'Diária', semanal:'Semanal', mensal:'Mensal'};
+const REPEAT = {'':'Não se repete', semanal:'Todas as semanas', quinzenal:'De 15 em 15 dias', mensal:'Todos os meses', trimestral:'De 3 em 3 meses'};
+const FIN_COLOR = '#1B8A8A';
+const FIN_TABS = {cofre:'Controlo Cofre', moedas:'Pedido de moedas', deposito:'Folha de depósito'};
+const FIN_LINKS = [
+  {label:'Controlo Cofre 2026', url:'https://docs.google.com/spreadsheets/d/1-aVSJ5zr_ysB8BYMtBFefQBt5bL2O0g1Fhmq3Z4Alvg/edit'},
+  {label:'Controlo - Pedido Moedas', url:'https://docs.google.com/spreadsheets/d/1yBtbkLHuhJv4FsmPbF-z1inn0XT9WU7JkRTPynFuG3c/edit'},
+  {label:'Folha Depósito - Outubro 2026', url:'https://docs.google.com/spreadsheets/d/1GXLNbvNfgpKohn4uQJ_8mjzZssAu0G4NOVLgAY1UBXI/edit'}
+];
+const RUBRICAS = ['Outros Gastos Controláveis','Combustível'];
+const ETIQUETAS = ['Outros','Correios','Plano LRM','Combustível'];
+const EVAL = {ok:'OK', melhorar:'Necessita melhorar', nok:'Não OK'};
+const folderSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+const STATUS = {aberta:'Por iniciar', em_curso:'Em curso', concluida:'Concluída'};
+const OBJ_LABEL = {ok:'Na meta', warn:'Perto da meta', bad:'Fora da meta', none:'Sem valor'};
+
+const S = {
+  db:null, user:null, canWrite:true, myId:null, myName:'', noDb:false, error:null,
+  loaded:new Set(), names:{}, asked:new Set(),
+  departments:[], objectives:[], actions:[], areas:[], tasks:[], cofre:[], moedas:[], depositos:[], difcx:[], config:[],
+  ui:{actFilter:'abertas', freq:'todas', objFilter:null, todo:null, finMonth:null}
+};
+
+const $app = document.getElementById('app'), $nav = document.getElementById('nav'), dlg = document.getElementById('dlg');
+
+/* helpers */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const ymd = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const todayStr = () => ymd(new Date());
+const fmtN = n => (n === null || n === undefined || n === '' || isNaN(+n)) ? '—' : (+n).toLocaleString('pt-PT',{maximumFractionDigits:2});
+const parseN = s => { if (s === '' || s == null) return null; const x = parseFloat(String(s).replace(/\s/g,'').replace(/[−–]/g,'-').replace(',','.')); return isNaN(x) ? null : x; };
+const toDate = iso => new Date(iso.length === 10 ? iso+'T00:00' : iso);
+const fmtDate = iso => iso ? toDate(iso).toLocaleDateString('pt-PT',{day:'numeric',month:'short'}) : '';
+const fmtTime = iso => new Date(iso).toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'});
+const sameDay = (a,b) => ymd(a) === ymd(b);
+const byName = (a,b) => String(a.name||'').localeCompare(String(b.name||''),'pt');
+const depts = () => [...S.departments].sort((a,b) => (a.order??0)-(b.order??0) || byName(a,b));
+const dept = id => S.departments.find(d => d.id === id);
+const clean = o => { const c = {...o}; delete c.id; return c; };
+const nowIso = () => new Date().toISOString();
+const checkSvg = '<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+const daysUntil = iso => Math.round((toDate(iso) - toDate(todayStr())) / 864e5);
+function relDue(iso){
+  if (!iso) return {txt:'sem prazo', late:false};
+  const n = daysUntil(iso);
+  if (n < 0) return {txt: n === -1 ? 'atrasada desde ontem' : `atrasada há ${-n} dias`, late:true};
+  if (n === 0) return {txt:'hoje', late:false};
+  if (n === 1) return {txt:'amanhã', late:false};
+  return {txt:`em ${n} dias`, late:false};
+}
+function addPeriod(iso, rep){
+  const d = toDate(iso);
+  if (rep === 'semanal') d.setDate(d.getDate()+7);
+  else if (rep === 'quinzenal') d.setDate(d.getDate()+14);
+  else { const day = d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+(rep === 'trimestral' ? 3 : 1)); d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth()+1, 0).getDate())); }
+  return ymd(d);
+}
+const monthKey = (d = new Date()) => d.getFullYear()+'-'+pad(d.getMonth()+1);
+const monthLabel = k => { const [y,m] = k.split('-'); return new Date(+y, +m-1, 1).toLocaleDateString('pt-PT',{month:'short'}).replace('.',''); };
+const lastMonths = n => { const out = [], d = new Date(); d.setDate(1); for (let i = 0; i < n; i++){ out.unshift(monthKey(d)); d.setMonth(d.getMonth()-1); } return out; };
+const fmtE = n => (n === null || n === undefined || isNaN(+n)) ? '—' : (+n).toLocaleString('pt-PT',{style:'currency',currency:'EUR'});
+const sum = (arr, f) => arr.reduce((t, x) => t + (+f(x) || 0), 0);
+function isoWeek(d){ const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day); const y = t.getUTCFullYear(); return {y, w:Math.ceil(((t - Date.UTC(y,0,1)) / 864e5 + 1) / 7)}; }
+function fridayOf(y, w){ const j4 = new Date(Date.UTC(y,0,4)); const mon = new Date(j4); mon.setUTCDate(j4.getUTCDate() - (j4.getUTCDay() || 7) + 1 + (w-1)*7 + 4); return mon.toISOString().slice(0,10); }
+const weekId = (y, w) => `${y}-W${pad(w)}`;
+const consumo = m => (m.initial == null || m.final == null) ? null : (+m.initial) + (+m.received || 0) - (+m.final);
+function finMonths(keys){ const set = new Set([monthKey(), ...keys.filter(Boolean)]); return [...set].sort().reverse().slice(0,6); }
+const monthLong = k => { const [y,m] = k.split('-'); return new Date(+y, +m-1, 1).toLocaleDateString('pt-PT',{month:'long', year:'numeric'}); };
+function objStatus(o){
+  const c = parseN(o.current), t = parseN(o.target);
+  if (c === null || t === null) return 'none';
+  if (o.direction === 'down') return c <= t ? 'ok' : (c <= t*1.1 ? 'warn' : 'bad');
+  return c >= t ? 'ok' : (c >= t*0.9 ? 'warn' : 'bad');
+}
+function objPct(o){
+  const c = parseN(o.current), t = parseN(o.target);
+  if (c === null || t === null) return 0;
+  if (o.direction === 'down') return c <= 0 ? 100 : Math.min(100, t/c*100);
+  return t <= 0 ? 100 : Math.max(0, Math.min(100, c/t*100));
+}
+function taskDone(t){
+  if (!t.lastDone) return false;
+  const d = new Date(t.lastDone), now = new Date();
+  if (t.freq === 'diaria' || !t.freq) return sameDay(d, now);
+  const days = (now - d) / 864e5;
+  return t.freq === 'semanal' ? days < 7 : days < 30;
+}
+const actLate = a => a.status !== 'concluida' && a.due && a.due < todayStr();
+const mine = a => { const n = (S.myName || '').trim().split(/\s+/)[0]; return n && (a.owner || '').toLowerCase().includes(n.toLowerCase()); };
+
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+/* recents (per viewer, this browser only) */
+function getRecent(){ try { return JSON.parse(localStorage.getItem('gi-recent') || '{}'); } catch(e){ return {}; } }
+function trackVisit(r){
+  if (r.view !== 'd' && r.view !== 'fin') return;
+  try { const m = getRecent(); const k = r.view === 'fin' ? 'fin/'+(r.id || 'cofre') : r.id+'/'+r.tab; m[k] = {c:(m[k]?.c || 0)+1, t:Date.now()}; localStorage.setItem('gi-recent', JSON.stringify(m)); } catch(e){}
+}
+
+/* writes */
+function handleErr(e){
+  const code = e && e.code;
+  if (code === 'invalid_argument'){ S.canWrite = false; toast('Não tens permissão para alterar dados. Pede acesso de Contribuidor ao gerente.'); render(); }
+  else if (code === 'quota_exceeded') toast('Limite de dados atingido. Elimina itens antigos e tenta outra vez.');
+  else toast('Não foi possível guardar. Verifica a ligação e tenta outra vez.');
+}
+async function put(col, id, data){
+  try { if (id) await S.db.collection(col).doc(id).set(data); else await S.db.collection(col).add(data); return true; }
+  catch(e){ handleErr(e); return false; }
+}
+async function remove(col, id){
+  try { await S.db.collection(col).doc(id).delete(); return true; } catch(e){ handleErr(e); return false; }
+}
+
+async function resolveNames(){
+  if (!S.user) return;
+  const ids = [...new Set(S.tasks.map(t => t.lastDoneBy).filter(Boolean))].filter(id => !S.asked.has(id));
+  if (!ids.length) return;
+  ids.forEach(id => S.asked.add(id));
+  try { const ps = await S.user.profiles(ids); ids.forEach(id => { S.names[id] = (ps && ps[id] && ps[id].name) || ''; }); scheduleRender(); } catch(e){}
+}
+const who = id => !id ? '' : (id === S.myId ? 'ti' : (S.names[id] || 'alguém'));
+
+/* boot */
+let raf = 0;
+function scheduleRender(){ if (raf) return; raf = requestAnimationFrame(() => { raf = 0; render(); }); }
+(async function boot(){
+  if (!window.claude || !window.claude.use){ S.noDb = true; render(); return; }
+  const db = await window.claude.use('db');
+  if (!db){ S.noDb = true; render(); return; }
+  S.db = db;
+  const user = await window.claude.use('user');
+  S.user = user;
+  if (user){
+    try { S.myId = await user.id(); } catch(e){}
+    try { S.myName = (await user.name()) || ''; } catch(e){}
+    try { const c = await user.can('data.write'); if (c === false) S.canWrite = false; } catch(e){}
+  }
+  document.getElementById('avatar').textContent = (S.myName.trim()[0] || '·').toUpperCase();
+  COLS.forEach(c => {
+    db.collection(c).onSnapshot(snap => {
+      S[c] = snap.docs.map(d => ({id:d.id, ...d.data()}));
+      S.loaded.add(c);
+      if (c === 'tasks') resolveNames();
+      scheduleRender();
+    }, err => { S.error = err && err.code; scheduleRender(); });
+  });
+})();
+window.addEventListener('hashchange', () => { S.ui.objFilter = null; trackVisit(route()); render(); window.scrollTo(0,0); });
+
+function route(){
+  const p = location.hash.replace(/^#\/?/,'').split('/');
+  return {view:p[0] || 'inicio', id:p[1], tab:p[2] || 'objetivos'};
+}
+
+/* render */
+function render(){
+  const r = route();
+  renderNav(r);
+  if (S.noDb){ $app.innerHTML = `<div class="empty"><p>Abre este site no claude.ai, com a tua conta, para veres e atualizares os dados da equipa.</p></div>`; return; }
+  if (S.error === 'revoked'){ $app.innerHTML = `<div class="empty"><p>Este site deixou de estar disponível para ti.</p></div>`; return; }
+  if (S.loaded.size < COLS.length){ $app.innerHTML = `<p class="muted">A carregar…</p>`; return; }
+  const ro = S.canWrite ? '' : `<div class="note">Estás em modo de leitura. Para atualizar dados, pede ao gerente acesso de Contribuidor.</div>`;
+  if (r.view === 'd'){
+    const d = dept(r.id);
+    if (!d){ location.hash = '#/'; return; }
+    $app.innerHTML = ro + viewDept(d, r.tab);
+  } else if (r.view === 'fin') $app.innerHTML = ro + viewFin(FIN_TABS[r.id] ? r.id : 'cofre');
+  else if (r.view === 'gerir') $app.innerHTML = ro + viewSettings();
+  else $app.innerHTML = ro + viewHome();
+}
+
+function renderNav(r){
+  $nav.innerHTML = depts().map(d => `<a href="#/d/${esc(d.id)}/objetivos" style="--dc:${esc(d.color)}"${r.view === 'd' && r.id === d.id ? ' aria-current="page"' : ''}>${esc(d.name)}</a>`).join('')
+    + `<a href="#/fin/cofre" style="--dc:${FIN_COLOR}"${r.view === 'fin' ? ' aria-current="page"' : ''}>Financeiro</a>`
+    + `<a href="#/gerir"${r.view === 'gerir' ? ' aria-current="page"' : ''}>Gerir</a>`;
+}
+
+function greeting(){ const h = new Date().getHours(); return h < 12 ? 'Bom dia' : (h < 20 ? 'Boa tarde' : 'Boa noite'); }
+const heroArt = `<svg class="art" viewBox="0 0 160 160" aria-hidden="true">
+  <rect x="34" y="22" width="92" height="122" rx="12" fill="#fff"/>
+  <rect x="58" y="12" width="44" height="22" rx="6" fill="#C8102E"/>
+  <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M50 58l7 7 12-13" stroke="#2F7A49" stroke-width="5"/>
+    <path d="M78 60h32" stroke="#C9CDD2" stroke-width="5"/>
+    <path d="M50 88l7 7 12-13" stroke="#2F7A49" stroke-width="5"/>
+    <path d="M78 90h26" stroke="#C9CDD2" stroke-width="5"/>
+    <rect x="49" y="110" width="18" height="18" rx="4" stroke="#C8102E" stroke-width="4"/>
+    <path d="M78 120h30" stroke="#C9CDD2" stroke-width="5"/>
+  </g></svg>`;
+
+function deptStats(d){
+  const objs = S.objectives.filter(o => o.deptId === d.id);
+  const acts = S.actions.filter(a => a.deptId === d.id && a.status !== 'concluida');
+  const tasks = S.tasks.filter(t => t.deptId === d.id);
+  const st = objs.map(objStatus);
+  const areas = S.areas.filter(a => a.deptId === d.id), mk = monthKey();
+  const ev = areas.map(a => (a.evals || {})[mk]);
+  return {areas:areas.length, nok:ev.filter(x => x === 'nok' || x === 'melhorar').length, unev:ev.filter(x => !x).length,
+    objs:objs.length, okObjs:st.filter(x => x === 'ok').length, badObjs:st.filter(x => x === 'bad').length,
+    open:acts.length, late:acts.filter(actLate).length, tasks:tasks.length, done:tasks.filter(taskDone).length};
+}
+
+function viewHome(){
+  const first = (S.myName || '').trim().split(/\s+/)[0];
+  const date = new Date().toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long'});
+  const ds = depts();
+  const hero = `<section class="hero"><div class="txt">
+      <div class="date">${esc(date)}</div>
+      <h1>${greeting()}${first ? ', '+esc(first) : ''}.</h1>
+      <p>Gerente de restaurante, Imperial. Escolhe uma área para começar.</p>
+    </div>${heroArt}</section>`;
+
+  let cards;
+  if (!ds.length){
+    cards = `<div class="empty" style="grid-column:1/-1"><p>Ainda não há departamentos. Podes começar com: ${SUGGESTED.map(s => esc(s[0])).join(', ')}.</p>
+      ${S.canWrite ? `<div class="row" style="justify-content:center"><button class="btn primary" data-act="seedDepts">Usar esta sugestão</button><button class="btn" data-act="addDept">Criar departamento</button></div>` : ''}</div>`;
+  } else {
+    cards = ds.map(d => {
+      const s = deptStats(d);
+      const tags = [];
+      if (s.objs) tags.push(`<span class="tag${s.badObjs ? ' bad' : (s.okObjs === s.objs ? ' ok' : '')}">${s.okObjs}/${s.objs} objetivos na meta</span>`);
+      if (s.late) tags.push(`<span class="tag bad">${s.late} ${s.late === 1 ? 'ação atrasada' : 'ações atrasadas'}</span>`);
+      else if (s.open) tags.push(`<span class="tag">${s.open} ${s.open === 1 ? 'ação aberta' : 'ações abertas'}</span>`);
+      if (s.nok) tags.push(`<span class="tag bad">${s.nok} ${s.nok === 1 ? 'área a melhorar' : 'áreas a melhorar'}</span>`);
+      else if (s.areas && s.unev) tags.push(`<span class="tag">Limpeza: ${s.unev} por avaliar</span>`);
+      else if (s.areas) tags.push(`<span class="tag ok">Limpeza OK</span>`);
+      if ((d.team || []).length) tags.push(`<span class="tag">${d.team.length} ${d.team.length === 1 ? 'pessoa' : 'pessoas'}</span>`);
+      if (!tags.length) tags.push(`<span class="tag">Por configurar</span>`);
+      return `<a class="card" href="#/d/${esc(d.id)}/objetivos" style="--dc:${esc(d.color)}">
+        <span class="ico">${svg(d.icon)}</span>
+        <h3>${esc(d.name)}</h3>
+        ${d.desc ? `<p class="desc">${esc(d.desc)}</p>` : ''}
+        <div class="tags">${tags.join('')}</div></a>`;
+    }).join('') + finCard() + (S.canWrite ? `<button class="card add" data-act="addDept">+ Novo departamento</button>` : '');
+  }
+  return hero + `<div class="layout"><div class="cards">${cards}</div>${todoPanel()}</div>` + recents();
+}
+
+function todoPanel(){
+  const open = S.actions.filter(a => a.status !== 'concluida');
+  const hasMine = open.some(mine);
+  if (S.ui.todo === null) S.ui.todo = (S.myName && hasMine) ? 'minhas' : 'todas';
+  const list = (S.ui.todo === 'minhas' ? open.filter(mine) : open).sort((a,b) => (a.due||'9999').localeCompare(b.due||'9999'));
+  const items = list.map(a => {
+    const r = relDue(a.due), d = dept(a.deptId);
+    return `<div class="td">
+      ${S.canWrite ? `<button class="check" data-act="doneAction" data-id="${esc(a.id)}" aria-label="Marcar como feita">${checkSvg}</button>` : ''}
+      <div class="b" ${S.canWrite ? `data-act="editAction" data-id="${esc(a.id)}"` : ''}>
+        <div class="t">${a.repeat ? `<span class="rep">${a.repeat}</span>` : ''}${esc(a.text)}</div>
+        <div class="m"><span>${esc(d ? d.name : '')}${a.owner ? ', '+esc(a.owner) : ''}</span><span class="due${r.late ? ' late' : ''}">${r.txt}</span></div>
+      </div></div>`;
+  }).join('');
+  const empty = S.ui.todo === 'minhas'
+    ? `<div class="empty sm">Nada atribuído a ti${S.myName ? ` (${esc(S.myName.split(' ')[0])})` : ''}. Vê todas as tarefas da equipa.</div>`
+    : `<div class="empty sm">Sem tarefas por fazer.</div>`;
+  return `<aside class="todo" aria-label="O que tenho para fazer">
+    <div class="todo-head"><h2>O que tenho para fazer</h2><span>${list.length} por fazer</span></div>
+    ${S.myName ? `<div class="seg"><button class="chip" data-act="todoFilter" data-id="minhas" aria-pressed="${S.ui.todo === 'minhas'}">Minhas</button><button class="chip" data-act="todoFilter" data-id="todas" aria-pressed="${S.ui.todo === 'todas'}">Toda a equipa</button></div>` : ''}
+    <div class="todo-list">${items || empty}</div>
+    ${S.canWrite && S.departments.length ? `<div class="todo-foot"><button class="link" data-act="addAction">+ Nova tarefa</button></div>` : ''}
+  </aside>`;
+}
+
+function recents(){
+  const TAB = {objetivos:'Objetivos', acoes:'Ações', limpeza:'Limpeza', equipa:'Equipa'};
+  const m = getRecent();
+  const list = Object.entries(m).map(([k,v]) => { const [id,tab] = k.split('/'); return {id, tab, ...v, d: id === 'fin' ? {name:'Financeiro', color:FIN_COLOR} : dept(id)}; })
+    .filter(x => x.d && (x.id === 'fin' ? FIN_TABS[x.tab] : TAB[x.tab])).sort((a,b) => b.c - a.c || b.t - a.t).slice(0,5);
+  if (!list.length) return '';
+  const ago = t => { const n = Math.floor((Date.now()-t)/864e5); return n === 0 ? 'Hoje' : (n === 1 ? 'Ontem' : `Há ${n} dias`); };
+  return `<section class="recent"><h2>Onde costumas ir</h2><p>As páginas que mais abres neste dispositivo.</p>
+    <div class="rec">${list.map(x => `<a href="${x.id === 'fin' ? '#/fin/'+x.tab : `#/d/${esc(x.id)}/${x.tab}`}" style="--dc:${esc(x.d.color)}"><small>${esc(x.d.name)}</small><b>${x.id === 'fin' ? FIN_TABS[x.tab] : TAB[x.tab]}</b><small>${ago(x.t)}</small></a>`).join('')}</div></section>`;
+}
+
+function viewDept(d, tab){
+  const s = deptStats(d);
+  const t = (k, label, extra) => `<a href="#/d/${esc(d.id)}/${k}"${tab === k ? ' aria-current="page"' : ''}>${label} <span>${extra}</span></a>`;
+  const body = tab === 'acoes' ? tabActions(d) : (tab === 'limpeza' ? tabCleaning(d) : (tab === 'equipa' ? tabTeam(d) : tabObjectives(d)));
+  const links = (d.links || []).filter(l => l && /^https:\/\//.test(l.url || ''));
+  return `<div class="crumb"><a href="#/">Início</a> / ${esc(d.name)}</div>
+  <section class="dhead" style="--dc:${esc(d.color)}">
+    <div class="top-row"><span class="ico">${svg(d.icon)}</span>
+      <div style="flex:1;min-width:0"><h1>${esc(d.name)}</h1>${d.desc ? `<p class="desc">${esc(d.desc)}</p>` : ''}${d.lead ? `<div class="lead">Responsável: <b>${esc(d.lead)}</b></div>` : ''}
+      ${links.length ? `<div class="links">${links.map(l => `<a class="lk" href="${esc(l.url)}" target="_blank" rel="noopener">${folderSvg}${esc(l.label || 'Abrir')}</a>`).join('')}</div>` : ''}</div>
+      ${S.canWrite ? `<button class="btn small" data-act="editDept" data-id="${esc(d.id)}">Editar</button>` : ''}</div>
+    <nav class="tabs" aria-label="Secções do departamento">
+      ${t('objetivos','Objetivos', `(${s.objs})`)}${t('acoes','Ações', `(${s.open})`)}${t('limpeza','Limpeza', `(${s.areas})`)}${t('equipa','Equipa', `(${(d.team || []).length})`)}
+    </nav>
+  </section>${body}`;
+}
+
+function tabObjectives(d){
+  const objs = S.objectives.filter(o => o.deptId === d.id).sort(byName);
+  const add = S.canWrite ? `<button class="btn primary" data-act="addObj" data-id="${esc(d.id)}">Novo objetivo</button>` : '';
+  if (!objs.length) return `<div class="empty"><p>Ainda não há objetivos para ${esc(d.name)}. Define a meta e o valor atual para acompanhar a evolução.</p>${add}</div>`;
+  return `<div class="toolbar"><span class="sp"></span>${add}</div><div class="objs">${objs.map(o => {
+    const st = objStatus(o), sign = o.direction === 'down' ? '≤' : '≥';
+    const nActs = S.actions.filter(a => a.objectiveId === o.id && a.status !== 'concluida').length;
+    return `<article class="obj">
+      <div class="row" style="align-items:flex-start"><div style="flex:1;min-width:0"><h3>${esc(o.name)}</h3>${o.period ? `<div class="period">${esc(o.period)}</div>` : ''}</div><span class="pill ${st}">${OBJ_LABEL[st]}</span></div>
+      <div class="val"><span class="cur">${fmtN(o.current)}</span>${o.unit ? `<span class="unit">${esc(o.unit)}</span>` : ''}<span class="tgt">Meta ${sign} ${fmtN(o.target)}${o.unit ? ' '+esc(o.unit) : ''}</span></div>
+      <div class="bar ${st}"><i style="width:${objPct(o).toFixed(0)}%"></i></div>
+      ${o.notes ? `<div class="meta">${esc(o.notes)}</div>` : ''}
+      ${o.updatedAt ? `<div class="meta">Atualizado a ${esc(fmtDate(o.updatedAt))}</div>` : ''}
+      <div class="acts">
+        ${S.canWrite ? `<button class="btn small primary" data-act="updVal" data-id="${esc(o.id)}">Atualizar valor</button>` : ''}
+        <button class="btn small" data-act="objActions" data-id="${esc(o.id)}">Ações (${nActs})</button>
+        ${S.canWrite ? `<button class="btn small ghost" data-act="editObj" data-id="${esc(o.id)}">Editar</button>` : ''}
+      </div></article>`;
+  }).join('')}</div>`;
+}
+
+function tabActions(d){
+  const f = S.ui.actFilter, of = S.ui.objFilter;
+  let acts = S.actions.filter(a => a.deptId === d.id);
+  if (of) acts = acts.filter(a => a.objectiveId === of);
+  const shown = acts.filter(a => f === 'concluidas' ? a.status === 'concluida' : a.status !== 'concluida').sort((a,b) => (a.due||'9999').localeCompare(b.due||'9999'));
+  const objName = id => (S.objectives.find(o => o.id === id) || {}).name;
+  const ofObj = of && objName(of);
+  const add = S.canWrite ? `<button class="btn primary" data-act="addAction" data-id="${esc(d.id)}">Nova ação</button>` : '';
+  const items = shown.map(a => {
+    const done = a.status === 'concluida', r = relDue(a.due);
+    return `<div class="item${done ? ' done' : ''}">
+      ${S.canWrite ? `<button class="check${done ? ' on' : (a.status === 'em_curso' ? ' mid' : '')}" data-act="doneAction" data-id="${esc(a.id)}" aria-label="${done ? 'Reabrir ação' : 'Marcar como concluída'}">${checkSvg}</button>` : ''}
+      <div class="body" ${S.canWrite ? `data-act="editAction" data-id="${esc(a.id)}"` : ''}>
+        <div class="title">${a.repeat ? `<span class="rep">${a.repeat}</span>` : ''}${esc(a.text)}</div>
+        <div class="sub"><span class="st ${esc(a.status||'aberta')}">${STATUS[a.status] || STATUS.aberta}</span>
+          ${a.owner ? `<span>${esc(a.owner)}</span>` : ''}
+          ${a.due && !done ? `<span class="${r.late ? 'late' : ''}">Prazo ${esc(fmtDate(a.due))}, ${r.txt}</span>` : ''}
+          ${a.objectiveId && objName(a.objectiveId) ? `<span>Objetivo: ${esc(objName(a.objectiveId))}</span>` : ''}</div>
+      </div></div>`;
+  }).join('');
+  return `<div class="toolbar">
+      <button class="chip" data-act="actFilter" data-id="abertas" aria-pressed="${f !== 'concluidas'}">Abertas</button>
+      <button class="chip" data-act="actFilter" data-id="concluidas" aria-pressed="${f === 'concluidas'}">Concluídas</button>
+      ${ofObj ? `<button class="chip" data-act="clearObjFilter" aria-pressed="true">Objetivo: ${esc(ofObj)} ✕</button>` : ''}
+      <span class="sp"></span>${add}</div>
+    ${shown.length ? `<div class="list">${items}</div>` : `<div class="empty"><p style="margin:0">${f === 'concluidas' ? 'Ainda não há ações concluídas.' : 'Não há ações abertas. Cria uma ação para um objetivo fora da meta.'}</p></div>`}`;
+}
+
+function tabCleaning(d){
+  const fq = S.ui.freq, mk = monthKey(), months = lastMonths(6).slice(0,5);
+  const areas = S.areas.filter(a => a.deptId === d.id).sort(byName);
+  const add = S.canWrite ? `<button class="btn primary" data-act="addArea" data-id="${esc(d.id)}">Nova área</button>` : '';
+  if (!areas.length) return `<div class="empty"><p>Ainda não há áreas de limpeza. Cria uma área (por exemplo, a zona de fritura) e escolhe o responsável.</p>${add}</div>`;
+  const hasTasks = S.tasks.some(t => t.deptId === d.id);
+  const chip = (k, l) => `<button class="chip" data-act="freqFilter" data-id="${k}" aria-pressed="${fq === k}">${l}</button>`;
+  const monthName = new Date().toLocaleDateString('pt-PT',{month:'long'});
+  return `<div class="toolbar">${hasTasks ? chip('todas','Todas')+chip('diaria','Diárias')+chip('semanal','Semanais')+chip('mensal','Mensais') : `<span class="muted">Avalia cada área uma vez por mês.</span>`}<span class="sp"></span>${add}</div>` + areas.map(ar => {
+    const ev = ar.evals || {};
+    const all = S.tasks.filter(t => t.areaId === ar.id);
+    const tasks = all.filter(t => fq === 'todas' || t.freq === fq).sort((a,b) => (taskDone(a)-taskDone(b)) || byName(a,b));
+    const items = tasks.map(t => {
+      const ok = taskDone(t);
+      let info = 'Nunca registada';
+      if (t.lastDone){
+        info = sameDay(new Date(t.lastDone), new Date()) ? `Feita hoje às ${fmtTime(t.lastDone)}` : `Última vez a ${fmtDate(t.lastDone)}`;
+        const w = who(t.lastDoneBy); if (w) info += ` por ${esc(w)}`;
+      }
+      return `<div class="item${ok ? ' done' : ''}">
+        ${S.canWrite ? `<button class="check${ok ? ' on' : ''}" data-act="toggleTask" data-id="${esc(t.id)}" aria-label="${ok ? 'Desmarcar tarefa' : 'Marcar como feita'}">${checkSvg}</button>` : ''}
+        <div class="body" ${S.canWrite ? `data-act="editTask" data-id="${esc(t.id)}"` : ''}>
+          <div class="title">${esc(t.name)}</div>
+          <div class="sub"><span class="freq">${FREQ[t.freq] || 'Diária'}</span>${t.owner ? `<span>${esc(t.owner)}</span>` : ''}<span>${info}</span></div>
+        </div></div>`;
+    }).join('');
+    const evBtn = (k) => S.canWrite
+      ? `<button class="evb ${k}" data-act="setEval" data-id="${esc(ar.id)}" data-v="${k}" aria-pressed="${ev[mk] === k}">${EVAL[k]}</button>`
+      : (ev[mk] === k ? `<span class="pill ${k === 'ok' ? 'ok' : (k === 'nok' ? 'bad' : 'warn')}">${EVAL[k]}</span>` : '');
+    return `<section class="area">
+      <div class="area-head"><div><h3>${esc(ar.name)}</h3>${ar.owner ? `<div class="owner">Responsável: ${esc(ar.owner)}</div>` : ''}</div><span class="sp"></span>
+        ${S.canWrite ? `<button class="btn small ghost" data-act="editArea" data-id="${esc(ar.id)}">Editar</button>` : ''}</div>
+      <div class="list">
+        <div class="evrow"><span class="lbl">Avaliação de ${esc(monthName)}</span>${evBtn('ok')}${evBtn('melhorar')}${evBtn('nok')}${!S.canWrite && !ev[mk] ? '<span class="muted">Por avaliar</span>' : ''}
+          <span class="hist" aria-label="Meses anteriores">${months.map(m => `<span class="${ev[m] || ''}" title="${esc(EVAL[ev[m]] || 'Sem avaliação')}">${monthLabel(m)}</span>`).join('')}</span></div>
+        ${items ? `<div style="border-top:1px solid var(--line)">${items}</div>` : ''}
+        ${S.canWrite ? `<div class="add-row"><button class="link" data-act="addTask" data-id="${esc(ar.id)}">+ Adicionar tarefa de limpeza</button></div>` : ''}
+      </div>
+    </section>`;
+  }).join('');
+}
+
+function tabTeam(d){
+  const team = d.team || [];
+  const add = S.canWrite ? `<button class="btn primary" data-act="addPerson" data-id="${esc(d.id)}">Adicionar pessoa</button>` : '';
+  if (!team.length) return `<div class="empty"><p>Ainda não há pessoas neste departamento.</p>${add}</div>`;
+  const open = S.actions.filter(a => a.status !== 'concluida');
+  return `<div class="toolbar"><span class="muted">Responsabilidades de cada pessoa no departamento.</span><span class="sp"></span>${add}</div>
+  <div class="team" style="--dc:${esc(d.color)}">${team.map((p, i) => {
+    const first = (p.name || '').split(' ')[0].toLowerCase();
+    const n = open.filter(a => first && (a.owner || '').toLowerCase().includes(first)).length;
+    const ar = S.areas.filter(a => a.deptId === d.id && a.owner === p.name).map(a => a.name);
+    return `<article class="person">
+      <div class="who"><span class="av">${esc((p.name || '?').trim()[0] || '?')}</span><div><h3>${esc(p.name)}</h3>${p.role ? `<div class="role">${esc(p.role)}</div>` : ''}</div></div>
+      ${(p.duties || []).length ? `<ul>${p.duties.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '<p class="muted" style="margin:0">Sem responsabilidades definidas.</p>'}
+      ${ar.length ? `<div class="role">Limpeza: ${ar.map(esc).join(', ')}</div>` : ''}
+      <div class="foot"><span>${n} ${n === 1 ? 'tarefa aberta' : 'tarefas abertas'}</span><span class="sp"></span>${S.canWrite ? `<button class="btn small ghost" data-act="editPerson" data-id="${esc(d.id)}" data-v="${i}">Editar</button>` : ''}</div>
+    </article>`;
+  }).join('')}</div>`;
+}
+
+function finCard(){
+  const mk = monthKey(), mon = new Date().toLocaleDateString('pt-PT',{month:'long'});
+  const cof = S.cofre.filter(e => (e.date || '').startsWith(mk));
+  const deps = S.depositos.filter(e => (e.id || '').startsWith(mk));
+  const difs = sum(S.difcx.filter(e => (e.date || '').startsWith(mk)), e => e.valor);
+  const unver = cof.filter(e => !e.verified).length + deps.filter(e => !e.verified).length;
+  const tags = [`<span class="tag">Cofre: ${fmtE(sum(cof, e => e.valor))} em ${mon}</span>`, `<span class="tag">${deps.length} ${deps.length === 1 ? 'depósito' : 'depósitos'} em ${mon}</span>`];
+  if (Math.abs(difs) >= 0.005) tags.push(`<span class="tag${difs < 0 ? ' bad' : ''}">Dif. caixa ${fmtE(difs)}</span>`);
+  if (unver) tags.push(`<span class="tag bad">${unver} por verificar</span>`);
+  return `<a class="card" href="#/fin/cofre" style="--dc:${FIN_COLOR}">
+    <span class="ico">${svg('coins')}</span><h3>Financeiro</h3>
+    <p class="desc">Controlo do cofre, pedido de moedas e folha de depósito.</p>
+    <div class="tags">${tags.join('')}</div></a>`;
+}
+
+function monthBar(keys){
+  if (!S.ui.finMonth) S.ui.finMonth = monthKey();
+  return finMonths(keys).map(k => `<button class="chip" data-act="finMonth" data-id="${k}" aria-pressed="${S.ui.finMonth === k}">${esc(monthLong(k))}</button>`).join('');
+}
+
+function viewFin(tab){
+  const t = k => `<a href="#/fin/${k}"${tab === k ? ' aria-current="page"' : ''}>${FIN_TABS[k]}</a>`;
+  const body = tab === 'moedas' ? tabMoedas() : (tab === 'deposito' ? tabDeposito() : tabCofre());
+  return `<div class="crumb"><a href="#/">Início</a> / Financeiro</div>
+  <section class="dhead" style="--dc:${FIN_COLOR}">
+    <div class="top-row"><span class="ico">${svg('coins')}</span>
+      <div style="flex:1;min-width:0"><h1>Financeiro</h1><p class="desc">Saídas do cofre, controlo semanal das moedas e registo diário dos depósitos.</p>
+      <div class="links">${FIN_LINKS.map(l => `<a class="lk" href="${esc(l.url)}" target="_blank" rel="noopener">${folderSvg}${esc(l.label)}</a>`).join('')}</div></div></div>
+    <nav class="tabs" aria-label="Secções do Financeiro">${t('cofre')}${t('moedas')}${t('deposito')}</nav>
+  </section>${body}`;
+}
+
+function tabCofre(){
+  const months = monthBar(S.cofre.map(e => (e.date || '').slice(0,7)));
+  const mk = S.ui.finMonth;
+  const list = S.cofre.filter(e => (e.date || '').startsWith(mk)).sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+  const tot = sum(list, e => e.valor);
+  const byLocal = l => sum(list.filter(e => e.local === l), e => e.valor);
+  const unver = list.filter(e => !e.verified).length;
+  const byTag = {};
+  list.forEach(e => { const k = e.etiqueta || 'Sem etiqueta'; byTag[k] = (byTag[k] || 0) + (+e.valor || 0); });
+  const add = S.canWrite ? `<button class="btn primary" data-act="addCofre">Registar saída</button>` : '';
+  const rows = list.map(e => `<tr class="click" ${S.canWrite ? `data-act="editCofre" data-id="${esc(e.id)}"` : ''}>
+      <td>${esc(fmtDate(e.date))}</td>
+      <td>${esc(e.desc)}${e.petty ? '<small>Petty cash</small>' : ''}</td>
+      <td class="num">${fmtE(e.valor)}</td>
+      <td>${esc(e.rubrica || '')}<small>${esc(e.etiqueta || '')}</small></td>
+      <td>${esc(e.local || '')}</td>
+      <td>${S.canWrite ? `<button class="check${e.verified ? ' on' : ''}" data-act="verifyCofre" data-id="${esc(e.id)}" aria-label="${e.verified ? 'Retirar verificação' : 'Marcar como verificado'}">${checkSvg}</button>` : (e.verified ? 'Sim' : 'Não')}</td>
+    </tr>`).join('');
+  return `<div class="toolbar">${months}<span class="sp"></span>${add}</div>
+  <div class="kpis">
+    <div class="kpi"><div class="n">${fmtE(tot)}</div><div class="l">Saídas em ${esc(monthLong(mk))}</div></div>
+    <div class="kpi"><div class="n">${fmtE(byLocal('Restaurante'))}</div><div class="l">Restaurante</div></div>
+    <div class="kpi"><div class="n">${fmtE(byLocal('Escritório'))}</div><div class="l">Escritório</div></div>
+    <div class="kpi"><div class="n${unver ? ' neg' : ''}">${unver}</div><div class="l">Por verificar</div></div>
+  </div>
+  ${list.length ? `<div class="tags" style="margin:-4px 0 14px;padding:0">${Object.entries(byTag).sort((a,b) => b[1]-a[1]).map(([k,v]) => `<span class="tag">${esc(k)}: ${fmtE(v)}</span>`).join('')}</div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Data</th><th>Fornecedor e descrição</th><th class="num">Valor</th><th>Rubrica</th><th>Local</th><th>Verificado</th></tr></thead>
+    <tbody>${rows}</tbody><tfoot><tr><td colspan="2">Total (${list.length})</td><td class="num">${fmtE(tot)}</td><td colspan="3"></td></tr></tfoot></table></div>`
+  : `<div class="empty"><p>Sem saídas do cofre registadas em ${esc(monthLong(mk))}.</p>${add}</div>`}`;
+}
+
+function tabMoedas(){
+  const rows = [...S.moedas].sort((a,b) => (b.year - a.year) || (b.week - a.week));
+  const withC = rows.filter(r => consumo(r) !== null);
+  const last4 = withC.slice(0,4);
+  const avg = last4.length ? sum(last4, consumo) / last4.length : null;
+  const lastF = rows.find(r => r.final != null);
+  const cfg = S.config.find(c => c.id === 'moedas') || {};
+  const alvo = cfg.alvo != null ? +cfg.alvo : null;
+  const sug = (alvo != null && avg != null && lastF) ? Math.max(0, Math.round((alvo + avg - lastF.final) / 5) * 5) : null;
+  const add = S.canWrite ? `<button class="btn primary" data-act="addMoedas">Registar semana</button>` : '';
+  const body = rows.map(r => { const c = consumo(r); return `<tr class="click" ${S.canWrite ? `data-act="editMoedas" data-id="${esc(r.id)}"` : ''}>
+      <td>Sem ${r.week}<small>${r.year}</small></td><td>${esc(fmtDate(fridayOf(r.year, r.week)))}</td>
+      <td class="num">${r.initial != null ? fmtE(r.initial) : '—'}</td><td class="num">${r.received != null ? fmtE(r.received) : '—'}</td>
+      <td class="num">${r.final != null ? fmtE(r.final) : '—'}</td><td class="num"><b>${c !== null ? fmtE(c) : '—'}</b></td></tr>`; }).join('');
+  return `<div class="toolbar"><span class="muted">Contagem à sexta-feira: iniciais + recebidas − finais = consumidas.</span><span class="sp"></span>
+      ${S.canWrite ? `<button class="btn" data-act="moedasAlvo">Stock alvo${alvo != null ? `: ${fmtE(alvo)}` : ''}</button>` : ''}${add}</div>
+  <div class="kpis">
+    <div class="kpi"><div class="n">${lastF ? fmtE(lastF.final) : '—'}</div><div class="l">Moedas em stock${lastF ? ` (sexta, sem ${lastF.week})` : ''}</div></div>
+    <div class="kpi"><div class="n">${avg !== null ? fmtE(avg) : '—'}</div><div class="l">Consumo médio (últimas ${last4.length || 4} semanas)</div></div>
+    <div class="kpi"><div class="n">${sug !== null ? fmtE(sug) : '—'}</div><div class="l">${sug !== null ? 'Pedido sugerido para a próxima semana' : 'Define o stock alvo para ver o pedido sugerido'}</div></div>
+  </div>
+  ${rows.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Semana</th><th>Sexta-feira</th><th class="num">Iniciais</th><th class="num">Recebidas</th><th class="num">Finais</th><th class="num">Consumidas</th></tr></thead><tbody>${body}</tbody></table></div>`
+  : `<div class="empty"><p>Ainda não há semanas registadas.</p>${add}</div>`}`;
+}
+
+function tabDeposito(){
+  const months = monthBar([...S.depositos.map(e => (e.id || '').slice(0,7)), ...S.difcx.map(e => (e.date || '').slice(0,7))]);
+  const mk = S.ui.finMonth;
+  const list = S.depositos.filter(e => (e.id || '').startsWith(mk)).sort((a,b) => b.id.localeCompare(a.id));
+  const esp = e => (+e.vendas || 0) - (+e.mb || 0) - (+e.outros || 0);
+  const dif = e => e.depositado == null ? null : (+e.depositado) - esp(e);
+  const totV = sum(list, e => e.vendas), totD = sum(list, e => e.depositado), totDif = sum(list, e => dif(e));
+  const cls = v => v == null || Math.abs(v) < 0.005 ? '' : (v < 0 ? 'neg' : 'pos');
+  const add = S.canWrite ? `<button class="btn primary" data-act="addDeposito">Registar dia</button>` : '';
+  const rows = list.map(e => { const d = dif(e); return `<tr class="click" ${S.canWrite ? `data-act="editDeposito" data-id="${esc(e.id)}"` : ''}>
+      <td>${esc(toDate(e.id).toLocaleDateString('pt-PT',{weekday:'short', day:'numeric', month:'short'}))}${e.resp ? `<small>${esc(e.resp)}</small>` : ''}</td>
+      <td class="num">${fmtE(e.vendas)}</td><td class="num">${fmtE(e.mb || 0)}</td><td class="num">${fmtE(e.outros || 0)}</td>
+      <td class="num">${fmtE(esp(e))}</td><td class="num">${e.depositado != null ? fmtE(e.depositado) : '—'}</td>
+      <td class="num ${cls(d)}">${d !== null ? fmtE(d) : '—'}</td><td>${esc(e.saco || '')}</td>
+      <td>${S.canWrite ? `<button class="check${e.verified ? ' on' : ''}" data-act="verifyDeposito" data-id="${esc(e.id)}" aria-label="${e.verified ? 'Retirar verificação' : 'Marcar como verificado'}">${checkSvg}</button>` : (e.verified ? 'Sim' : 'Não')}</td></tr>`; }).join('');
+
+  const difs = S.difcx.filter(e => (e.date || '').startsWith(mk)).sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+  const byP = {};
+  difs.forEach(e => { const k = e.funcionario || 'Sem nome'; byP[k] = byP[k] || {n:0, v:0}; byP[k].n++; byP[k].v += +e.valor || 0; });
+  const addDif = S.canWrite ? `<button class="btn" data-act="addDif">Registar diferença</button>` : '';
+  return `<div class="toolbar">${months}<span class="sp"></span>${add}</div>
+  <div class="kpis">
+    <div class="kpi"><div class="n">${fmtE(totV)}</div><div class="l">Vendas registadas (${list.length} ${list.length === 1 ? 'dia' : 'dias'})</div></div>
+    <div class="kpi"><div class="n">${fmtE(totD)}</div><div class="l">Numerário depositado</div></div>
+    <div class="kpi"><div class="n ${cls(totDif)}">${fmtE(totDif)}</div><div class="l">Diferença acumulada</div></div>
+  </div>
+  ${list.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Dia</th><th class="num">Vendas</th><th class="num">Multibanco</th><th class="num">Outros meios</th><th class="num">Numerário esperado</th><th class="num">Depositado</th><th class="num">Diferença</th><th>Nº saco</th><th>Verificado</th></tr></thead>
+    <tbody>${rows}</tbody><tfoot><tr><td>Total</td><td class="num">${fmtE(totV)}</td><td class="num">${fmtE(sum(list, e => e.mb))}</td><td class="num">${fmtE(sum(list, e => e.outros))}</td><td class="num">${fmtE(sum(list, esp))}</td><td class="num">${fmtE(totD)}</td><td class="num ${cls(totDif)}">${fmtE(totDif)}</td><td colspan="2"></td></tr></tfoot></table></div>`
+  : `<div class="empty"><p>Sem depósitos registados em ${esc(monthLong(mk))}.</p>${add}</div>`}
+  <div class="row"><h2 class="sec" style="flex:1">Diferenças de caixa</h2>${addDif}</div>
+  ${difs.length ? `<div class="tags" style="margin:0 0 12px;padding:0">${Object.entries(byP).sort((a,b) => a[1].v - b[1].v).map(([k,v]) => `<span class="tag${v.v < 0 ? ' bad' : ''}">${esc(k)}: ${fmtE(v.v)} (${v.n})</span>`).join('')}</div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Dia</th><th>Caixa</th><th>Funcionário</th><th class="num">Diferença</th><th>Notas</th></tr></thead><tbody>
+    ${difs.map(e => `<tr class="click" ${S.canWrite ? `data-act="editDif" data-id="${esc(e.id)}"` : ''}><td>${esc(fmtDate(e.date))}</td><td>${esc(e.caixa || '')}</td><td>${esc(e.funcionario || '')}</td><td class="num ${cls(+e.valor)}">${fmtE(e.valor)}</td><td>${esc(e.notas || '')}</td></tr>`).join('')}
+  </tbody></table></div>` : `<div class="empty sm" style="margin:0">Sem diferenças de caixa em ${esc(monthLong(mk))}. Regista as faltas com sinal menos (por exemplo, −2,50).</div>`}`;
+}
+
+function viewSettings(){
+  const ds = depts();
+  return `<div class="crumb"><a href="#/">Início</a> / Gerir departamentos</div>
+    <div class="toolbar"><span class="muted">A posição define a ordem no menu e no início.</span><span class="sp"></span>${S.canWrite ? `<button class="btn primary" data-act="addDept">Novo departamento</button>` : ''}</div>
+    ${ds.length ? `<div class="list">${ds.map(d => `<div class="set-row" style="--dc:${esc(d.color)}"><span class="ico">${svg(d.icon)}</span>
+      <div class="nm"><b>${esc(d.name)}</b>${d.lead ? `<small>Responsável: ${esc(d.lead)}</small>` : ''}</div>
+      ${S.canWrite ? `<button class="btn small" data-act="editDept" data-id="${esc(d.id)}">Editar</button>` : ''}</div>`).join('')}</div>`
+    : `<div class="empty"><p style="margin:0">Ainda não há departamentos.</p></div>`}`;
+}
+
+/* forms */
+function fieldHtml(f){
+  const id = 'f_'+f.name, v = f.value ?? '';
+  const lab = `<label for="${id}">${esc(f.label)}${f.required ? '' : ' <span class="muted">(opcional)</span>'}</label>`;
+  let input;
+  if (f.type === 'select') input = `<select id="${id}" name="${f.name}">${f.options.map(o => `<option value="${esc(o[0])}"${String(o[0]) === String(v) ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+  else if (f.type === 'textarea') input = `<textarea id="${id}" name="${f.name}">${esc(v)}</textarea>`;
+  else if (f.type === 'color') return `<div class="fld"><span class="lbl">${esc(f.label)}</span><div class="picks">${COLORS.map((c,i) => `<label><input type="radio" name="${f.name}" value="${c}"${c === v ? ' checked' : ''} aria-label="Cor ${i+1}"><span style="--c:${c}"></span></label>`).join('')}</div></div>`;
+  else if (f.type === 'icon') return `<div class="fld"><span class="lbl">${esc(f.label)}</span><div class="picks">${Object.keys(ICONS).map(k => `<label><input type="radio" name="${f.name}" value="${k}"${k === v ? ' checked' : ''} aria-label="Ícone ${k}"><span>${svg(k)}</span></label>`).join('')}</div></div>`;
+  else if (f.type === 'suggest') input = `<input id="${id}" name="${f.name}" type="text" autocomplete="off" list="dl_${f.name}" value="${esc(v)}"><datalist id="dl_${f.name}">${(f.options || []).map(o => `<option value="${esc(o)}">`).join('')}</datalist>`;
+  else if (f.type === 'decimal') input = `<input id="${id}" name="${f.name}" type="text" inputmode="decimal" autocomplete="off" value="${esc(v === null ? '' : String(v).replace('.',','))}">`;
+  else input = `<input id="${id}" name="${f.name}" type="${f.type || 'text'}" autocomplete="off" value="${esc(v)}">`;
+  return `<div class="fld${f.half ? ' half' : ''}">${lab}${input}${f.hint ? `<span class="hint">${esc(f.hint)}</span>` : ''}</div>`;
+}
+function openForm(cfg){
+  dlg.innerHTML = `<form class="sheet" id="frm" novalidate>
+    <div class="sheet-head"><h2>${esc(cfg.title)}</h2><button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button></div>
+    <div class="sheet-body">${cfg.fields.map(fieldHtml).join('')}</div>
+    <div class="sheet-foot">${cfg.onDelete ? `<button type="button" class="btn danger-ghost" data-del>${esc(cfg.deleteLabel || 'Eliminar')}</button>` : ''}
+      <span class="sp"></span><button type="button" class="btn ghost" data-close>Cancelar</button><button type="submit" class="btn primary">${esc(cfg.submit || 'Guardar')}</button></div></form>`;
+  const frm = dlg.querySelector('#frm'), close = () => dlg.close();
+  dlg.querySelectorAll('[data-close]').forEach(b => b.onclick = close);
+  dlg.onclick = e => { if (e.target === dlg) close(); };
+  const delBtn = dlg.querySelector('[data-del]');
+  if (delBtn) delBtn.onclick = async () => {
+    if (!delBtn.classList.contains('armed')){ delBtn.classList.add('armed'); delBtn.textContent = 'Confirmar eliminação'; return; }
+    delBtn.disabled = true; await cfg.onDelete(); close();
+  };
+  frm.onsubmit = async e => {
+    e.preventDefault();
+    const vals = {};
+    cfg.fields.forEach(f => {
+      const el = frm.elements[f.name];
+      let v = el ? (el.value ?? '') : '';
+      if (typeof v === 'string') v = v.trim();
+      vals[f.name] = f.type === 'decimal' ? parseN(v) : v;
+    });
+    const miss = cfg.fields.find(f => f.required && (vals[f.name] === '' || vals[f.name] === null));
+    if (miss){ toast(`Preenche o campo "${miss.label}".`); const el = frm.elements[miss.name]; el && el.focus && el.focus(); return; }
+    const btn = frm.querySelector('[type=submit]'); btn.disabled = true;
+    const ok = await cfg.onSubmit(vals);
+    btn.disabled = false;
+    if (ok !== false) close();
+  };
+  dlg.showModal();
+  const first = frm.querySelector('input:not([type=radio]),select,textarea');
+  if (first) setTimeout(() => first.focus(), 30);
+}
+
+const ACTS = {
+  async seedDepts(){
+    for (let i = 0; i < SUGGESTED.length; i++){
+      const [name, desc, icon] = SUGGESTED[i];
+      if (!await put('departments', null, {name, desc, icon, color:COLORS[i % COLORS.length], order:i+1, lead:''})) return;
+    }
+    toast('Departamentos criados.');
+  },
+  addDept(){ deptForm(null); },
+  editDept(id){ deptForm(dept(id)); },
+  addObj(deptId){ objForm(null, deptId); },
+  editObj(id){ const o = S.objectives.find(x => x.id === id); o && objForm(o, o.deptId); },
+  updVal(id){
+    const o = S.objectives.find(x => x.id === id); if (!o) return;
+    openForm({title:'Atualizar valor', submit:'Guardar valor',
+      fields:[{name:'current', label:`${o.name}${o.unit ? ' ('+o.unit+')' : ''}`, type:'decimal', value:o.current, required:true, hint:`Meta: ${o.direction === 'down' ? '≤' : '≥'} ${fmtN(o.target)}${o.unit ? ' '+o.unit : ''}`}],
+      onSubmit: v => put('objectives', o.id, {...clean(o), current:v.current, updatedAt:nowIso()})});
+  },
+  objActions(id){
+    const o = S.objectives.find(x => x.id === id); if (!o) return;
+    location.hash = `#/d/${o.deptId}/acoes`;
+    setTimeout(() => { S.ui.objFilter = id; S.ui.actFilter = 'abertas'; render(); }, 0);
+  },
+  addAction(deptId){ actionForm(null, deptId || null); },
+  editAction(id){ const a = S.actions.find(x => x.id === id); a && actionForm(a, a.deptId); },
+  async doneAction(id){
+    const a = S.actions.find(x => x.id === id); if (!a) return;
+    if (a.status === 'concluida'){ await put('actions', a.id, {...clean(a), status:'aberta', doneAt:null}); return; }
+    if (a.repeat){
+      const base = a.due || todayStr();
+      const next = addPeriod(base, a.repeat);
+      if (await put('actions', a.id, {...clean(a), status:'aberta', due:next, lastDoneAt:nowIso()})) toast(`Feito. Próximo prazo: ${fmtDate(next)}.`);
+      return;
+    }
+    if (await put('actions', a.id, {...clean(a), status:'concluida', doneAt:nowIso()})) toast('Ação concluída.');
+  },
+  actFilter(k){ S.ui.actFilter = k; render(); },
+  clearObjFilter(){ S.ui.objFilter = null; render(); },
+  todoFilter(k){ S.ui.todo = k; render(); },
+  addArea(deptId){ areaForm(null, deptId); },
+  editArea(id){ const a = S.areas.find(x => x.id === id); a && areaForm(a, a.deptId); },
+  addTask(areaId){ const ar = S.areas.find(x => x.id === areaId); ar && taskForm(null, ar); },
+  editTask(id){ const t = S.tasks.find(x => x.id === id); const ar = t && S.areas.find(x => x.id === t.areaId); t && ar && taskForm(t, ar); },
+  async toggleTask(id){
+    const t = S.tasks.find(x => x.id === id); if (!t) return;
+    if (taskDone(t)) await put('tasks', t.id, {...clean(t), lastDone:t.prevDone || null, lastDoneBy:t.prevDoneBy || null, prevDone:null, prevDoneBy:null});
+    else await put('tasks', t.id, {...clean(t), prevDone:t.lastDone || null, prevDoneBy:t.lastDoneBy || null, lastDone:nowIso(), lastDoneBy:S.myId || null});
+  },
+  freqFilter(k){ S.ui.freq = k; render(); },
+  async setEval(id, el){
+    const ar = S.areas.find(x => x.id === id); if (!ar) return;
+    const v = el.dataset.v, mk = monthKey(), ev = {...(ar.evals || {})};
+    if (ev[mk] === v) delete ev[mk]; else ev[mk] = v;
+    await put('areas', ar.id, {...clean(ar), evals:ev});
+  },
+  addPerson(deptId){ personForm(dept(deptId), -1); },
+  finMonth(k){ S.ui.finMonth = k; render(); },
+  addCofre(){ cofreForm(null); },
+  editCofre(id){ const e = S.cofre.find(x => x.id === id); e && cofreForm(e); },
+  async verifyCofre(id){ const e = S.cofre.find(x => x.id === id); e && await put('cofre', e.id, {...clean(e), verified:!e.verified}); },
+  addMoedas(){ moedasForm(null); },
+  editMoedas(id){ const e = S.moedas.find(x => x.id === id); e && moedasForm(e); },
+  moedasAlvo(){
+    const c = S.config.find(x => x.id === 'moedas');
+    openForm({title:'Stock alvo de moedas', submit:'Guardar',
+      fields:[{name:'alvo', label:'Valor que queres ter em moedas à sexta-feira (€)', type:'decimal', value:c?.alvo ?? null, required:true, hint:'Usado para calcular o pedido sugerido: stock alvo + consumo médio − stock atual'}],
+      onSubmit: v => put('config', 'moedas', {...(c ? clean(c) : {}), alvo:v.alvo})});
+  },
+  addDeposito(){ depositoForm(null); },
+  editDeposito(id){ const e = S.depositos.find(x => x.id === id); e && depositoForm(e); },
+  async verifyDeposito(id){ const e = S.depositos.find(x => x.id === id); e && await put('depositos', e.id, {...clean(e), verified:!e.verified}); },
+  addDif(){ difForm(null); },
+  editDif(id){ const e = S.difcx.find(x => x.id === id); e && difForm(e); },
+  editPerson(deptId, el){ personForm(dept(deptId), +el.dataset.v); }
+};
+
+function personForm(d, idx){
+  if (!d) return;
+  const team = [...(d.team || [])], p = idx >= 0 ? team[idx] : null;
+  openForm({
+    title: p ? 'Editar pessoa' : 'Adicionar pessoa',
+    fields:[
+      {name:'name', label:'Nome', value:p?.name, required:true, half:true},
+      {name:'role', label:'Função', value:p?.role, half:true},
+      {name:'duties', label:'Responsabilidades', type:'textarea', value:(p?.duties || []).join('\n'), hint:'Uma por linha'}
+    ],
+    onSubmit: v => {
+      const np = {name:v.name, role:v.role, duties:v.duties.split('\n').map(x => x.trim()).filter(Boolean)};
+      if (p) team[idx] = np; else team.push(np);
+      return put('departments', d.id, {...clean(d), team});
+    },
+    onDelete: p ? async () => { team.splice(idx, 1); await put('departments', d.id, {...clean(d), team}); toast('Pessoa removida.'); } : null
+  });
+}
+
+function deptForm(d){
+  const isNew = !d, nextColor = COLORS[S.departments.length % COLORS.length];
+  openForm({
+    title: isNew ? 'Novo departamento' : 'Editar departamento',
+    fields:[
+      {name:'name', label:'Nome', value:d?.name, required:true},
+      {name:'desc', label:'Descrição', value:d?.desc, hint:'Aparece no cartão da página inicial'},
+      {name:'lead', label:'Responsável', value:d?.lead, half:true},
+      {name:'order', label:'Posição', type:'number', value:d?.order ?? (S.departments.length + 1), half:true, required:true},
+      {name:'links', label:'Ligações a pastas e ficheiros', type:'textarea', value:(d?.links || []).map(l => `${l.label} | ${l.url}`).join('\n'), hint:'Uma por linha, no formato: Nome | https://…'},
+      {name:'icon', label:'Ícone', type:'icon', value:d?.icon || 'clipboard'},
+      {name:'color', label:'Cor', type:'color', value:d?.color || nextColor}
+    ],
+    onSubmit: v => put('departments', d?.id, {...(d ? clean(d) : {}), name:v.name, desc:v.desc, lead:v.lead, order:+v.order || 0, icon:v.icon || 'clipboard', color:v.color || nextColor,
+      links:v.links.split('\n').map(l => { const i = l.lastIndexOf('|'); const url = (i >= 0 ? l.slice(i+1) : l).trim(); const label = (i >= 0 ? l.slice(0,i) : '').trim(); return {label: label || 'Abrir', url}; }).filter(l => /^https:\/\//.test(l.url))}),
+    deleteLabel:'Eliminar departamento',
+    onDelete: isNew ? null : async () => {
+      for (const c of ['objectives','actions','areas','tasks']) for (const x of S[c].filter(x => x.deptId === d.id)) await remove(c, x.id);
+      await remove('departments', d.id); location.hash = '#/'; toast('Departamento eliminado.');
+    }
+  });
+}
+function objForm(o, deptId){
+  openForm({
+    title: o ? 'Editar objetivo' : 'Novo objetivo',
+    fields:[
+      {name:'name', label:'Objetivo', value:o?.name, required:true, hint:'Por exemplo: tempo médio de serviço no Drive'},
+      {name:'target', label:'Meta', type:'decimal', value:o?.target, required:true, half:true},
+      {name:'unit', label:'Unidade', value:o?.unit, half:true, hint:'%, seg, €, pontos…'},
+      {name:'direction', label:'Como se mede', type:'select', value:o?.direction || 'up', options:[['up','Quanto mais, melhor'],['down','Quanto menos, melhor']]},
+      {name:'current', label:'Valor atual', type:'decimal', value:o?.current, half:true},
+      {name:'period', label:'Período', value:o?.period, half:true, hint:'Por exemplo: outubro'},
+      {name:'notes', label:'Notas', type:'textarea', value:o?.notes}
+    ],
+    onSubmit: v => {
+      const changed = !o || v.current !== o.current;
+      return put('objectives', o?.id, {...(o ? clean(o) : {createdAt:nowIso()}), deptId, ...v, updatedAt: changed && v.current !== null ? nowIso() : (o?.updatedAt || null)});
+    },
+    onDelete: o ? async () => {
+      for (const a of S.actions.filter(a => a.objectiveId === o.id)) await put('actions', a.id, {...clean(a), objectiveId:''});
+      await remove('objectives', o.id); toast('Objetivo eliminado.');
+    } : null
+  });
+}
+function actionForm(a, deptId){
+  const fields = [{name:'text', label:'O que vai ser feito', value:a?.text, required:true}];
+  if (!deptId) fields.push({name:'deptId', label:'Departamento', type:'select', value:depts()[0]?.id, options:depts().map(d => [d.id, d.name])});
+  else {
+    const objs = S.objectives.filter(o => o.deptId === deptId).sort(byName);
+    fields.push({name:'objectiveId', label:'Objetivo', type:'select', value:a?.objectiveId ?? (S.ui.objFilter || ''), options:[['','Sem objetivo associado'], ...objs.map(o => [o.id, o.name])]});
+  }
+  fields.push(
+    {name:'owner', label:'Responsável', value:a?.owner ?? (deptId ? '' : (S.myName || '').split(' ')[0]), half:true},
+    {name:'due', label:'Prazo', type:'date', value:a?.due, half:true},
+    {name:'repeat', label:'Repetição', type:'select', value:a?.repeat || '', options:Object.entries(REPEAT), half:true},
+    {name:'status', label:'Estado', type:'select', value:a?.status || 'aberta', options:Object.entries(STATUS), half:true}
+  );
+  openForm({
+    title: a ? 'Editar ação' : 'Nova ação', fields,
+    onSubmit: v => {
+      const dId = v.deptId || deptId; delete v.deptId;
+      return put('actions', a?.id, {...(a ? clean(a) : {createdAt:nowIso(), objectiveId:''}), deptId:dId, ...v, doneAt: v.status === 'concluida' ? (a?.doneAt || nowIso()) : null});
+    },
+    onDelete: a ? async () => { await remove('actions', a.id); toast('Ação eliminada.'); } : null
+  });
+}
+function areaForm(ar, deptId){
+  openForm({
+    title: ar ? 'Editar área' : 'Nova área de limpeza',
+    fields:[{name:'name', label:'Nome da área', value:ar?.name, required:true, hint:'Por exemplo: zona de fritura, sala, casas de banho'},
+      {name:'owner', label:'Responsável', type:'select', value:ar?.owner || '', options:[['','Sem responsável'], ...((dept(deptId)?.team) || []).map(p => [p.name, p.name])]}],
+    onSubmit: v => put('areas', ar?.id, {...(ar ? clean(ar) : {evals:{}}), deptId, name:v.name, owner:v.owner}),
+    deleteLabel:'Eliminar área e tarefas',
+    onDelete: ar ? async () => { for (const t of S.tasks.filter(t => t.areaId === ar.id)) await remove('tasks', t.id); await remove('areas', ar.id); toast('Área eliminada.'); } : null
+  });
+}
+function taskForm(t, ar){
+  openForm({
+    title: t ? 'Editar tarefa' : `Nova tarefa em ${ar.name}`,
+    fields:[
+      {name:'name', label:'Tarefa', value:t?.name, required:true},
+      {name:'freq', label:'Frequência', type:'select', value:t?.freq || 'diaria', options:Object.entries(FREQ), half:true},
+      {name:'owner', label:'Quem faz', value:t?.owner, half:true, hint:'Pessoa ou turno'}
+    ],
+    onSubmit: v => put('tasks', t?.id, {...(t ? clean(t) : {lastDone:null, lastDoneBy:null}), deptId:ar.deptId, areaId:ar.id, ...v}),
+    onDelete: t ? async () => { await remove('tasks', t.id); toast('Tarefa eliminada.'); } : null
+  });
+}
+
+const yesNo = [['nao','Não'],['sim','Sim']];
+function cofreForm(e){
+  const uniq = (arr) => [...new Set(arr.filter(Boolean))];
+  openForm({
+    title: e ? 'Editar saída do cofre' : 'Registar saída do cofre',
+    fields:[
+      {name:'date', label:'Data', type:'date', value:e?.date || todayStr(), required:true, half:true},
+      {name:'valor', label:'Valor (€)', type:'decimal', value:e?.valor ?? null, required:true, half:true},
+      {name:'desc', label:'Fornecedor e descrição', value:e?.desc, required:true, hint:'Por exemplo: Continente - detergentes e vassouras'},
+      {name:'rubrica', label:'Rubrica', type:'suggest', value:e?.rubrica || RUBRICAS[0], options:uniq([...RUBRICAS, ...S.cofre.map(x => x.rubrica)]), half:true, required:true},
+      {name:'etiqueta', label:'Etiqueta', type:'suggest', value:e?.etiqueta || 'Outros', options:uniq([...ETIQUETAS, ...S.cofre.map(x => x.etiqueta)]), half:true},
+      {name:'local', label:'Local', type:'select', value:e?.local || 'Restaurante', options:[['Restaurante','Restaurante'],['Escritório','Escritório']], half:true},
+      {name:'petty', label:'Petty cash', type:'select', value:e?.petty ? 'sim' : 'nao', options:yesNo, half:true},
+      {name:'verified', label:'Verificado', type:'select', value:e?.verified ? 'sim' : 'nao', options:yesNo, half:true}
+    ],
+    onSubmit: v => put('cofre', e?.id, {...(e ? clean(e) : {createdAt:nowIso()}), date:v.date, valor:v.valor, desc:v.desc, rubrica:v.rubrica, etiqueta:v.etiqueta, local:v.local, petty:v.petty === 'sim', verified:v.verified === 'sim'}),
+    onDelete: e ? async () => { await remove('cofre', e.id); toast('Saída eliminada.'); } : null
+  });
+}
+function moedasForm(e){
+  const now = isoWeek(new Date());
+  const y = e?.year ?? now.y, w = e?.week ?? now.w;
+  const prev = !e ? [...S.moedas].filter(m => m.final != null && (m.year < y || (m.year === y && m.week < w))).sort((a,b) => (b.year - a.year) || (b.week - a.week))[0] : null;
+  openForm({
+    title: e ? `Editar semana ${e.week}` : 'Registar semana',
+    fields:[
+      {name:'week', label:'Semana', type:'number', value:w, required:true, half:true},
+      {name:'year', label:'Ano', type:'number', value:y, required:true, half:true},
+      {name:'initial', label:'Moedas iniciais (sexta)', type:'decimal', value:e ? e.initial : (prev ? prev.final : null), half:true, hint: prev ? `Finais da semana ${prev.week}` : ''},
+      {name:'received', label:'Moedas recebidas', type:'decimal', value:e?.received ?? null, half:true},
+      {name:'final', label:'Moedas finais (sexta)', type:'decimal', value:e?.final ?? null, half:true},
+      {name:'notas', label:'Notas', value:e?.notas, half:true}
+    ],
+    onSubmit: async v => {
+      const yy = +v.year, ww = +v.week;
+      if (!(ww >= 1 && ww <= 53)){ toast('A semana tem de estar entre 1 e 53.'); return false; }
+      const id = weekId(yy, ww);
+      if ((!e || e.id !== id) && S.moedas.some(m => m.id === id)){ toast(`A semana ${ww} de ${yy} já está registada. Abre-a na tabela para editar.`); return false; }
+      const ok = await put('moedas', id, {year:yy, week:ww, initial:v.initial, received:v.received, final:v.final, notas:v.notas});
+      if (ok && e && e.id !== id) await remove('moedas', e.id);
+      return ok;
+    },
+    onDelete: e ? async () => { await remove('moedas', e.id); toast('Semana eliminada.'); } : null
+  });
+}
+function depositoForm(e){
+  openForm({
+    title: e ? 'Editar depósito' : 'Registar depósito do dia',
+    fields:[
+      {name:'date', label:'Dia', type:'date', value:e?.id || todayStr(), required:true, half:true},
+      {name:'resp', label:'Responsável', value:e?.resp ?? (S.myName || '').split(' ')[0], half:true},
+      {name:'vendas', label:'Vendas do dia (€)', type:'decimal', value:e?.vendas ?? null, required:true, half:true},
+      {name:'mb', label:'Multibanco (€)', type:'decimal', value:e?.mb ?? null, half:true},
+      {name:'outros', label:'Outros meios (€)', type:'decimal', value:e?.outros ?? null, half:true, hint:'Delivery, app, vales…'},
+      {name:'depositado', label:'Numerário depositado (€)', type:'decimal', value:e?.depositado ?? null, half:true},
+      {name:'saco', label:'Nº do saco / guia', value:e?.saco, half:true},
+      {name:'verified', label:'Verificado', type:'select', value:e?.verified ? 'sim' : 'nao', options:yesNo, half:true},
+      {name:'notas', label:'Notas', type:'textarea', value:e?.notas}
+    ],
+    onSubmit: async v => {
+      const id = v.date;
+      if ((!e || e.id !== id) && S.depositos.some(d => d.id === id)){ toast(`O dia ${fmtDate(id)} já está registado. Abre-o na tabela para editar.`); return false; }
+      const ok = await put('depositos', id, {resp:v.resp, vendas:v.vendas, mb:v.mb, outros:v.outros, depositado:v.depositado, saco:v.saco, verified:v.verified === 'sim', notas:v.notas, updatedAt:nowIso()});
+      if (ok && e && e.id !== id) await remove('depositos', e.id);
+      return ok;
+    },
+    onDelete: e ? async () => { await remove('depositos', e.id); toast('Depósito eliminado.'); } : null
+  });
+}
+function difForm(e){
+  const names = [...new Set(S.difcx.map(x => x.funcionario).filter(Boolean))].sort();
+  openForm({
+    title: e ? 'Editar diferença de caixa' : 'Registar diferença de caixa',
+    fields:[
+      {name:'date', label:'Dia', type:'date', value:e?.date || todayStr(), required:true, half:true},
+      {name:'caixa', label:'Caixa', value:e?.caixa, half:true, hint:'Por exemplo: CX 3'},
+      {name:'funcionario', label:'Funcionário', type:'suggest', value:e?.funcionario, options:names, required:true, half:true},
+      {name:'valor', label:'Diferença (€)', type:'decimal', value:e?.valor ?? null, required:true, half:true, hint:'Falta com sinal menos: −2,50'},
+      {name:'notas', label:'Notas', value:e?.notas}
+    ],
+    onSubmit: v => put('difcx', e?.id, {...(e ? clean(e) : {createdAt:nowIso()}), ...v}),
+    onDelete: e ? async () => { await remove('difcx', e.id); toast('Diferença eliminada.'); } : null
+  });
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el || dlg.contains(el)) return;
+  const fn = ACTS[el.dataset.act];
+  if (fn){ e.preventDefault(); fn(el.dataset.id, el); }
+});
+trackVisit(route());
+render();
+})();
+</script>
+</body>
+</html>
