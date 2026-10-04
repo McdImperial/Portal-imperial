@@ -1,17 +1,11 @@
-'use client';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 export default function GestaoImperial() {
+  const htmlPath = join(process.cwd(), 'public/gestao-imperial/index.html');
+  const htmlContent = readFileSync(htmlPath, 'utf-8');
+
   return (
-    <iframe
-      src="/gestao-imperial/index.html"
-      style={{
-        width: '100%',
-        height: '100vh',
-        border: 'none',
-        margin: 0,
-        padding: 0,
-      }}
-      title="Gestão Imperial"
-    />
+    <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
   );
 }
